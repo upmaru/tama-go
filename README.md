@@ -17,6 +17,7 @@ import (
     "fmt"
     "time"
     tama "github.com/upmaru/tama-go"
+    "github.com/upmaru/tama-go/neural"
     "github.com/upmaru/tama-go/sensory"
 )
 
@@ -31,8 +32,8 @@ func main() {
     client := tama.NewClient(config)
     
     // Create a neural space
-    space, err := client.Neural.CreateSpace(tama.CreateSpaceRequest{
-        Space: tama.SpaceRequest{
+    space, err := client.Neural.CreateSpace(neural.CreateSpaceRequest{
+        Space: neural.SpaceRequestData{
             Name: "My Neural Space",
             Type: "root",
         },
@@ -44,6 +45,31 @@ func main() {
     fmt.Printf("Created space: %+v\n", space)
 }
 ```
+
+## Project Structure
+
+The client library is organized into the following packages:
+
+### Main Package
+- `client.go` - Main client configuration and initialization
+- `neural.go` - Neural service wrapper that uses the neural package
+- `sensory.go` - Sensory service wrapper that uses the sensory package
+- `types.go` - Shared types and documentation
+
+### Neural Package (`neural/`)
+- `service.go` - Service definition and neural-related types
+- `space.go` - Space operations (GET, POST, PATCH, PUT, DELETE)
+
+### Sensory Package (`sensory/`)
+- `service.go` - Service definition and sensory-related types
+- `source.go` - Source operations (GET, POST, PATCH, PUT, DELETE)
+- `model.go` - Model operations (GET, POST, PATCH, PUT, DELETE)
+- `limit.go` - Limit operations (GET, POST, PATCH, PUT, DELETE)
+
+### Examples
+- `example/` - Working examples demonstrating all features
+
+This modular structure separates concerns into different packages, making the codebase easier to navigate, maintain, and extend. Each service package encapsulates its related functionality with its own types and operations.
 
 ## API Coverage
 
@@ -86,9 +112,11 @@ The client provides comprehensive coverage of the Tama API endpoints, organized 
 ### Neural Service - Spaces
 
 ```go
+import "github.com/upmaru/tama-go/neural"
+
 // Create a space
-space, err := client.Neural.CreateSpace(tama.CreateSpaceRequest{
-    Space: tama.SpaceRequest{
+space, err := client.Neural.CreateSpace(neural.CreateSpaceRequest{
+    Space: neural.SpaceRequestData{
         Name: "Production Space",
         Type: "root",
     },
@@ -98,16 +126,16 @@ space, err := client.Neural.CreateSpace(tama.CreateSpaceRequest{
 space, err := client.Neural.GetSpace("space-123")
 
 // Update a space (partial update)
-space, err := client.Neural.UpdateSpace("space-123", tama.UpdateSpaceRequest{
-    Space: tama.UpdateSpaceData{
+space, err := client.Neural.UpdateSpace("space-123", neural.UpdateSpaceRequest{
+    Space: neural.UpdateSpaceData{
         Name: "Updated Production Space",
         Type: "component",
     },
 })
 
 // Replace a space (full replacement)
-space, err := client.Neural.ReplaceSpace("space-123", tama.UpdateSpaceRequest{
-    Space: tama.UpdateSpaceData{
+space, err := client.Neural.ReplaceSpace("space-123", neural.UpdateSpaceRequest{
+    Space: neural.UpdateSpaceData{
         Name: "New Production Space",
         Type: "root",
     },
@@ -120,6 +148,8 @@ err := client.Neural.DeleteSpace("space-123")
 ### Sensory Service - Sources
 
 ```go
+import "github.com/upmaru/tama-go/sensory"
+
 // Create a source in a space
 source, err := client.Sensory.CreateSource("space-123", sensory.CreateSourceRequest{
     Source: sensory.SourceRequestData{
@@ -153,6 +183,8 @@ err := client.Sensory.DeleteSource("source-123")
 ### Sensory Service - Models
 
 ```go
+import "github.com/upmaru/tama-go/sensory"
+
 // Create a model for a source
 model, err := client.Sensory.CreateModel("source-123", sensory.CreateModelRequest{
     Model: sensory.ModelRequestData{
@@ -179,6 +211,8 @@ err := client.Sensory.DeleteModel("model-123")
 ### Sensory Service - Limits
 
 ```go
+import "github.com/upmaru/tama-go/sensory"
+
 // Create a limit for a source
 limit, err := client.Sensory.CreateLimit("source-123", sensory.CreateLimitRequest{
     Limit: sensory.LimitRequestData{
@@ -236,13 +270,35 @@ client.SetDebug(true)
 
 ## Error Handling
 
-The client provides structured error handling:
+The client provides structured error handling with service-specific error types:
+
+### Neural Service Errors
 
 ```go
+import "github.com/upmaru/tama-go/neural"
+
 space, err := client.Neural.GetSpace("invalid-id")
 if err != nil {
-    if apiErr, ok := err.(*tama.Error); ok {
-        fmt.Printf("API Error %d: %s\n", apiErr.StatusCode, apiErr.Message)
+    if apiErr, ok := err.(*neural.Error); ok {
+        fmt.Printf("Neural API Error %d: %s\n", apiErr.StatusCode, apiErr.Message)
+        if apiErr.Details != "" {
+            fmt.Printf("Details: %s\n", apiErr.Details)
+        }
+    } else {
+        fmt.Printf("Client Error: %v\n", err)
+    }
+}
+```
+
+### Sensory Service Errors
+
+```go
+import "github.com/upmaru/tama-go/sensory"
+
+source, err := client.Sensory.GetSource("invalid-id")
+if err != nil {
+    if apiErr, ok := err.(*sensory.Error); ok {
+        fmt.Printf("Sensory API Error %d: %s\n", apiErr.StatusCode, apiErr.Message)
         if apiErr.Details != "" {
             fmt.Printf("Details: %s\n", apiErr.Details)
         }
@@ -254,23 +310,28 @@ if err != nil {
 
 ## Data Types
 
-### Core Resources
+### Neural Package Types
 
-- **Space**: Neural space resource with configuration
-- **Source**: Sensory data source with type and connection details
-- **Model**: Machine learning model with version and parameters
-- **Limit**: Resource limits with values and units
+- **neural.Space**: Neural space resource with configuration
+- **neural.CreateSpaceRequest**: For creating new spaces
+- **neural.UpdateSpaceRequest**: For updating existing spaces
+- **neural.SpaceRequestData**: Space data in create requests
+- **neural.UpdateSpaceData**: Space data in update requests
+- **neural.SpaceResponse**: API response wrapper for space operations
+- **neural.Error**: Neural service specific error type
 
-### Request Types
+### Sensory Package Types
 
-- **CreateSpaceRequest**: For creating new spaces
-- **UpdateSpaceRequest**: For updating existing spaces
-- **CreateSourceRequest**: For creating new sources
-- **UpdateSourceRequest**: For updating existing sources
-- **CreateModelRequest**: For creating new models
-- **UpdateModelRequest**: For updating existing models
-- **CreateLimitRequest**: For creating new limits
-- **UpdateLimitRequest**: For updating existing limits
+- **sensory.Source**: Sensory data source with type and connection details
+- **sensory.Model**: Machine learning model with version and parameters
+- **sensory.Limit**: Resource limits with values and units
+- **sensory.CreateSourceRequest**: For creating new sources
+- **sensory.UpdateSourceRequest**: For updating existing sources
+- **sensory.CreateModelRequest**: For creating new models
+- **sensory.UpdateModelRequest**: For updating existing models
+- **sensory.CreateLimitRequest**: For creating new limits
+- **sensory.UpdateLimitRequest**: For updating existing limits
+- **sensory.Error**: Sensory service specific error type
 
 ## Examples
 
@@ -285,6 +346,22 @@ See the [example/main.go](example/main.go) file for a complete working example d
 
 - [go-resty/resty](https://github.com/go-resty/resty) - HTTP client library
 
+## Testing
+
+Run the test suite:
+
+```bash
+go test -v
+```
+
+Run integration tests (requires API credentials):
+
+```bash
+export TAMA_BASE_URL="https://api.tama.io"
+export TAMA_API_KEY="your-api-key"
+go test -tags=integration -v
+```
+
 ## License
 
 This project is licensed under the MIT License.
@@ -296,27 +373,6 @@ This project is licensed under the MIT License.
 3. Commit your changes (`git commit -m 'Add some amazing feature'`)
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
-
-## Project Structure
-
-The client library is organized into the following files and packages:
-
-### Main Package
-- `client.go` - Main client configuration and initialization
-- `neural.go` - Neural service for space operations
-- `sensory.go` - SensoryService wrapper that uses the sensory package
-- `types.go` - Core data structures (Space, Error, etc.)
-
-### Sensory Package (`sensory/`)
-- `service.go` - Service definition and all sensory-related types
-- `source.go` - Source operations (GET, POST, PATCH, PUT, DELETE)
-- `model.go` - Model operations (GET, POST, PATCH, PUT, DELETE)
-- `limit.go` - Limit operations (GET, POST, PATCH, PUT, DELETE)
-
-### Examples
-- `example/` - Working examples demonstrating all features
-
-This modular structure separates concerns into different packages, making the codebase easier to navigate, maintain, and extend. The sensory package encapsulates all sensory-related functionality with its own types and operations.
 
 ## Support
 
