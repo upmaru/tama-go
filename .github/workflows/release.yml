@@ -3,7 +3,7 @@ name: Release
 on:
   push:
     tags:
-      - 'v*'
+      - "v*"
 
 permissions:
   contents: write
@@ -14,83 +14,85 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-    - name: Set up Go
-      uses: actions/setup-go@v5
-      with:
-        go-version: '1.23'
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.23"
 
-    - name: Cache Go modules
-      uses: actions/cache@v4
-      with:
-        path: |
-          ~/.cache/go-build
-          ~/go/pkg/mod
-        key: ${{ runner.os }}-go-1.23-${{ hashFiles('**/go.sum') }}
-        restore-keys: |
-          ${{ runner.os }}-go-1.23-
+      - name: Cache Go modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-1.23-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-1.23-
 
-    - name: Download dependencies
-      run: go mod download
+      - name: Download dependencies
+        run: go mod download
 
-    - name: Run tests
-      run: go test -v ./...
+      - name: Run tests
+        run: go test -v ./...
 
-    - name: Build examples
-      run: |
-        cd example
-        go build -v ./...
+      - name: Build examples
+        run: |
+          cd example
+          go build -v ./...
 
-    - name: Generate changelog
-      id: changelog
-      run: |
-        # Get the previous tag
-        PREV_TAG=$(git tag --sort=-version:refname | head -n 2 | tail -n 1)
-        if [ -z "$PREV_TAG" ]; then
-          PREV_TAG=$(git rev-list --max-parents=0 HEAD)
-        fi
+      - name: Generate changelog
+        id: changelog
+        run: |
+          # Get the previous tag
+          PREV_TAG=$(git tag --sort=-version:refname | head -n 2 | tail -n 1)
+          if [ -z "$PREV_TAG" ]; then
+            PREV_TAG=$(git rev-list --max-parents=0 HEAD)
+          fi
 
-        # Generate changelog
-        echo "## Changes" > CHANGELOG.md
-        echo "" >> CHANGELOG.md
-        git log $PREV_TAG..HEAD --pretty=format:"- %s (%h)" --no-merges >> CHANGELOG.md
+          # Generate changelog
+          echo "## Changes" > CHANGELOG.md
+          echo "" >> CHANGELOG.md
+          git log $PREV_TAG..HEAD --pretty=format:"- %s (%h)" --no-merges >> CHANGELOG.md
 
-        # Set output for use in release
-        echo "changelog<<EOF" >> $GITHUB_OUTPUT
-        cat CHANGELOG.md >> $GITHUB_OUTPUT
-        echo "EOF" >> $GITHUB_OUTPUT
+          # Set output for use in release
+          {
+            echo "changelog<<EOF"
+            cat CHANGELOG.md
+            echo "EOF"
+          } >> $GITHUB_OUTPUT
 
-    - name: Create Release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: ${{ github.ref }}
-        release_name: Release ${{ github.ref }}
-        body: ${{ steps.changelog.outputs.changelog }}
-        draft: false
-        prerelease: ${{ contains(github.ref, 'alpha') || contains(github.ref, 'beta') || contains(github.ref, 'rc') }}
+      - name: Create Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          body: ${{ steps.changelog.outputs.changelog }}
+          draft: false
+          prerelease: ${{ contains(github.ref, 'alpha') || contains(github.ref, 'beta') || contains(github.ref, 'rc') }}
 
   validate-tag:
     name: Validate Tag
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Validate semantic version
-      run: |
-        TAG=${GITHUB_REF#refs/tags/}
-        if [[ ! $TAG =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9.-]+)?$ ]]; then
-          echo "Tag $TAG is not a valid semantic version"
-          exit 1
-        fi
-        echo "Tag $TAG is valid"
+      - name: Validate semantic version
+        run: |
+          TAG=${GITHUB_REF#refs/tags/}
+          if [[ ! $TAG =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9.-]+)?$ ]]; then
+            echo "Tag $TAG is not a valid semantic version"
+            exit 1
+          fi
+          echo "Tag $TAG is valid"
 
   test-installation:
     name: Test Installation
@@ -98,39 +100,39 @@ jobs:
     needs: release
 
     steps:
-    - name: Set up Go
-      uses: actions/setup-go@v5
-      with:
-        go-version: '1.23'
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.23"
 
-    - name: Test go get
-      run: |
-        mkdir -p test-install
-        cd test-install
-        go mod init test
-        TAG=${GITHUB_REF#refs/tags/}
-        go get github.com/upmaru/tama-go@$TAG
+      - name: Test go get
+        run: |
+          mkdir -p test-install
+          cd test-install
+          go mod init test
+          TAG=${GITHUB_REF#refs/tags/}
+          go get github.com/upmaru/tama-go@$TAG
 
-        # Create a simple test file
-        cat > main.go << 'EOF'
-        package main
+          # Create a simple test file
+          cat > main.go << 'EOF'
+          package main
 
-        import (
-            "fmt"
-            "time"
-            tama "github.com/upmaru/tama-go"
-        )
+          import (
+              "fmt"
+              "time"
+              tama "github.com/upmaru/tama-go"
+          )
 
-        func main() {
-            config := tama.Config{
-                BaseURL: "https://api.example.com",
-                APIKey:  "test-key",
-                Timeout: 30 * time.Second,
-            }
-            client := tama.NewClient(config)
-            fmt.Printf("Client created successfully: %v\n", client != nil)
-        }
-        EOF
+          func main() {
+              config := tama.Config{
+                  BaseURL: "https://api.example.com",
+                  APIKey:  "test-key",
+                  Timeout: 30 * time.Second,
+              }
+              client := tama.NewClient(config)
+              fmt.Printf("Client created successfully: %v\n", client != nil)
+          }
+          EOF
 
-        go build -v .
-        echo "Installation test successful"
+          go build -v .
+          echo "Installation test successful"
