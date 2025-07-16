@@ -242,7 +242,7 @@ func runSensoryLimitOperations(client *tama.Client) {
 }
 
 // runDeleteOperations demonstrates delete operations.
-func runDeleteOperations(client *tama.Client) {
+func runDeleteOperations(_ *tama.Client) {
 	log.Printf("=== Delete Operations ===")
 
 	// Delete resources (uncomment to test)

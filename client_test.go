@@ -11,7 +11,7 @@ import (
 )
 
 // createMockServer creates a test HTTP server with the given handler.
-func createMockServer(t *testing.T, handler http.HandlerFunc) *httptest.Server {
+func createMockServer(_ *testing.T, handler http.HandlerFunc) *httptest.Server {
 	return httptest.NewServer(handler)
 }
 
@@ -54,7 +54,7 @@ func TestNewClientDefaultTimeout(t *testing.T) {
 	}
 }
 
-func TestSetAPIKey(t *testing.T) {
+func TestSetAPIKey(_ *testing.T) {
 	client := tama.NewClient(tama.Config{
 		BaseURL: "https://api.example.com",
 		APIKey:  "original-key",
@@ -66,7 +66,7 @@ func TestSetAPIKey(t *testing.T) {
 	// API key is set successfully - internal field is not accessible from external package
 }
 
-func TestSetDebug(t *testing.T) {
+func TestSetDebug(_ *testing.T) {
 	client := tama.NewClient(tama.Config{
 		BaseURL: "https://api.example.com",
 		APIKey:  "test-key",
