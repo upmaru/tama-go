@@ -50,10 +50,11 @@ type Model struct {
 
 // Limit represents a sensory limit resource
 type Limit struct {
-	ID         string `json:"id,omitempty"`
-	Limit      int    `json:"limit"`
-	ScaleUnit  string `json:"scale_unit"`
-	ScaleCount int    `json:"scale_count"`
+	ID           string `json:"id,omitempty"`
+	Count        int    `json:"count"`
+	ScaleUnit    string `json:"scale_unit"`
+	ScaleCount   int    `json:"scale_count"`
+	CurrentState string `json:"current_state"`
 }
 
 // SourceResponse represents the API response for source operations
@@ -128,7 +129,7 @@ type CreateLimitRequest struct {
 type LimitRequestData struct {
 	ScaleUnit  string `json:"scale_unit"`
 	ScaleCount int    `json:"scale_count"`
-	Limit      int    `json:"limit"`
+	Count      int    `json:"count"`
 }
 
 // UpdateLimitRequest represents the request payload for updating a limit
@@ -138,7 +139,8 @@ type UpdateLimitRequest struct {
 
 // UpdateLimitData represents the limit update data
 type UpdateLimitData struct {
-	ScaleUnit  string `json:"scale_unit,omitempty"`
-	ScaleCount int    `json:"scale_count,omitempty"`
-	Limit      int    `json:"limit,omitempty"`
+	ScaleUnit    string `json:"scale_unit,omitempty"`
+	ScaleCount   int    `json:"scale_count,omitempty"`
+	Count        int    `json:"count,omitempty"`
+	CurrentState string `json:"current_state,omitempty"`
 }
