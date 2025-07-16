@@ -114,7 +114,8 @@ func runSensorySourceOperations(client *tama.Client) {
 	if err != nil {
 		log.Printf("Error creating source: %v", err)
 	} else {
-		log.Printf("Created source: %+v", source)
+		log.Printf("Created source: ID=%s, Name=%s, Endpoint=%s, SpaceID=%s, State=%s",
+			source.ID, source.Name, source.Endpoint, source.SpaceID, source.CurrentState)
 	}
 
 	// Get a source by ID (replace with actual ID)
@@ -123,7 +124,8 @@ func runSensorySourceOperations(client *tama.Client) {
 	if err != nil {
 		log.Printf("Error getting source: %v", err)
 	} else {
-		log.Printf("Retrieved source: %+v", source)
+		log.Printf("Retrieved source: ID=%s, Name=%s, Endpoint=%s, SpaceID=%s, State=%s",
+			source.ID, source.Name, source.Endpoint, source.SpaceID, source.CurrentState)
 	}
 
 	// Update a source
@@ -142,7 +144,8 @@ func runSensorySourceOperations(client *tama.Client) {
 	if err != nil {
 		log.Printf("Error updating source: %v", err)
 	} else {
-		log.Printf("Updated source: %+v", source)
+		log.Printf("Updated source: ID=%s, Name=%s, Endpoint=%s, SpaceID=%s, State=%s",
+			source.ID, source.Name, source.Endpoint, source.SpaceID, source.CurrentState)
 	}
 }
 

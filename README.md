@@ -52,13 +52,16 @@ func main() {
             Type:     "model",
             Endpoint: "https://api.example.com/v1",
             Credential: sensory.SourceCredential{
-                ApiKey: "source-api-key",
+                APIKey: "source-api-key",
             },
         },
     })
     if err != nil {
         panic(err)
     }
+    
+    fmt.Printf("Created source: ID=%s, Name=%s, Endpoint=%s, SpaceID=%s, State=%s\n", 
+        source.ID, source.Name, source.Endpoint, source.SpaceID, source.CurrentState)
     
     // Create a limit for the source
     limit, err := client.Sensory.CreateLimit(source.ID, sensory.CreateLimitRequest{
@@ -192,7 +195,7 @@ source, err := client.Sensory.CreateSource("space-123", sensory.CreateSourceRequ
         Type: "model",
         Endpoint: "https://api.mistral.ai/v1",
         Credential: sensory.SourceCredential{
-            ApiKey: "your-api-key",
+            APIKey: "your-api-key",
         },
     },
 })
@@ -206,7 +209,7 @@ source, err := client.Sensory.UpdateSource("source-123", sensory.UpdateSourceReq
         Name: "Updated Mistral Source",
         Endpoint: "https://api.mistral.ai/v2",
         Credential: &sensory.SourceCredential{
-            ApiKey: "your-updated-api-key",
+            APIKey: "your-updated-api-key",
         },
     },
 })

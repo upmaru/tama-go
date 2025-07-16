@@ -39,8 +39,11 @@ type SourceCredential struct {
 
 // Source represents a sensory source resource.
 type Source struct {
-	ID   string `json:"id,omitempty"`
-	Name string `json:"name"`
+	ID           string `json:"id,omitempty"`
+	Name         string `json:"name"`
+	Endpoint     string `json:"endpoint"`
+	SpaceID      string `json:"space_id"`
+	CurrentState string `json:"current_state"`
 }
 
 // Model represents a sensory model resource.

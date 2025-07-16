@@ -12,8 +12,11 @@ import (
 
 func TestSensoryGetSource(t *testing.T) {
 	expectedSource := sensory.Source{
-		ID:   "source-123",
-		Name: "Test Source",
+		ID:           "source-123",
+		Name:         "Test Source",
+		Endpoint:     "https://api.test.com/v1",
+		SpaceID:      "space-456",
+		CurrentState: "active",
 	}
 
 	expectedResponse := sensory.SourceResponse{
@@ -51,12 +54,27 @@ func TestSensoryGetSource(t *testing.T) {
 	if source.Name != expectedSource.Name {
 		t.Errorf("Expected source name %s, got %s", expectedSource.Name, source.Name)
 	}
+
+	if source.Endpoint != expectedSource.Endpoint {
+		t.Errorf("Expected source endpoint %s, got %s", expectedSource.Endpoint, source.Endpoint)
+	}
+
+	if source.CurrentState != expectedSource.CurrentState {
+		t.Errorf("Expected source current state %s, got %s", expectedSource.CurrentState, source.CurrentState)
+	}
+
+	if source.SpaceID != expectedSource.SpaceID {
+		t.Errorf("Expected source space ID %s, got %s", expectedSource.SpaceID, source.SpaceID)
+	}
 }
 
 func TestSensoryCreateSource(t *testing.T) {
 	expectedSource := sensory.Source{
-		ID:   "source-789",
-		Name: "New Source",
+		ID:           "source-789",
+		Name:         "New Source",
+		Endpoint:     "https://api.mistral.ai/v1",
+		SpaceID:      "space-123",
+		CurrentState: "pending",
 	}
 
 	expectedResponse := sensory.SourceResponse{
@@ -118,6 +136,22 @@ func TestSensoryCreateSource(t *testing.T) {
 
 	if source.ID != expectedSource.ID {
 		t.Errorf("Expected source ID %s, got %s", expectedSource.ID, source.ID)
+	}
+
+	if source.Name != expectedSource.Name {
+		t.Errorf("Expected source name %s, got %s", expectedSource.Name, source.Name)
+	}
+
+	if source.Endpoint != expectedSource.Endpoint {
+		t.Errorf("Expected source endpoint %s, got %s", expectedSource.Endpoint, source.Endpoint)
+	}
+
+	if source.CurrentState != expectedSource.CurrentState {
+		t.Errorf("Expected source current state %s, got %s", expectedSource.CurrentState, source.CurrentState)
+	}
+
+	if source.SpaceID != expectedSource.SpaceID {
+		t.Errorf("Expected source space ID %s, got %s", expectedSource.SpaceID, source.SpaceID)
 	}
 }
 
@@ -538,5 +572,204 @@ func TestSensoryGetLimit_EmptyIDValidation(t *testing.T) {
 	_, err := client.Sensory.GetLimit("")
 	if err == nil {
 		t.Error("Expected validation error for empty limit ID in GetLimit")
+	}
+}
+
+func TestSensoryUpdateSource(t *testing.T) {
+	expectedSource := sensory.Source{
+		ID:           "source-123",
+		Name:         "Updated Source",
+		Endpoint:     "https://api.updated.com/v1",
+		SpaceID:      "space-456",
+		CurrentState: "active",
+	}
+
+	expectedResponse := sensory.SourceResponse{
+		Data: expectedSource,
+	}
+
+	server := createMockServer(t, func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPatch {
+			t.Errorf("Expected PATCH request, got %s", r.Method)
+		}
+
+		if r.URL.Path != "/provision/sensory/sources/source-123" {
+			t.Errorf("Expected path /provision/sensory/sources/source-123, got %s", r.URL.Path)
+		}
+
+		var req sensory.UpdateSourceRequest
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			t.Fatalf("Failed to decode request body: %v", err)
+		}
+
+		if req.Source.Name != "Updated Source" {
+			t.Errorf("Expected request name 'Updated Source', got %s", req.Source.Name)
+		}
+
+		if req.Source.Endpoint != "https://api.updated.com/v1" {
+			t.Errorf("Expected request endpoint 'https://api.updated.com/v1', got %s", req.Source.Endpoint)
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(expectedResponse)
+	})
+	defer server.Close()
+
+	client := tama.NewClient(tama.Config{
+		BaseURL: server.URL,
+		APIKey:  "test-key",
+	})
+
+	updateReq := sensory.UpdateSourceRequest{
+		Source: sensory.UpdateSourceData{
+			Name:     "Updated Source",
+			Endpoint: "https://api.updated.com/v1",
+			Credential: &sensory.SourceCredential{
+				APIKey: "updated-api-key",
+			},
+		},
+	}
+
+	source, err := client.Sensory.UpdateSource("source-123", updateReq)
+	if err != nil {
+		t.Fatalf("Unexpected error: %v", err)
+	}
+
+	if source.ID != expectedSource.ID {
+		t.Errorf("Expected source ID %s, got %s", expectedSource.ID, source.ID)
+	}
+
+	if source.Name != expectedSource.Name {
+		t.Errorf("Expected source name %s, got %s", expectedSource.Name, source.Name)
+	}
+
+	if source.Endpoint != expectedSource.Endpoint {
+		t.Errorf("Expected source endpoint %s, got %s", expectedSource.Endpoint, source.Endpoint)
+	}
+
+	if source.CurrentState != expectedSource.CurrentState {
+		t.Errorf("Expected source current state %s, got %s", expectedSource.CurrentState, source.CurrentState)
+	}
+
+	if source.SpaceID != expectedSource.SpaceID {
+		t.Errorf("Expected source space ID %s, got %s", expectedSource.SpaceID, source.SpaceID)
+	}
+}
+
+func TestSensoryUpdateSource_EmptyIDValidation(t *testing.T) {
+	client := tama.NewClient(tama.Config{
+		BaseURL: "https://api.example.com",
+		APIKey:  "test-key",
+	})
+
+	updateReq := sensory.UpdateSourceRequest{
+		Source: sensory.UpdateSourceData{
+			Name: "Updated Source",
+		},
+	}
+
+	_, err := client.Sensory.UpdateSource("", updateReq)
+	if err == nil {
+		t.Error("Expected validation error for empty source ID in UpdateSource")
+	}
+}
+
+func TestSensoryReplaceSource(t *testing.T) {
+	expectedSource := sensory.Source{
+		ID:           "source-123",
+		Name:         "Replaced Source",
+		Endpoint:     "https://api.replaced.com/v1",
+		SpaceID:      "space-456",
+		CurrentState: "pending",
+	}
+
+	expectedResponse := sensory.SourceResponse{
+		Data: expectedSource,
+	}
+
+	server := createMockServer(t, func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPut {
+			t.Errorf("Expected PUT request, got %s", r.Method)
+		}
+
+		if r.URL.Path != "/provision/sensory/sources/source-123" {
+			t.Errorf("Expected path /provision/sensory/sources/source-123, got %s", r.URL.Path)
+		}
+
+		var req sensory.UpdateSourceRequest
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			t.Fatalf("Failed to decode request body: %v", err)
+		}
+
+		if req.Source.Name != "Replaced Source" {
+			t.Errorf("Expected request name 'Replaced Source', got %s", req.Source.Name)
+		}
+
+		if req.Source.Endpoint != "https://api.replaced.com/v1" {
+			t.Errorf("Expected request endpoint 'https://api.replaced.com/v1', got %s", req.Source.Endpoint)
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(expectedResponse)
+	})
+	defer server.Close()
+
+	client := tama.NewClient(tama.Config{
+		BaseURL: server.URL,
+		APIKey:  "test-key",
+	})
+
+	replaceReq := sensory.UpdateSourceRequest{
+		Source: sensory.UpdateSourceData{
+			Name:     "Replaced Source",
+			Type:     "model",
+			Endpoint: "https://api.replaced.com/v1",
+			Credential: &sensory.SourceCredential{
+				APIKey: "replaced-api-key",
+			},
+		},
+	}
+
+	source, err := client.Sensory.ReplaceSource("source-123", replaceReq)
+	if err != nil {
+		t.Fatalf("Unexpected error: %v", err)
+	}
+
+	if source.ID != expectedSource.ID {
+		t.Errorf("Expected source ID %s, got %s", expectedSource.ID, source.ID)
+	}
+
+	if source.Name != expectedSource.Name {
+		t.Errorf("Expected source name %s, got %s", expectedSource.Name, source.Name)
+	}
+
+	if source.Endpoint != expectedSource.Endpoint {
+		t.Errorf("Expected source endpoint %s, got %s", expectedSource.Endpoint, source.Endpoint)
+	}
+
+	if source.CurrentState != expectedSource.CurrentState {
+		t.Errorf("Expected source current state %s, got %s", expectedSource.CurrentState, source.CurrentState)
+	}
+
+	if source.SpaceID != expectedSource.SpaceID {
+		t.Errorf("Expected source space ID %s, got %s", expectedSource.SpaceID, source.SpaceID)
+	}
+}
+
+func TestSensoryReplaceSource_EmptyIDValidation(t *testing.T) {
+	client := tama.NewClient(tama.Config{
+		BaseURL: "https://api.example.com",
+		APIKey:  "test-key",
+	})
+
+	replaceReq := sensory.UpdateSourceRequest{
+		Source: sensory.UpdateSourceData{
+			Name: "Replaced Source",
+		},
+	}
+
+	_, err := client.Sensory.ReplaceSource("", replaceReq)
+	if err == nil {
+		t.Error("Expected validation error for empty source ID in ReplaceSource")
 	}
 }

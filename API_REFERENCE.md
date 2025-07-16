@@ -182,8 +182,10 @@ Creates a new source in a specific space.
     - `Credential` (SourceCredential): Source credentials (required)
 
 **Returns:**
-- `*Source`: Created source object
+- `*Source`: Created source object with ID, Name, Endpoint, SpaceID, and server-managed CurrentState
 - `error`: Error if request fails
+
+**Note:** The `CurrentState` and `SpaceID` fields are managed server-side and cannot be set during creation.
 
 #### UpdateSource(id string, req UpdateSourceRequest) (*Source, error)
 
@@ -196,14 +198,26 @@ Updates an existing source using PATCH.
 - `req` (UpdateSourceRequest): Update request
 
 **Returns:**
-- `*Source`: Updated source object
+- `*Source`: Updated source object with all fields including server-managed CurrentState and SpaceID
 - `error`: Error if request fails
+
+**Note:** The `CurrentState` and `SpaceID` fields cannot be updated via API calls - they are managed server-side.
 
 #### ReplaceSource(id string, req UpdateSourceRequest) (*Source, error)
 
 Replaces an existing source using PUT.
 
 **Endpoint:** `PUT /provision/sensory/sources/:id`
+
+**Parameters:**
+- `id` (string): Source ID (required)
+- `req` (UpdateSourceRequest): Replacement request
+
+**Returns:**
+- `*Source`: Updated source object with all fields including server-managed CurrentState and SpaceID
+- `error`: Error if request fails
+
+**Note:** The `CurrentState` and `SpaceID` fields cannot be updated via API calls - they are managed server-side.
 
 #### DeleteSource(id string) error
 
@@ -344,8 +358,11 @@ type Space struct {
 
 ```go
 type Source struct {
-    ID   string `json:"id,omitempty"`
-    Name string `json:"name"`
+    ID           string `json:"id,omitempty"`
+    Name         string `json:"name"`
+    Endpoint     string `json:"endpoint"`
+    SpaceID      string `json:"space_id"`
+    CurrentState string `json:"current_state"`
 }
 ```
 
@@ -508,6 +525,8 @@ type UpdateSourceData struct {
     Credential *SourceCredential `json:"credential,omitempty"`
 }
 ```
+
+**Note:** The `CurrentState` and `SpaceID` fields cannot be updated via API calls - they are managed server-side.
 
 #### SourceResponse
 

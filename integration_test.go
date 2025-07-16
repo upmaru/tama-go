@@ -138,6 +138,10 @@ func TestIntegrationSensorySourceLifecycle(t *testing.T) {
 		t.Errorf("Retrieved source ID %s doesn't match created source ID %s", retrievedSource.ID, source.ID)
 	}
 
+	if retrievedSource.SpaceID != spaceID {
+		t.Errorf("Retrieved source SpaceID %s doesn't match expected SpaceID %s", retrievedSource.SpaceID, spaceID)
+	}
+
 	// Test source update
 	updateReq := sensory.UpdateSourceRequest{
 		Source: sensory.UpdateSourceData{
@@ -157,6 +161,10 @@ func TestIntegrationSensorySourceLifecycle(t *testing.T) {
 
 	if updatedSource.Name != updateReq.Source.Name {
 		t.Errorf("Expected name '%s', got '%s'", updateReq.Source.Name, updatedSource.Name)
+	}
+
+	if updatedSource.SpaceID != spaceID {
+		t.Errorf("Updated source SpaceID %s doesn't match expected SpaceID %s", updatedSource.SpaceID, spaceID)
 	}
 
 	// Test source deletion
