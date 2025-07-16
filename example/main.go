@@ -38,7 +38,8 @@ func main() {
 	if err != nil {
 		log.Printf("Error creating space: %v", err)
 	} else {
-		fmt.Printf("Created space: %+v\n", space)
+		fmt.Printf("Created space: ID=%s, Name=%s, Type=%s, State=%s\n",
+			space.ID, space.Name, space.Type, space.CurrentState)
 	}
 
 	// Get a space by ID (replace with actual ID)
@@ -47,7 +48,8 @@ func main() {
 	if err != nil {
 		log.Printf("Error getting space: %v", err)
 	} else {
-		fmt.Printf("Retrieved space: %+v\n", space)
+		fmt.Printf("Retrieved space: ID=%s, Name=%s, Type=%s, State=%s\n",
+			space.ID, space.Name, space.Type, space.CurrentState)
 	}
 
 	// Update a space

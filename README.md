@@ -42,7 +42,8 @@ func main() {
         panic(err)
     }
     
-    fmt.Printf("Created space: %+v\n", space)
+    fmt.Printf("Created space: ID=%s, Name=%s, Type=%s, State=%s\n", 
+        space.ID, space.Name, space.Type, space.CurrentState)
     
     // Create a source in the space
     source, err := client.Sensory.CreateSource(space.ID, sensory.CreateSourceRequest{
@@ -153,6 +154,7 @@ space, err := client.Neural.CreateSpace(neural.CreateSpaceRequest{
         Type: "root",
     },
 })
+// space will have ID, Name, Slug, Type, and CurrentState populated
 
 // Get a space
 space, err := client.Neural.GetSpace("space-123")
@@ -164,6 +166,7 @@ space, err := client.Neural.UpdateSpace("space-123", neural.UpdateSpaceRequest{
         Type: "component",
     },
 })
+// CurrentState cannot be updated via API - it's managed server-side
 
 // Replace a space (full replacement)
 space, err := client.Neural.ReplaceSpace("space-123", neural.UpdateSpaceRequest{
@@ -345,7 +348,7 @@ if err != nil {
 
 ### Neural Package Types
 
-- **neural.Space**: Neural space resource with configuration
+- **neural.Space**: Neural space resource with configuration, type, and current state
 - **neural.CreateSpaceRequest**: For creating new spaces
 - **neural.UpdateSpaceRequest**: For updating existing spaces
 - **neural.SpaceRequestData**: Space data in create requests

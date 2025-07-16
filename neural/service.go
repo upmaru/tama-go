@@ -33,9 +33,11 @@ func (e *Error) Error() string {
 
 // Space represents a neural space resource
 type Space struct {
-	ID   string `json:"id,omitempty"`
-	Name string `json:"name"`
-	Slug string `json:"slug,omitempty"`
+	ID           string `json:"id,omitempty"`
+	Name         string `json:"name"`
+	Slug         string `json:"slug,omitempty"`
+	Type         string `json:"type"`
+	CurrentState string `json:"current_state"`
 }
 
 // SpaceResponse represents the API response for space operations

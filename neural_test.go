@@ -11,9 +11,11 @@ import (
 
 func TestNeuralGetSpace(t *testing.T) {
 	expectedSpace := neural.Space{
-		ID:   "space-123",
-		Name: "test-space",
-		Slug: "test-space-slug",
+		ID:           "space-123",
+		Name:         "test-space",
+		Slug:         "test-space-slug",
+		Type:         "root",
+		CurrentState: "active",
 	}
 
 	expectedResponse := neural.SpaceResponse{
@@ -96,9 +98,11 @@ func TestNeuralGetSpaceError(t *testing.T) {
 
 func TestNeuralCreateSpace(t *testing.T) {
 	expectedSpace := neural.Space{
-		ID:   "space-789",
-		Name: "new-space",
-		Slug: "new-space-slug",
+		ID:           "space-789",
+		Name:         "new-space",
+		Slug:         "new-space-slug",
+		Type:         "root",
+		CurrentState: "active",
 	}
 
 	expectedResponse := neural.SpaceResponse{
@@ -197,9 +201,11 @@ func TestNeuralCreateSpaceValidation(t *testing.T) {
 
 func TestNeuralUpdateSpace(t *testing.T) {
 	expectedSpace := neural.Space{
-		ID:   "space-123",
-		Name: "updated-space",
-		Slug: "updated-slug",
+		ID:           "space-123",
+		Name:         "updated-space",
+		Slug:         "updated-slug",
+		Type:         "component",
+		CurrentState: "active",
 	}
 
 	expectedResponse := neural.SpaceResponse{
