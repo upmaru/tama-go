@@ -709,10 +709,11 @@ func TestEmptyIDValidationLimits(t *testing.T) {
 
 func TestSensoryGetLimit(t *testing.T) {
 	expectedLimit := sensory.Limit{
-		ID:         "limit-123",
-		Limit:      32,
-		ScaleUnit:  "seconds",
-		ScaleCount: 1,
+		ID:           "limit-123",
+		Count:        32,
+		ScaleUnit:    "seconds",
+		ScaleCount:   1,
+		CurrentState: "active",
 	}
 
 	expectedResponse := sensory.LimitResponse{
@@ -747,8 +748,8 @@ func TestSensoryGetLimit(t *testing.T) {
 		t.Errorf("Expected limit ID %s, got %s", expectedLimit.ID, limit.ID)
 	}
 
-	if limit.Limit != expectedLimit.Limit {
-		t.Errorf("Expected limit value %d, got %d", expectedLimit.Limit, limit.Limit)
+	if limit.Count != expectedLimit.Count {
+		t.Errorf("Expected count %d, got %d", expectedLimit.Count, limit.Count)
 	}
 
 	if limit.ScaleUnit != expectedLimit.ScaleUnit {
@@ -762,10 +763,11 @@ func TestSensoryGetLimit(t *testing.T) {
 
 func TestSensoryCreateLimit(t *testing.T) {
 	expectedLimit := sensory.Limit{
-		ID:         "limit-789",
-		Limit:      64,
-		ScaleUnit:  "minutes",
-		ScaleCount: 5,
+		ID:           "limit-789",
+		Count:        64,
+		ScaleUnit:    "minutes",
+		ScaleCount:   5,
+		CurrentState: "active",
 	}
 
 	expectedResponse := sensory.LimitResponse{
@@ -786,8 +788,8 @@ func TestSensoryCreateLimit(t *testing.T) {
 			t.Fatalf("Failed to decode request body: %v", err)
 		}
 
-		if req.Limit.Limit != 64 {
-			t.Errorf("Expected request limit 64, got %d", req.Limit.Limit)
+		if req.Limit.Count != 64 {
+			t.Errorf("Expected count 64, got %d", req.Limit.Count)
 		}
 
 		if req.Limit.ScaleUnit != "minutes" {
@@ -811,7 +813,7 @@ func TestSensoryCreateLimit(t *testing.T) {
 
 	createReq := sensory.CreateLimitRequest{
 		Limit: sensory.LimitRequestData{
-			Limit:      64,
+			Count:      64,
 			ScaleUnit:  "minutes",
 			ScaleCount: 5,
 		},
@@ -836,7 +838,7 @@ func TestSensoryCreateLimitValidation(t *testing.T) {
 	// Test empty source ID validation
 	_, err := client.Sensory.CreateLimit("", sensory.CreateLimitRequest{
 		Limit: sensory.LimitRequestData{
-			Limit:      32,
+			Count:      32,
 			ScaleUnit:  "seconds",
 			ScaleCount: 1,
 		},
@@ -848,7 +850,7 @@ func TestSensoryCreateLimitValidation(t *testing.T) {
 	// Test empty scale_unit validation
 	_, err = client.Sensory.CreateLimit("source-123", sensory.CreateLimitRequest{
 		Limit: sensory.LimitRequestData{
-			Limit:      32,
+			Count:      32,
 			ScaleCount: 1,
 		},
 	})
@@ -859,7 +861,7 @@ func TestSensoryCreateLimitValidation(t *testing.T) {
 	// Test invalid scale_count validation
 	_, err = client.Sensory.CreateLimit("source-123", sensory.CreateLimitRequest{
 		Limit: sensory.LimitRequestData{
-			Limit:      32,
+			Count:      32,
 			ScaleUnit:  "seconds",
 			ScaleCount: 0,
 		},
@@ -871,7 +873,7 @@ func TestSensoryCreateLimitValidation(t *testing.T) {
 	// Test invalid limit value validation
 	_, err = client.Sensory.CreateLimit("source-123", sensory.CreateLimitRequest{
 		Limit: sensory.LimitRequestData{
-			Limit:      0,
+			Count:      0,
 			ScaleUnit:  "seconds",
 			ScaleCount: 1,
 		},

@@ -165,7 +165,7 @@ func main() {
 		Limit: sensory.LimitRequestData{
 			ScaleUnit:  "seconds",
 			ScaleCount: 1,
-			Limit:      32,
+			Count:      32,
 		},
 	}
 
@@ -188,9 +188,10 @@ func main() {
 	// Update a limit
 	updateLimit := sensory.UpdateLimitRequest{
 		Limit: sensory.UpdateLimitData{
-			ScaleUnit:  "minutes",
-			ScaleCount: 5,
-			Limit:      100,
+			ScaleUnit:    "minutes",
+			ScaleCount:   5,
+			Count:        100,
+			CurrentState: "active",
 		},
 	}
 

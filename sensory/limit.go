@@ -49,8 +49,8 @@ func (s *Service) CreateLimit(sourceID string, req CreateLimitRequest) (*Limit, 
 	if req.Limit.ScaleCount <= 0 {
 		return nil, fmt.Errorf("limit scale_count must be greater than 0")
 	}
-	if req.Limit.Limit <= 0 {
-		return nil, fmt.Errorf("limit value must be greater than 0")
+	if req.Limit.Count <= 0 {
+		return nil, fmt.Errorf("count value must be greater than 0")
 	}
 
 	var limitResp LimitResponse
