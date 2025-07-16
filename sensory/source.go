@@ -1,6 +1,8 @@
+//nolint:dupl // Similar CRUD patterns across resource types are intentional
 package sensory
 
 import (
+	"errors"
 	"fmt"
 )
 
@@ -9,11 +11,11 @@ import (
 
 // Source operations
 
-// GetSource retrieves a specific source by ID
-// GET /provision/sensory/sources/:id
+// GetSource retrieves a specific source by ID.
+// GET /provision/sensory/sources/:id.
 func (s *Service) GetSource(id string) (*Source, error) {
 	if id == "" {
-		return nil, fmt.Errorf("source ID is required")
+		return nil, errors.New("source ID is required")
 	}
 
 	var sourceResp SourceResponse
@@ -26,31 +28,27 @@ func (s *Service) GetSource(id string) (*Source, error) {
 		return nil, fmt.Errorf("failed to get source: %w", err)
 	}
 
-	if resp.IsError() {
-		if errorResp, ok := resp.Error().(*Error); ok {
-			errorResp.StatusCode = resp.StatusCode()
-			return nil, errorResp
-		}
-		return nil, fmt.Errorf("API error: %s", resp.Status())
+	if apiErr := s.handleAPIError(resp); apiErr != nil {
+		return nil, apiErr
 	}
 
 	return &sourceResp.Data, nil
 }
 
-// CreateSource creates a new source in a specific space
-// POST /provision/sensory/spaces/:space_id/sources
+// CreateSource creates a new source in a specific space.
+// POST /provision/sensory/spaces/:space_id/sources.
 func (s *Service) CreateSource(spaceID string, req CreateSourceRequest) (*Source, error) {
 	if spaceID == "" {
-		return nil, fmt.Errorf("space ID is required")
+		return nil, errors.New("space ID is required")
 	}
 	if req.Source.Name == "" {
-		return nil, fmt.Errorf("source name is required")
+		return nil, errors.New("source name is required")
 	}
 	if req.Source.Type == "" {
-		return nil, fmt.Errorf("source type is required")
+		return nil, errors.New("source type is required")
 	}
 	if req.Source.Endpoint == "" {
-		return nil, fmt.Errorf("source endpoint is required")
+		return nil, errors.New("source endpoint is required")
 	}
 
 	var sourceResp SourceResponse
@@ -64,22 +62,18 @@ func (s *Service) CreateSource(spaceID string, req CreateSourceRequest) (*Source
 		return nil, fmt.Errorf("failed to create source: %w", err)
 	}
 
-	if resp.IsError() {
-		if errorResp, ok := resp.Error().(*Error); ok {
-			errorResp.StatusCode = resp.StatusCode()
-			return nil, errorResp
-		}
-		return nil, fmt.Errorf("API error: %s", resp.Status())
+	if apiErr := s.handleAPIError(resp); apiErr != nil {
+		return nil, apiErr
 	}
 
 	return &sourceResp.Data, nil
 }
 
-// UpdateSource updates an existing source using PATCH
-// PATCH /provision/sensory/sources/:id
+// UpdateSource updates an existing source using PATCH.
+// PATCH /provision/sensory/sources/:id.
 func (s *Service) UpdateSource(id string, req UpdateSourceRequest) (*Source, error) {
 	if id == "" {
-		return nil, fmt.Errorf("source ID is required")
+		return nil, errors.New("source ID is required")
 	}
 
 	var sourceResp SourceResponse
@@ -93,22 +87,18 @@ func (s *Service) UpdateSource(id string, req UpdateSourceRequest) (*Source, err
 		return nil, fmt.Errorf("failed to update source: %w", err)
 	}
 
-	if resp.IsError() {
-		if errorResp, ok := resp.Error().(*Error); ok {
-			errorResp.StatusCode = resp.StatusCode()
-			return nil, errorResp
-		}
-		return nil, fmt.Errorf("API error: %s", resp.Status())
+	if apiErr := s.handleAPIError(resp); apiErr != nil {
+		return nil, apiErr
 	}
 
 	return &sourceResp.Data, nil
 }
 
-// ReplaceSource replaces an existing source using PUT
-// PUT /provision/sensory/sources/:id
+// ReplaceSource replaces an existing source using PUT.
+// PUT /provision/sensory/sources/:id.
 func (s *Service) ReplaceSource(id string, req UpdateSourceRequest) (*Source, error) {
 	if id == "" {
-		return nil, fmt.Errorf("source ID is required")
+		return nil, errors.New("source ID is required")
 	}
 
 	var sourceResp SourceResponse
@@ -122,22 +112,18 @@ func (s *Service) ReplaceSource(id string, req UpdateSourceRequest) (*Source, er
 		return nil, fmt.Errorf("failed to replace source: %w", err)
 	}
 
-	if resp.IsError() {
-		if errorResp, ok := resp.Error().(*Error); ok {
-			errorResp.StatusCode = resp.StatusCode()
-			return nil, errorResp
-		}
-		return nil, fmt.Errorf("API error: %s", resp.Status())
+	if apiErr := s.handleAPIError(resp); apiErr != nil {
+		return nil, apiErr
 	}
 
 	return &sourceResp.Data, nil
 }
 
-// DeleteSource deletes a source by ID
-// DELETE /provision/sensory/sources/:id
+// DeleteSource deletes a source by ID.
+// DELETE /provision/sensory/sources/:id.
 func (s *Service) DeleteSource(id string) error {
 	if id == "" {
-		return fmt.Errorf("source ID is required")
+		return errors.New("source ID is required")
 	}
 
 	resp, err := s.client.R().
@@ -148,12 +134,8 @@ func (s *Service) DeleteSource(id string) error {
 		return fmt.Errorf("failed to delete source: %w", err)
 	}
 
-	if resp.IsError() {
-		if errorResp, ok := resp.Error().(*Error); ok {
-			errorResp.StatusCode = resp.StatusCode()
-			return errorResp
-		}
-		return fmt.Errorf("API error: %s", resp.Status())
+	if apiErr := s.handleAPIError(resp); apiErr != nil {
+		return apiErr
 	}
 
 	return nil

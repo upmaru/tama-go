@@ -1,0 +1,53 @@
+# CODEOWNERS file for tama-go
+# This file defines who should be automatically requested for review
+# when changes are made to specific files or directories
+
+# Global owners - these users will be requested for review on every PR
+* @upmaru/maintainers
+
+# Core library files
+/client.go @upmaru/maintainers @upmaru/core-team
+/neural.go @upmaru/maintainers @upmaru/core-team
+/sensory.go @upmaru/maintainers @upmaru/core-team
+/types.go @upmaru/maintainers @upmaru/core-team
+
+# Neural package
+/neural/ @upmaru/maintainers @upmaru/neural-team
+
+# Sensory package
+/sensory/ @upmaru/maintainers @upmaru/sensory-team
+
+# Documentation - require approval from documentation team
+*.md @upmaru/maintainers @upmaru/docs-team
+/docs/ @upmaru/maintainers @upmaru/docs-team
+
+# CI/CD and GitHub configuration
+/.github/ @upmaru/maintainers @upmaru/devops-team
+/.golangci.yml @upmaru/maintainers @upmaru/devops-team
+/Makefile @upmaru/maintainers @upmaru/devops-team
+
+# Go module files - require core team approval
+/go.mod @upmaru/maintainers @upmaru/core-team
+/go.sum @upmaru/maintainers @upmaru/core-team
+
+# Example code
+/example/ @upmaru/maintainers @upmaru/docs-team
+
+# Test files - require approval from testing team
+*_test.go @upmaru/maintainers @upmaru/testing-team
+
+# License and legal files
+/LICENSE @upmaru/maintainers @upmaru/legal-team
+/NOTICE @upmaru/maintainers @upmaru/legal-team
+
+# Security-related files
+/SECURITY.md @upmaru/maintainers @upmaru/security-team
+
+# Configuration files
+*.yml @upmaru/maintainers @upmaru/devops-team
+*.yaml @upmaru/maintainers @upmaru/devops-team
+*.json @upmaru/maintainers
+
+# Specific critical files that require additional scrutiny
+/neural/service.go @upmaru/maintainers @upmaru/core-team @upmaru/neural-team
+/sensory/service.go @upmaru/maintainers @upmaru/core-team @upmaru/sensory-team

@@ -1,6 +1,7 @@
 package sensory
 
 import (
+	"errors"
 	"fmt"
 )
 
@@ -9,11 +10,11 @@ import (
 
 // Model operations
 
-// GetModel retrieves a specific model by ID
-// GET /provision/sensory/models/:id
+// GetModel retrieves a specific model by ID.
+// GET /provision/sensory/models/:id.
 func (s *Service) GetModel(id string) (*Model, error) {
 	if id == "" {
-		return nil, fmt.Errorf("model ID is required")
+		return nil, errors.New("model ID is required")
 	}
 
 	var modelResp ModelResponse
@@ -26,28 +27,24 @@ func (s *Service) GetModel(id string) (*Model, error) {
 		return nil, fmt.Errorf("failed to get model: %w", err)
 	}
 
-	if resp.IsError() {
-		if errorResp, ok := resp.Error().(*Error); ok {
-			errorResp.StatusCode = resp.StatusCode()
-			return nil, errorResp
-		}
-		return nil, fmt.Errorf("API error: %s", resp.Status())
+	if apiErr := s.handleAPIError(resp); apiErr != nil {
+		return nil, apiErr
 	}
 
 	return &modelResp.Data, nil
 }
 
-// CreateModel creates a new model for a specific source
-// POST /provision/sensory/sources/:source_id/models
+// CreateModel creates a new model for a specific source.
+// POST /provision/sensory/sources/:source_id/models.
 func (s *Service) CreateModel(sourceID string, req CreateModelRequest) (*Model, error) {
 	if sourceID == "" {
-		return nil, fmt.Errorf("source ID is required")
+		return nil, errors.New("source ID is required")
 	}
 	if req.Model.Identifier == "" {
-		return nil, fmt.Errorf("model identifier is required")
+		return nil, errors.New("model identifier is required")
 	}
 	if req.Model.Path == "" {
-		return nil, fmt.Errorf("model path is required")
+		return nil, errors.New("model path is required")
 	}
 
 	var modelResp ModelResponse
@@ -61,22 +58,18 @@ func (s *Service) CreateModel(sourceID string, req CreateModelRequest) (*Model, 
 		return nil, fmt.Errorf("failed to create model: %w", err)
 	}
 
-	if resp.IsError() {
-		if errorResp, ok := resp.Error().(*Error); ok {
-			errorResp.StatusCode = resp.StatusCode()
-			return nil, errorResp
-		}
-		return nil, fmt.Errorf("API error: %s", resp.Status())
+	if apiErr := s.handleAPIError(resp); apiErr != nil {
+		return nil, apiErr
 	}
 
 	return &modelResp.Data, nil
 }
 
-// UpdateModel updates an existing model using PATCH
-// PATCH /provision/sensory/models/:id
+// UpdateModel updates an existing model using PATCH.
+// PATCH /provision/sensory/models/:id.
 func (s *Service) UpdateModel(id string, req UpdateModelRequest) (*Model, error) {
 	if id == "" {
-		return nil, fmt.Errorf("model ID is required")
+		return nil, errors.New("model ID is required")
 	}
 
 	var modelResp ModelResponse
@@ -90,22 +83,18 @@ func (s *Service) UpdateModel(id string, req UpdateModelRequest) (*Model, error)
 		return nil, fmt.Errorf("failed to update model: %w", err)
 	}
 
-	if resp.IsError() {
-		if errorResp, ok := resp.Error().(*Error); ok {
-			errorResp.StatusCode = resp.StatusCode()
-			return nil, errorResp
-		}
-		return nil, fmt.Errorf("API error: %s", resp.Status())
+	if apiErr := s.handleAPIError(resp); apiErr != nil {
+		return nil, apiErr
 	}
 
 	return &modelResp.Data, nil
 }
 
-// ReplaceModel replaces an existing model using PUT
-// PUT /provision/sensory/models/:id
+// ReplaceModel replaces an existing model using PUT.
+// PUT /provision/sensory/models/:id.
 func (s *Service) ReplaceModel(id string, req UpdateModelRequest) (*Model, error) {
 	if id == "" {
-		return nil, fmt.Errorf("model ID is required")
+		return nil, errors.New("model ID is required")
 	}
 
 	var modelResp ModelResponse
@@ -119,22 +108,18 @@ func (s *Service) ReplaceModel(id string, req UpdateModelRequest) (*Model, error
 		return nil, fmt.Errorf("failed to replace model: %w", err)
 	}
 
-	if resp.IsError() {
-		if errorResp, ok := resp.Error().(*Error); ok {
-			errorResp.StatusCode = resp.StatusCode()
-			return nil, errorResp
-		}
-		return nil, fmt.Errorf("API error: %s", resp.Status())
+	if apiErr := s.handleAPIError(resp); apiErr != nil {
+		return nil, apiErr
 	}
 
 	return &modelResp.Data, nil
 }
 
-// DeleteModel deletes a model by ID
-// DELETE /provision/sensory/models/:id
+// DeleteModel deletes a model by ID.
+// DELETE /provision/sensory/models/:id.
 func (s *Service) DeleteModel(id string) error {
 	if id == "" {
-		return fmt.Errorf("model ID is required")
+		return errors.New("model ID is required")
 	}
 
 	resp, err := s.client.R().
@@ -145,12 +130,8 @@ func (s *Service) DeleteModel(id string) error {
 		return fmt.Errorf("failed to delete model: %w", err)
 	}
 
-	if resp.IsError() {
-		if errorResp, ok := resp.Error().(*Error); ok {
-			errorResp.StatusCode = resp.StatusCode()
-			return errorResp
-		}
-		return fmt.Errorf("API error: %s", resp.Status())
+	if apiErr := s.handleAPIError(resp); apiErr != nil {
+		return apiErr
 	}
 
 	return nil

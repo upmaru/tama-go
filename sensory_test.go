@@ -1,4 +1,4 @@
-package tama
+package tama_test
 
 import (
 	"encoding/json"
@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	tama "github.com/upmaru/tama-go"
 	"github.com/upmaru/tama-go/sensory"
 )
 
@@ -20,7 +21,7 @@ func TestSensoryGetSource(t *testing.T) {
 	}
 
 	server := createMockServer(t, func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != "GET" {
+		if r.Method != http.MethodGet {
 			t.Errorf("Expected GET request, got %s", r.Method)
 		}
 
@@ -33,7 +34,7 @@ func TestSensoryGetSource(t *testing.T) {
 	})
 	defer server.Close()
 
-	client := NewClient(Config{
+	client := tama.NewClient(tama.Config{
 		BaseURL: server.URL,
 		APIKey:  "test-key",
 	})
@@ -63,7 +64,7 @@ func TestSensoryCreateSource(t *testing.T) {
 	}
 
 	server := createMockServer(t, func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != "POST" {
+		if r.Method != http.MethodPost {
 			t.Errorf("Expected POST request, got %s", r.Method)
 		}
 
@@ -94,7 +95,7 @@ func TestSensoryCreateSource(t *testing.T) {
 	})
 	defer server.Close()
 
-	client := NewClient(Config{
+	client := tama.NewClient(tama.Config{
 		BaseURL: server.URL,
 		APIKey:  "test-key",
 	})
@@ -105,7 +106,7 @@ func TestSensoryCreateSource(t *testing.T) {
 			Type:     "model",
 			Endpoint: "https://api.mistral.ai/v1",
 			Credential: sensory.SourceCredential{
-				ApiKey: "test-key",
+				APIKey: "test-api-key",
 			},
 		},
 	}
@@ -121,7 +122,7 @@ func TestSensoryCreateSource(t *testing.T) {
 }
 
 func TestSensoryCreateSourceValidation(t *testing.T) {
-	client := NewClient(Config{
+	client := tama.NewClient(tama.Config{
 		BaseURL: "https://api.example.com",
 		APIKey:  "test-key",
 	})
@@ -133,7 +134,7 @@ func TestSensoryCreateSourceValidation(t *testing.T) {
 			Type:     "model",
 			Endpoint: "https://api.test.com",
 			Credential: sensory.SourceCredential{
-				ApiKey: "test-key",
+				APIKey: "test-api-key",
 			},
 		},
 	})
@@ -147,7 +148,7 @@ func TestSensoryCreateSourceValidation(t *testing.T) {
 			Type:     "model",
 			Endpoint: "https://api.test.com",
 			Credential: sensory.SourceCredential{
-				ApiKey: "test-key",
+				APIKey: "test-key",
 			},
 		},
 	})
@@ -161,7 +162,7 @@ func TestSensoryCreateSourceValidation(t *testing.T) {
 			Name:     "Test",
 			Endpoint: "https://api.test.com",
 			Credential: sensory.SourceCredential{
-				ApiKey: "test-key",
+				APIKey: "test-key",
 			},
 		},
 	})
@@ -175,7 +176,7 @@ func TestSensoryCreateSourceValidation(t *testing.T) {
 			Name: "Test",
 			Type: "model",
 			Credential: sensory.SourceCredential{
-				ApiKey: "test-key",
+				APIKey: "test-key",
 			},
 		},
 	})
@@ -185,7 +186,7 @@ func TestSensoryCreateSourceValidation(t *testing.T) {
 }
 
 func TestSensoryGetSource_EmptyIDValidation(t *testing.T) {
-	client := NewClient(Config{
+	client := tama.NewClient(tama.Config{
 		BaseURL: "https://api.example.com",
 		APIKey:  "test-key",
 	})
@@ -207,7 +208,7 @@ func TestSensoryGetModel(t *testing.T) {
 	}
 
 	server := createMockServer(t, func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != "GET" {
+		if r.Method != http.MethodGet {
 			t.Errorf("Expected GET request, got %s", r.Method)
 		}
 
@@ -220,7 +221,7 @@ func TestSensoryGetModel(t *testing.T) {
 	})
 	defer server.Close()
 
-	client := NewClient(Config{
+	client := tama.NewClient(tama.Config{
 		BaseURL: server.URL,
 		APIKey:  "test-key",
 	})
@@ -250,7 +251,7 @@ func TestSensoryCreateModel(t *testing.T) {
 	}
 
 	server := createMockServer(t, func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != "POST" {
+		if r.Method != http.MethodPost {
 			t.Errorf("Expected POST request, got %s", r.Method)
 		}
 
@@ -277,7 +278,7 @@ func TestSensoryCreateModel(t *testing.T) {
 	})
 	defer server.Close()
 
-	client := NewClient(Config{
+	client := tama.NewClient(tama.Config{
 		BaseURL: server.URL,
 		APIKey:  "test-key",
 	})
@@ -300,7 +301,7 @@ func TestSensoryCreateModel(t *testing.T) {
 }
 
 func TestSensoryCreateModelValidation(t *testing.T) {
-	client := NewClient(Config{
+	client := tama.NewClient(tama.Config{
 		BaseURL: "https://api.example.com",
 		APIKey:  "test-key",
 	})
@@ -338,7 +339,7 @@ func TestSensoryCreateModelValidation(t *testing.T) {
 }
 
 func TestSensoryGetModel_EmptyIDValidation(t *testing.T) {
-	client := NewClient(Config{
+	client := tama.NewClient(tama.Config{
 		BaseURL: "https://api.example.com",
 		APIKey:  "test-key",
 	})
@@ -364,7 +365,7 @@ func TestSensoryGetLimit(t *testing.T) {
 	}
 
 	server := createMockServer(t, func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != "GET" {
+		if r.Method != http.MethodGet {
 			t.Errorf("Expected GET request, got %s", r.Method)
 		}
 
@@ -377,7 +378,7 @@ func TestSensoryGetLimit(t *testing.T) {
 	})
 	defer server.Close()
 
-	client := NewClient(Config{
+	client := tama.NewClient(tama.Config{
 		BaseURL: server.URL,
 		APIKey:  "test-key",
 	})
@@ -419,7 +420,7 @@ func TestSensoryCreateLimit(t *testing.T) {
 	}
 
 	server := createMockServer(t, func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != "POST" {
+		if r.Method != http.MethodPost {
 			t.Errorf("Expected POST request, got %s", r.Method)
 		}
 
@@ -450,7 +451,7 @@ func TestSensoryCreateLimit(t *testing.T) {
 	})
 	defer server.Close()
 
-	client := NewClient(Config{
+	client := tama.NewClient(tama.Config{
 		BaseURL: server.URL,
 		APIKey:  "test-key",
 	})
@@ -474,7 +475,7 @@ func TestSensoryCreateLimit(t *testing.T) {
 }
 
 func TestSensoryCreateLimitValidation(t *testing.T) {
-	client := NewClient(Config{
+	client := tama.NewClient(tama.Config{
 		BaseURL: "https://api.example.com",
 		APIKey:  "test-key",
 		Timeout: 10 * time.Second,
@@ -529,7 +530,7 @@ func TestSensoryCreateLimitValidation(t *testing.T) {
 }
 
 func TestSensoryGetLimit_EmptyIDValidation(t *testing.T) {
-	client := NewClient(Config{
+	client := tama.NewClient(tama.Config{
 		BaseURL: "https://api.example.com",
 		APIKey:  "test-key",
 	})

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"time"
 
@@ -10,21 +9,46 @@ import (
 	"github.com/upmaru/tama-go/sensory"
 )
 
+const (
+	exampleSpaceID    = "space-123"
+	exampleSourceID   = "source-123"
+	exampleModelID    = "model-123"
+	exampleLimitID    = "limit-123"
+	defaultTimeout    = 30
+	defaultLimitCount = 32
+	scaleCountValue   = 5
+	limitCountValue   = 100
+)
+
 func main() {
-	// Initialize the client
+	client := initializeClient()
+
+	// Run examples in separate functions to reduce complexity
+	runNeuralSpaceOperations(client)
+	runSensorySourceOperations(client)
+	runSensoryModelOperations(client)
+	runSensoryLimitOperations(client)
+	runDeleteOperations(client)
+
+	log.Printf("Example completed!")
+}
+
+// initializeClient creates and configures the Tama client.
+func initializeClient() *tama.Client {
 	config := tama.Config{
 		BaseURL: "https://api.tama.io", // Replace with your actual API base URL
 		APIKey:  "your-api-key",        // Replace with your actual API key
-		Timeout: 30 * time.Second,
+		Timeout: defaultTimeout * time.Second,
 	}
 
 	client := tama.NewClient(config)
+	client.SetDebug(true) // Enable debug mode to see HTTP requests/responses (optional)
+	return client
+}
 
-	// Enable debug mode to see HTTP requests/responses (optional)
-	client.SetDebug(true)
-
-	// Example: Neural Space operations
-	fmt.Println("=== Neural Space Operations ===")
+// runNeuralSpaceOperations demonstrates neural space operations.
+func runNeuralSpaceOperations(client *tama.Client) {
+	log.Printf("=== Neural Space Operations ===")
 
 	// Create a new space
 	newSpace := neural.CreateSpaceRequest{
@@ -38,17 +62,17 @@ func main() {
 	if err != nil {
 		log.Printf("Error creating space: %v", err)
 	} else {
-		fmt.Printf("Created space: ID=%s, Name=%s, Type=%s, State=%s\n",
+		log.Printf("Created space: ID=%s, Name=%s, Type=%s, State=%s",
 			space.ID, space.Name, space.Type, space.CurrentState)
 	}
 
 	// Get a space by ID (replace with actual ID)
-	spaceID := "space-123"
+	spaceID := exampleSpaceID
 	space, err = client.Neural.GetSpace(spaceID)
 	if err != nil {
 		log.Printf("Error getting space: %v", err)
 	} else {
-		fmt.Printf("Retrieved space: ID=%s, Name=%s, Type=%s, State=%s\n",
+		log.Printf("Retrieved space: ID=%s, Name=%s, Type=%s, State=%s",
 			space.ID, space.Name, space.Type, space.CurrentState)
 	}
 
@@ -64,11 +88,15 @@ func main() {
 	if err != nil {
 		log.Printf("Error updating space: %v", err)
 	} else {
-		fmt.Printf("Updated space: %+v\n", space)
+		log.Printf("Updated space: %+v", space)
 	}
+}
 
-	// Example: Sensory Source operations
-	fmt.Println("\n=== Sensory Source Operations ===")
+// runSensorySourceOperations demonstrates sensory source operations.
+func runSensorySourceOperations(client *tama.Client) {
+	log.Printf("=== Sensory Source Operations ===")
+
+	spaceID := exampleSpaceID
 
 	// Create a new source
 	newSource := sensory.CreateSourceRequest{
@@ -77,7 +105,7 @@ func main() {
 			Type:     "model",
 			Endpoint: "https://api.mistral.ai/v1",
 			Credential: sensory.SourceCredential{
-				ApiKey: "your-api-key-here",
+				APIKey: "your-api-key-here",
 			},
 		},
 	}
@@ -86,16 +114,16 @@ func main() {
 	if err != nil {
 		log.Printf("Error creating source: %v", err)
 	} else {
-		fmt.Printf("Created source: %+v\n", source)
+		log.Printf("Created source: %+v", source)
 	}
 
 	// Get a source by ID (replace with actual ID)
-	sourceID := "source-123"
+	sourceID := exampleSourceID
 	source, err = client.Sensory.GetSource(sourceID)
 	if err != nil {
 		log.Printf("Error getting source: %v", err)
 	} else {
-		fmt.Printf("Retrieved source: %+v\n", source)
+		log.Printf("Retrieved source: %+v", source)
 	}
 
 	// Update a source
@@ -105,7 +133,7 @@ func main() {
 			Type:     "model",
 			Endpoint: "https://api.openai.com/v1",
 			Credential: &sensory.SourceCredential{
-				ApiKey: "your-updated-api-key",
+				APIKey: "your-updated-api-key",
 			},
 		},
 	}
@@ -114,11 +142,15 @@ func main() {
 	if err != nil {
 		log.Printf("Error updating source: %v", err)
 	} else {
-		fmt.Printf("Updated source: %+v\n", source)
+		log.Printf("Updated source: %+v", source)
 	}
+}
 
-	// Example: Sensory Model operations
-	fmt.Println("\n=== Sensory Model Operations ===")
+// runSensoryModelOperations demonstrates sensory model operations.
+func runSensoryModelOperations(client *tama.Client) {
+	log.Printf("=== Sensory Model Operations ===")
+
+	sourceID := exampleSourceID
 
 	// Create a new model
 	newModel := sensory.CreateModelRequest{
@@ -132,16 +164,16 @@ func main() {
 	if err != nil {
 		log.Printf("Error creating model: %v", err)
 	} else {
-		fmt.Printf("Created model: %+v\n", model)
+		log.Printf("Created model: %+v", model)
 	}
 
 	// Get a model by ID (replace with actual ID)
-	modelID := "model-123"
+	modelID := exampleModelID
 	model, err = client.Sensory.GetModel(modelID)
 	if err != nil {
 		log.Printf("Error getting model: %v", err)
 	} else {
-		fmt.Printf("Retrieved model: %+v\n", model)
+		log.Printf("Retrieved model: %+v", model)
 	}
 
 	// Update a model
@@ -156,18 +188,22 @@ func main() {
 	if err != nil {
 		log.Printf("Error updating model: %v", err)
 	} else {
-		fmt.Printf("Updated model: %+v\n", model)
+		log.Printf("Updated model: %+v", model)
 	}
+}
 
-	// Example: Sensory Limit operations
-	fmt.Println("\n=== Sensory Limit Operations ===")
+// runSensoryLimitOperations demonstrates sensory limit operations.
+func runSensoryLimitOperations(client *tama.Client) {
+	log.Printf("=== Sensory Limit Operations ===")
+
+	sourceID := exampleSourceID
 
 	// Create a new limit
 	newLimit := sensory.CreateLimitRequest{
 		Limit: sensory.LimitRequestData{
 			ScaleUnit:  "seconds",
 			ScaleCount: 1,
-			Count:      32,
+			Count:      defaultLimitCount,
 		},
 	}
 
@@ -175,24 +211,24 @@ func main() {
 	if err != nil {
 		log.Printf("Error creating limit: %v", err)
 	} else {
-		fmt.Printf("Created limit: %+v\n", limit)
+		log.Printf("Created limit: %+v", limit)
 	}
 
 	// Get a limit by ID (replace with actual ID)
-	limitID := "limit-123"
+	limitID := exampleLimitID
 	limit, err = client.Sensory.GetLimit(limitID)
 	if err != nil {
 		log.Printf("Error getting limit: %v", err)
 	} else {
-		fmt.Printf("Retrieved limit: %+v\n", limit)
+		log.Printf("Retrieved limit: %+v", limit)
 	}
 
 	// Update a limit
 	updateLimit := sensory.UpdateLimitRequest{
 		Limit: sensory.UpdateLimitData{
 			ScaleUnit:    "minutes",
-			ScaleCount:   5,
-			Count:        100,
+			ScaleCount:   scaleCountValue,
+			Count:        limitCountValue,
 			CurrentState: "active",
 		},
 	}
@@ -201,42 +237,47 @@ func main() {
 	if err != nil {
 		log.Printf("Error updating limit: %v", err)
 	} else {
-		fmt.Printf("Updated limit: %+v\n", limit)
+		log.Printf("Updated limit: %+v", limit)
 	}
+}
 
-	// Example: Delete operations
-	fmt.Println("\n=== Delete Operations ===")
+// runDeleteOperations demonstrates delete operations.
+func runDeleteOperations(_ *tama.Client) {
+	log.Printf("=== Delete Operations ===")
 
 	// Delete resources (uncomment to test)
 	/*
-		err = client.Sensory.DeleteLimit(limitID)
+		limitID := exampleLimitID
+		modelID := exampleModelID
+		sourceID := exampleSourceID
+		spaceID := exampleSpaceID
+
+		err := client.Sensory.DeleteLimit(limitID)
 		if err != nil {
 			log.Printf("Error deleting limit: %v", err)
 		} else {
-			fmt.Println("Deleted limit successfully")
+			log.Printf("Deleted limit successfully")
 		}
 
 		err = client.Sensory.DeleteModel(modelID)
 		if err != nil {
 			log.Printf("Error deleting model: %v", err)
 		} else {
-			fmt.Println("Deleted model successfully")
+			log.Printf("Deleted model successfully")
 		}
 
 		err = client.Sensory.DeleteSource(sourceID)
 		if err != nil {
 			log.Printf("Error deleting source: %v", err)
 		} else {
-			fmt.Println("Deleted source successfully")
+			log.Printf("Deleted source successfully")
 		}
 
 		err = client.Neural.DeleteSpace(spaceID)
 		if err != nil {
 			log.Printf("Error deleting space: %v", err)
 		} else {
-			fmt.Println("Deleted space successfully")
+			log.Printf("Deleted space successfully")
 		}
 	*/
-
-	fmt.Println("\nExample completed!")
 }

@@ -1,14 +1,15 @@
 package neural
 
 import (
+	"errors"
 	"fmt"
 )
 
-// GetSpace retrieves a specific space by ID
-// GET /provision/neural/spaces/:id
+// GetSpace retrieves a specific space by ID.
+// GET /provision/neural/spaces/:id.
 func (s *Service) GetSpace(id string) (*Space, error) {
 	if id == "" {
-		return nil, fmt.Errorf("space ID is required")
+		return nil, errors.New("space ID is required")
 	}
 
 	var spaceResp SpaceResponse
@@ -21,28 +22,24 @@ func (s *Service) GetSpace(id string) (*Space, error) {
 		return nil, fmt.Errorf("failed to get space: %w", err)
 	}
 
-	if resp.IsError() {
-		if errorResp, ok := resp.Error().(*Error); ok {
-			errorResp.StatusCode = resp.StatusCode()
-			return nil, errorResp
-		}
-		return nil, fmt.Errorf("API error: %s", resp.Status())
+	if apiErr := s.handleAPIError(resp); apiErr != nil {
+		return nil, apiErr
 	}
 
 	return &spaceResp.Data, nil
 }
 
-// CreateSpace creates a new space
-// POST /provision/neural/spaces
+// CreateSpace creates a new space.
+// POST /provision/neural/spaces.
 func (s *Service) CreateSpace(req CreateSpaceRequest) (*Space, error) {
 	if req.Space.Name == "" {
-		return nil, fmt.Errorf("space name is required")
+		return nil, errors.New("space name is required")
 	}
 	if req.Space.Type == "" {
-		return nil, fmt.Errorf("space type is required")
+		return nil, errors.New("space type is required")
 	}
 	if req.Space.Type != "root" && req.Space.Type != "component" {
-		return nil, fmt.Errorf("space type must be 'root' or 'component'")
+		return nil, errors.New("space type must be 'root' or 'component'")
 	}
 
 	var spaceResp SpaceResponse
@@ -56,22 +53,18 @@ func (s *Service) CreateSpace(req CreateSpaceRequest) (*Space, error) {
 		return nil, fmt.Errorf("failed to create space: %w", err)
 	}
 
-	if resp.IsError() {
-		if errorResp, ok := resp.Error().(*Error); ok {
-			errorResp.StatusCode = resp.StatusCode()
-			return nil, errorResp
-		}
-		return nil, fmt.Errorf("API error: %s", resp.Status())
+	if apiErr := s.handleAPIError(resp); apiErr != nil {
+		return nil, apiErr
 	}
 
 	return &spaceResp.Data, nil
 }
 
-// UpdateSpace updates an existing space using PATCH
-// PATCH /provision/neural/spaces/:id
+// UpdateSpace updates an existing space using PATCH.
+// PATCH /provision/neural/spaces/:id.
 func (s *Service) UpdateSpace(id string, req UpdateSpaceRequest) (*Space, error) {
 	if id == "" {
-		return nil, fmt.Errorf("space ID is required")
+		return nil, errors.New("space ID is required")
 	}
 
 	var spaceResp SpaceResponse
@@ -85,22 +78,18 @@ func (s *Service) UpdateSpace(id string, req UpdateSpaceRequest) (*Space, error)
 		return nil, fmt.Errorf("failed to update space: %w", err)
 	}
 
-	if resp.IsError() {
-		if errorResp, ok := resp.Error().(*Error); ok {
-			errorResp.StatusCode = resp.StatusCode()
-			return nil, errorResp
-		}
-		return nil, fmt.Errorf("API error: %s", resp.Status())
+	if apiErr := s.handleAPIError(resp); apiErr != nil {
+		return nil, apiErr
 	}
 
 	return &spaceResp.Data, nil
 }
 
-// ReplaceSpace replaces an existing space using PUT
-// PUT /provision/neural/spaces/:id
+// ReplaceSpace replaces an existing space using PUT.
+// PUT /provision/neural/spaces/:id.
 func (s *Service) ReplaceSpace(id string, req UpdateSpaceRequest) (*Space, error) {
 	if id == "" {
-		return nil, fmt.Errorf("space ID is required")
+		return nil, errors.New("space ID is required")
 	}
 
 	var spaceResp SpaceResponse
@@ -114,22 +103,18 @@ func (s *Service) ReplaceSpace(id string, req UpdateSpaceRequest) (*Space, error
 		return nil, fmt.Errorf("failed to replace space: %w", err)
 	}
 
-	if resp.IsError() {
-		if errorResp, ok := resp.Error().(*Error); ok {
-			errorResp.StatusCode = resp.StatusCode()
-			return nil, errorResp
-		}
-		return nil, fmt.Errorf("API error: %s", resp.Status())
+	if apiErr := s.handleAPIError(resp); apiErr != nil {
+		return nil, apiErr
 	}
 
 	return &spaceResp.Data, nil
 }
 
-// DeleteSpace deletes a space by ID
-// DELETE /provision/neural/spaces/:id
+// DeleteSpace deletes a space by ID.
+// DELETE /provision/neural/spaces/:id.
 func (s *Service) DeleteSpace(id string) error {
 	if id == "" {
-		return fmt.Errorf("space ID is required")
+		return errors.New("space ID is required")
 	}
 
 	resp, err := s.client.R().
@@ -140,12 +125,8 @@ func (s *Service) DeleteSpace(id string) error {
 		return fmt.Errorf("failed to delete space: %w", err)
 	}
 
-	if resp.IsError() {
-		if errorResp, ok := resp.Error().(*Error); ok {
-			errorResp.StatusCode = resp.StatusCode()
-			return errorResp
-		}
-		return fmt.Errorf("API error: %s", resp.Status())
+	if apiErr := s.handleAPIError(resp); apiErr != nil {
+		return apiErr
 	}
 
 	return nil
