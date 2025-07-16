@@ -112,7 +112,7 @@ func TestIntegrationSensorySourceLifecycle(t *testing.T) {
 			Type:     "model",
 			Endpoint: "https://api.test.com/v1",
 			Credential: sensory.SourceCredential{
-				ApiKey: "test-key-12345",
+				APIKey: "test-key-12345",
 			},
 		},
 	}
@@ -145,7 +145,7 @@ func TestIntegrationSensorySourceLifecycle(t *testing.T) {
 			Type:     "model",
 			Endpoint: "https://api.updated-test.com/v1",
 			Credential: &sensory.SourceCredential{
-				ApiKey: "updated-test-key-67890",
+				APIKey: "updated-test-key-67890",
 			},
 		},
 	}

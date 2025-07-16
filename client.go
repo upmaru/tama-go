@@ -7,7 +7,12 @@ import (
 	"github.com/go-resty/resty/v2"
 )
 
-// Client represents the main Tama API client
+const (
+	// DefaultTimeout is the default timeout for API requests.
+	DefaultTimeout = 30 * time.Second
+)
+
+// Client represents the main Tama API client.
 type Client struct {
 	httpClient *resty.Client
 	baseURL    string
@@ -16,17 +21,17 @@ type Client struct {
 	Sensory    *SensoryService
 }
 
-// Config holds configuration options for the client
+// Config holds configuration options for the client.
 type Config struct {
 	BaseURL string
 	APIKey  string
 	Timeout time.Duration
 }
 
-// NewClient creates a new Tama API client
+// NewClient creates a new Tama API client.
 func NewClient(config Config) *Client {
 	if config.Timeout == 0 {
-		config.Timeout = 30 * time.Second
+		config.Timeout = DefaultTimeout
 	}
 
 	httpClient := resty.New().
@@ -52,18 +57,18 @@ func NewClient(config Config) *Client {
 	return client
 }
 
-// SetAPIKey sets the API key for authentication
+// SetAPIKey sets the API key for authentication.
 func (c *Client) SetAPIKey(apiKey string) {
 	c.apiKey = apiKey
 	c.httpClient.SetAuthToken(apiKey)
 }
 
-// SetDebug enables debug mode for HTTP requests
+// SetDebug enables debug mode for HTTP requests.
 func (c *Client) SetDebug(debug bool) {
 	c.httpClient.SetDebug(debug)
 }
 
-// Error represents an API error response
+// Error represents an API error response.
 type Error struct {
 	StatusCode int    `json:"status_code"`
 	Message    string `json:"message"`
@@ -77,7 +82,7 @@ func (e *Error) Error() string {
 	return fmt.Sprintf("API error %d: %s", e.StatusCode, e.Message)
 }
 
-// Response represents a standard API response wrapper
+// Response represents a standard API response wrapper.
 type Response struct {
 	Success bool        `json:"success"`
 	Data    interface{} `json:"data,omitempty"`

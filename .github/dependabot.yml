@@ -1,0 +1,100 @@
+# Dependabot configuration for tama-go
+# This file configures automated dependency updates
+
+version: 2
+updates:
+  # Enable version updates for Go modules
+  - package-ecosystem: "gomod"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Etc/UTC"
+    open-pull-requests-limit: 10
+    target-branch: "develop"
+    reviewers:
+      - "upmaru/maintainers"
+    assignees:
+      - "upmaru/maintainers"
+    commit-message:
+      prefix: "deps"
+      prefix-development: "deps-dev"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "go"
+    allow:
+      - dependency-type: "direct"
+      - dependency-type: "indirect"
+    ignore:
+      # Ignore major version updates for stable dependencies
+      - dependency-name: "github.com/go-resty/resty/v2"
+        update-types: ["version-update:semver-major"]
+    groups:
+      # Group test dependencies together
+      test-dependencies:
+        patterns:
+          - "*test*"
+          - "*mock*"
+          - "*assert*"
+        update-types:
+          - "minor"
+          - "patch"
+
+      # Group security updates together
+      security-updates:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+
+  # Enable version updates for GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "10:00"
+      timezone: "Etc/UTC"
+    open-pull-requests-limit: 5
+    target-branch: "develop"
+    reviewers:
+      - "upmaru/maintainers"
+    assignees:
+      - "upmaru/maintainers"
+    commit-message:
+      prefix: "ci"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "github-actions"
+      - "ci"
+    groups:
+      github-actions:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+
+  # Enable version updates for Docker (if we add Dockerfile later)
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+      time: "09:00"
+      timezone: "Etc/UTC"
+    open-pull-requests-limit: 3
+    target-branch: "develop"
+    reviewers:
+      - "upmaru/maintainers"
+    assignees:
+      - "upmaru/maintainers"
+    commit-message:
+      prefix: "docker"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "docker"

@@ -1,0 +1,199 @@
+name: Code Coverage
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  coverage:
+    name: Code Coverage
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.23'
+
+    - name: Cache Go modules
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cache/go-build
+          ~/go/pkg/mod
+        key: ${{ runner.os }}-go-1.23-${{ hashFiles('**/go.sum') }}
+        restore-keys: |
+          ${{ runner.os }}-go-1.23-
+
+    - name: Download dependencies
+      run: go mod download
+
+    - name: Run tests with coverage
+      run: |
+        go test -v -race -coverprofile=coverage.out -covermode=atomic ./...
+
+    - name: Generate coverage report
+      run: |
+        go tool cover -html=coverage.out -o coverage.html
+        go tool cover -func=coverage.out -o coverage.txt
+
+    - name: Calculate coverage percentage
+      id: coverage
+      run: |
+        COVERAGE=$(go tool cover -func=coverage.out | grep total | awk '{print $3}' | sed 's/%//')
+        echo "percentage=$COVERAGE" >> $GITHUB_OUTPUT
+        echo "Coverage: $COVERAGE%"
+
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v4
+      with:
+        file: ./coverage.out
+        flags: unittests
+        name: codecov-umbrella
+        fail_ci_if_error: true
+        verbose: true
+
+    - name: Upload coverage reports to Codacy
+      uses: codacy/codacy-coverage-reporter-action@v1
+      with:
+        project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
+        coverage-reports: coverage.out
+
+    - name: Comment coverage on PR
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const fs = require('fs');
+          const coverage = '${{ steps.coverage.outputs.percentage }}';
+
+          let coverageReport = '';
+          try {
+            coverageReport = fs.readFileSync('coverage.txt', 'utf8');
+          } catch (error) {
+            console.log('Could not read coverage.txt');
+          }
+
+          const body = `## Code Coverage Report
+
+          **Overall Coverage: ${coverage}%**
+
+          <details>
+          <summary>Detailed Coverage Report</summary>
+
+          \`\`\`
+          ${coverageReport}
+          \`\`\`
+
+          </details>
+
+          ${coverage >= 80 ? '✅' : coverage >= 70 ? '⚠️' : '❌'} Coverage is ${coverage}% (${coverage >= 80 ? 'Good' : coverage >= 70 ? 'Acceptable' : 'Needs Improvement'})
+          `;
+
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: body
+          });
+
+    - name: Upload coverage artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-reports
+        path: |
+          coverage.out
+          coverage.html
+          coverage.txt
+        retention-days: 30
+
+    - name: Coverage check
+      run: |
+        COVERAGE=${{ steps.coverage.outputs.percentage }}
+        echo "Current coverage: ${COVERAGE}%"
+
+        # Set minimum coverage threshold
+        MIN_COVERAGE=70
+
+        if (( $(echo "$COVERAGE < $MIN_COVERAGE" | bc -l) )); then
+          echo "❌ Coverage ${COVERAGE}% is below minimum threshold of ${MIN_COVERAGE}%"
+          exit 1
+        else
+          echo "✅ Coverage ${COVERAGE}% meets minimum threshold of ${MIN_COVERAGE}%"
+        fi
+
+  coverage-diff:
+    name: Coverage Diff
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+
+    steps:
+    - name: Checkout PR
+      uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.23'
+
+    - name: Run tests with coverage (PR)
+      run: |
+        go test -v -coverprofile=coverage-pr.out ./...
+        go tool cover -func=coverage-pr.out | grep total | awk '{print $3}' | sed 's/%//' > coverage-pr.txt
+
+    - name: Checkout base branch
+      uses: actions/checkout@v4
+      with:
+        ref: ${{ github.base_ref }}
+
+    - name: Run tests with coverage (base)
+      run: |
+        go test -v -coverprofile=coverage-base.out ./...
+        go tool cover -func=coverage-base.out | grep total | awk '{print $3}' | sed 's/%//' > coverage-base.txt
+
+    - name: Compare coverage
+      run: |
+        PR_COVERAGE=$(cat coverage-pr.txt)
+        BASE_COVERAGE=$(cat coverage-base.txt)
+        DIFF=$(echo "$PR_COVERAGE - $BASE_COVERAGE" | bc -l)
+
+        echo "Base coverage: ${BASE_COVERAGE}%"
+        echo "PR coverage: ${PR_COVERAGE}%"
+        echo "Difference: ${DIFF}%"
+
+        # Create coverage diff report
+        echo "## Coverage Comparison" > coverage-diff.md
+        echo "" >> coverage-diff.md
+        echo "| Branch | Coverage |" >> coverage-diff.md
+        echo "|--------|----------|" >> coverage-diff.md
+        echo "| Base (${{ github.base_ref }}) | ${BASE_COVERAGE}% |" >> coverage-diff.md
+        echo "| PR | ${PR_COVERAGE}% |" >> coverage-diff.md
+        echo "| **Difference** | **${DIFF}%** |" >> coverage-diff.md
+        echo "" >> coverage-diff.md
+
+        if (( $(echo "$DIFF < 0" | bc -l) )); then
+          echo "⚠️ **Warning**: Coverage decreased by ${DIFF#-}%" >> coverage-diff.md
+        elif (( $(echo "$DIFF > 0" | bc -l) )); then
+          echo "✅ **Great**: Coverage increased by ${DIFF}%" >> coverage-diff.md
+        else
+          echo "➡️ Coverage remained the same" >> coverage-diff.md
+        fi
+
+    - name: Comment coverage diff on PR
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const fs = require('fs');
+          const coverageDiff = fs.readFileSync('coverage-diff.md', 'utf8');
+
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: coverageDiff
+          });

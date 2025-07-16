@@ -1,11 +1,13 @@
-package tama
+package tama_test
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 	"testing"
 	"time"
 
+	tama "github.com/upmaru/tama-go"
 	"github.com/upmaru/tama-go/neural"
 )
 
@@ -23,7 +25,7 @@ func TestNeuralGetSpace(t *testing.T) {
 	}
 
 	server := createMockServer(t, func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != "GET" {
+		if r.Method != http.MethodGet {
 			t.Errorf("Expected GET request, got %s", r.Method)
 		}
 
@@ -36,13 +38,13 @@ func TestNeuralGetSpace(t *testing.T) {
 	})
 	defer server.Close()
 
-	config := Config{
+	config := tama.Config{
 		BaseURL: server.URL,
 		APIKey:  "test-key",
 		Timeout: 10 * time.Second,
 	}
 
-	client := NewClient(config)
+	client := tama.NewClient(config)
 	space, err := client.Neural.GetSpace("space-123")
 
 	if err != nil {
@@ -71,21 +73,22 @@ func TestNeuralGetSpaceError(t *testing.T) {
 	})
 	defer server.Close()
 
-	config := Config{
+	config := tama.Config{
 		BaseURL: server.URL,
 		APIKey:  "test-key",
 		Timeout: 10 * time.Second,
 	}
 
-	client := NewClient(config)
+	client := tama.NewClient(config)
 	_, err := client.Neural.GetSpace("nonexistent")
 
 	if err == nil {
 		t.Fatal("Expected error, got nil")
 	}
 
-	if neuralErr, ok := err.(*neural.Error); ok {
-		if neuralErr.StatusCode != 404 {
+	var neuralErr *neural.Error
+	if errors.As(err, &neuralErr) {
+		if neuralErr.StatusCode != http.StatusNotFound {
 			t.Errorf("Expected status code 404, got %d", neuralErr.StatusCode)
 		}
 		if neuralErr.Message != "Space not found" {
@@ -110,7 +113,7 @@ func TestNeuralCreateSpace(t *testing.T) {
 	}
 
 	server := createMockServer(t, func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != "POST" {
+		if r.Method != http.MethodPost {
 			t.Errorf("Expected POST request, got %s", r.Method)
 		}
 
@@ -137,13 +140,13 @@ func TestNeuralCreateSpace(t *testing.T) {
 	})
 	defer server.Close()
 
-	config := Config{
+	config := tama.Config{
 		BaseURL: server.URL,
 		APIKey:  "test-key",
 		Timeout: 10 * time.Second,
 	}
 
-	client := NewClient(config)
+	client := tama.NewClient(config)
 
 	createReq := neural.CreateSpaceRequest{
 		Space: neural.SpaceRequestData{
@@ -168,13 +171,13 @@ func TestNeuralCreateSpace(t *testing.T) {
 }
 
 func TestNeuralCreateSpaceValidation(t *testing.T) {
-	config := Config{
+	config := tama.Config{
 		BaseURL: "https://api.example.com",
 		APIKey:  "test-key",
 		Timeout: 10 * time.Second,
 	}
 
-	client := NewClient(config)
+	client := tama.NewClient(config)
 
 	// Test empty name validation
 	_, err := client.Neural.CreateSpace(neural.CreateSpaceRequest{
@@ -213,7 +216,7 @@ func TestNeuralUpdateSpace(t *testing.T) {
 	}
 
 	server := createMockServer(t, func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != "PATCH" {
+		if r.Method != http.MethodPatch {
 			t.Errorf("Expected PATCH request, got %s", r.Method)
 		}
 
@@ -226,13 +229,13 @@ func TestNeuralUpdateSpace(t *testing.T) {
 	})
 	defer server.Close()
 
-	config := Config{
+	config := tama.Config{
 		BaseURL: server.URL,
 		APIKey:  "test-key",
 		Timeout: 10 * time.Second,
 	}
 
-	client := NewClient(config)
+	client := tama.NewClient(config)
 
 	updateReq := neural.UpdateSpaceRequest{
 		Space: neural.UpdateSpaceData{
@@ -254,7 +257,7 @@ func TestNeuralUpdateSpace(t *testing.T) {
 
 func TestNeuralDeleteSpace(t *testing.T) {
 	server := createMockServer(t, func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != "DELETE" {
+		if r.Method != http.MethodDelete {
 			t.Errorf("Expected DELETE request, got %s", r.Method)
 		}
 
@@ -266,13 +269,13 @@ func TestNeuralDeleteSpace(t *testing.T) {
 	})
 	defer server.Close()
 
-	config := Config{
+	config := tama.Config{
 		BaseURL: server.URL,
 		APIKey:  "test-key",
 		Timeout: 10 * time.Second,
 	}
 
-	client := NewClient(config)
+	client := tama.NewClient(config)
 
 	err := client.Neural.DeleteSpace("space-123")
 
