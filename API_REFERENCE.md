@@ -65,7 +65,7 @@ Retrieves a specific neural space by ID.
 - `id` (string): Space ID (required)
 
 **Returns:**
-- `*Space`: Space object
+- `*Space`: Space object with ID, Name, Slug, Type, and CurrentState
 - `error`: Error if request fails
 
 **Example:**
@@ -90,7 +90,7 @@ Creates a new neural space.
     - `Type` (string): Space type - "root" or "component" (required)
 
 **Returns:**
-- `*Space`: Created space object
+- `*Space`: Created space object with ID, Name, Slug, Type, and CurrentState
 - `error`: Error if request fails
 
 **Example:**
@@ -118,7 +118,7 @@ Updates an existing space using PATCH (partial update).
     - `Type` (string): New space type - "root" or "component" (optional)
 
 **Returns:**
-- `*Space`: Updated space object
+- `*Space`: Updated space object with all fields including server-managed CurrentState
 - `error`: Error if request fails
 
 ### ReplaceSpace(id string, req UpdateSpaceRequest) (*Space, error)
@@ -132,7 +132,7 @@ Replaces an existing space using PUT (full replacement).
 - `req` (UpdateSpaceRequest): Replacement request
 
 **Returns:**
-- `*Space`: Updated space object
+- `*Space`: Updated space object with all fields including server-managed CurrentState
 - `error`: Error if request fails
 
 ### DeleteSpace(id string) error
@@ -270,7 +270,9 @@ Creates a new limit for a specific source.
   - `Limit` (LimitRequestData): Limit data (required)
     - `ScaleUnit` (string): Scale unit (required)
     - `ScaleCount` (int): Scale count (required, must be > 0)
-    - `Limit` (int): Limit value (required, must be > 0)
+    - `Count` (int): Count value (required, must be > 0)
+
+**Note:** The created limit will automatically be associated with the specified source via its `source_id` field.
 
 #### UpdateLimit(id string, req UpdateLimitRequest) (*Limit, error)
 
@@ -330,9 +332,11 @@ if err != nil {
 
 ```go
 type Space struct {
-    ID   string `json:"id,omitempty"`
-    Name string `json:"name"`
-    Slug string `json:"slug,omitempty"`
+    ID           string `json:"id,omitempty"`
+    Name         string `json:"name"`
+    Slug         string `json:"slug,omitempty"`
+    Type         string `json:"type"`
+    CurrentState string `json:"current_state"`
 }
 ```
 
@@ -358,10 +362,12 @@ type Model struct {
 
 ```go
 type Limit struct {
-    ID         string `json:"id,omitempty"`
-    Limit      int    `json:"limit"`
-    ScaleUnit  string `json:"scale_unit"`
-    ScaleCount int    `json:"scale_count"`
+    ID           string `json:"id,omitempty"`
+    SourceID     string `json:"source_id"`
+    Count        int    `json:"count"`
+    ScaleUnit    string `json:"scale_unit"`
+    ScaleCount   int    `json:"scale_count"`
+    CurrentState string `json:"current_state"`
 }
 ```
 
@@ -471,6 +477,8 @@ type UpdateSpaceData struct {
 }
 ```
 
+**Note:** The `CurrentState` field cannot be updated via API calls - it is managed server-side.
+
 #### SpaceResponse
 
 ```go
@@ -549,7 +557,7 @@ type ModelResponse struct {
 type LimitRequestData struct {
     ScaleUnit  string `json:"scale_unit"`
     ScaleCount int    `json:"scale_count"`
-    Limit      int    `json:"limit"`
+    Count      int    `json:"count"`
 }
 ```
 
@@ -557,9 +565,10 @@ type LimitRequestData struct {
 
 ```go
 type UpdateLimitData struct {
-    ScaleUnit  string `json:"scale_unit,omitempty"`
-    ScaleCount int    `json:"scale_count,omitempty"`
-    Limit      int    `json:"limit,omitempty"`
+    ScaleUnit    string `json:"scale_unit,omitempty"`
+    ScaleCount   int    `json:"scale_count,omitempty"`
+    Count        int    `json:"count,omitempty"`
+    CurrentState string `json:"current_state,omitempty"`
 }
 ```
 

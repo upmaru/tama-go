@@ -38,7 +38,8 @@ func main() {
 	if err != nil {
 		log.Printf("Error creating space: %v", err)
 	} else {
-		fmt.Printf("Created space: %+v\n", space)
+		fmt.Printf("Created space: ID=%s, Name=%s, Type=%s, State=%s\n",
+			space.ID, space.Name, space.Type, space.CurrentState)
 	}
 
 	// Get a space by ID (replace with actual ID)
@@ -47,7 +48,8 @@ func main() {
 	if err != nil {
 		log.Printf("Error getting space: %v", err)
 	} else {
-		fmt.Printf("Retrieved space: %+v\n", space)
+		fmt.Printf("Retrieved space: ID=%s, Name=%s, Type=%s, State=%s\n",
+			space.ID, space.Name, space.Type, space.CurrentState)
 	}
 
 	// Update a space
@@ -207,33 +209,33 @@ func main() {
 
 	// Delete resources (uncomment to test)
 	/*
-	err = client.Sensory.DeleteLimit(limitID)
-	if err != nil {
-		log.Printf("Error deleting limit: %v", err)
-	} else {
-		fmt.Println("Deleted limit successfully")
-	}
+		err = client.Sensory.DeleteLimit(limitID)
+		if err != nil {
+			log.Printf("Error deleting limit: %v", err)
+		} else {
+			fmt.Println("Deleted limit successfully")
+		}
 
-	err = client.Sensory.DeleteModel(modelID)
-	if err != nil {
-		log.Printf("Error deleting model: %v", err)
-	} else {
-		fmt.Println("Deleted model successfully")
-	}
+		err = client.Sensory.DeleteModel(modelID)
+		if err != nil {
+			log.Printf("Error deleting model: %v", err)
+		} else {
+			fmt.Println("Deleted model successfully")
+		}
 
-	err = client.Sensory.DeleteSource(sourceID)
-	if err != nil {
-		log.Printf("Error deleting source: %v", err)
-	} else {
-		fmt.Println("Deleted source successfully")
-	}
+		err = client.Sensory.DeleteSource(sourceID)
+		if err != nil {
+			log.Printf("Error deleting source: %v", err)
+		} else {
+			fmt.Println("Deleted source successfully")
+		}
 
-	err = client.Neural.DeleteSpace(spaceID)
-	if err != nil {
-		log.Printf("Error deleting space: %v", err)
-	} else {
-		fmt.Println("Deleted space successfully")
-	}
+		err = client.Neural.DeleteSpace(spaceID)
+		if err != nil {
+			log.Printf("Error deleting space: %v", err)
+		} else {
+			fmt.Println("Deleted space successfully")
+		}
 	*/
 
 	fmt.Println("\nExample completed!")
