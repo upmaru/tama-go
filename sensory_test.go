@@ -9,8 +9,6 @@ import (
 	"github.com/upmaru/tama-go/sensory"
 )
 
-
-
 func TestSensoryGetSource(t *testing.T) {
 	expectedSource := sensory.Source{
 		ID:   "source-123",

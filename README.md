@@ -43,6 +43,36 @@ func main() {
     }
     
     fmt.Printf("Created space: %+v\n", space)
+    
+    // Create a source in the space
+    source, err := client.Sensory.CreateSource(space.ID, sensory.CreateSourceRequest{
+        Source: sensory.SourceRequestData{
+            Name:     "AI Model Source",
+            Type:     "model",
+            Endpoint: "https://api.example.com/v1",
+            Credential: sensory.SourceCredential{
+                ApiKey: "source-api-key",
+            },
+        },
+    })
+    if err != nil {
+        panic(err)
+    }
+    
+    // Create a limit for the source
+    limit, err := client.Sensory.CreateLimit(source.ID, sensory.CreateLimitRequest{
+        Limit: sensory.LimitRequestData{
+            ScaleUnit:  "minutes",
+            ScaleCount: 1,
+            Count:      100,
+        },
+    })
+    if err != nil {
+        panic(err)
+    }
+    
+    fmt.Printf("Created limit: ID=%s, SourceID=%s, Count=%d, State=%s\n", 
+        limit.ID, limit.SourceID, limit.Count, limit.CurrentState)
 }
 ```
 
@@ -106,6 +136,8 @@ The client provides comprehensive coverage of the Tama API endpoints, organized 
 - `PATCH /provision/sensory/limits/:id` - Update limit
 - `PUT /provision/sensory/limits/:id` - Replace limit
 - `DELETE /provision/sensory/limits/:id` - Delete limit
+
+Note: Limits are associated with sources via the `source_id` field and track resource usage counts with current state.
 
 ## Usage Examples
 
@@ -218,7 +250,7 @@ limit, err := client.Sensory.CreateLimit("source-123", sensory.CreateLimitReques
     Limit: sensory.LimitRequestData{
         ScaleUnit:  "seconds",
         ScaleCount: 1,
-        Limit:      32,
+        Count:      32,
     },
 })
 
@@ -228,9 +260,10 @@ limit, err := client.Sensory.GetLimit("limit-123")
 // Update a limit
 limit, err := client.Sensory.UpdateLimit("limit-123", sensory.UpdateLimitRequest{
     Limit: sensory.UpdateLimitData{
-        ScaleUnit:  "minutes",
-        ScaleCount: 5,
-        Limit:      100,
+        ScaleUnit:    "minutes",
+        ScaleCount:   5,
+        Count:        100,
+        CurrentState: "active",
     },
 })
 
@@ -324,7 +357,7 @@ if err != nil {
 
 - **sensory.Source**: Sensory data source with type and connection details
 - **sensory.Model**: Machine learning model with version and parameters
-- **sensory.Limit**: Resource limits with values and units
+- **sensory.Limit**: Resource limits with counts, scale units, current state, and source association
 - **sensory.CreateSourceRequest**: For creating new sources
 - **sensory.UpdateSourceRequest**: For updating existing sources
 - **sensory.CreateModelRequest**: For creating new models

@@ -9,8 +9,6 @@ import (
 	"github.com/upmaru/tama-go/neural"
 )
 
-
-
 func TestNeuralGetSpace(t *testing.T) {
 	expectedSpace := neural.Space{
 		ID:   "space-123",
