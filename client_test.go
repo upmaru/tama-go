@@ -710,6 +710,7 @@ func TestEmptyIDValidationLimits(t *testing.T) {
 func TestSensoryGetLimit(t *testing.T) {
 	expectedLimit := sensory.Limit{
 		ID:           "limit-123",
+		SourceID:     "source-456",
 		Count:        32,
 		ScaleUnit:    "seconds",
 		ScaleCount:   1,
@@ -764,6 +765,7 @@ func TestSensoryGetLimit(t *testing.T) {
 func TestSensoryCreateLimit(t *testing.T) {
 	expectedLimit := sensory.Limit{
 		ID:           "limit-789",
+		SourceID:     "source-123",
 		Count:        64,
 		ScaleUnit:    "minutes",
 		ScaleCount:   5,

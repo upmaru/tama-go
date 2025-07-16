@@ -51,6 +51,7 @@ type Model struct {
 // Limit represents a sensory limit resource
 type Limit struct {
 	ID           string `json:"id,omitempty"`
+	SourceID     string `json:"source_id"`
 	Count        int    `json:"count"`
 	ScaleUnit    string `json:"scale_unit"`
 	ScaleCount   int    `json:"scale_count"`
