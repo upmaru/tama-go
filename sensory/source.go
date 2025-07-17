@@ -21,7 +21,6 @@ func (s *Service) GetSource(id string) (*Source, error) {
 	var sourceResp SourceResponse
 	resp, err := s.client.R().
 		SetResult(&sourceResp).
-		SetError(&Error{}).
 		Get(fmt.Sprintf("/provision/sensory/sources/%s", id))
 
 	if err != nil {
@@ -55,7 +54,6 @@ func (s *Service) CreateSource(spaceID string, req CreateSourceRequest) (*Source
 	resp, err := s.client.R().
 		SetBody(req).
 		SetResult(&sourceResp).
-		SetError(&Error{}).
 		Post(fmt.Sprintf("/provision/sensory/spaces/%s/sources", spaceID))
 
 	if err != nil {
@@ -80,7 +78,6 @@ func (s *Service) UpdateSource(id string, req UpdateSourceRequest) (*Source, err
 	resp, err := s.client.R().
 		SetBody(req).
 		SetResult(&sourceResp).
-		SetError(&Error{}).
 		Patch(fmt.Sprintf("/provision/sensory/sources/%s", id))
 
 	if err != nil {
@@ -105,7 +102,6 @@ func (s *Service) ReplaceSource(id string, req UpdateSourceRequest) (*Source, er
 	resp, err := s.client.R().
 		SetBody(req).
 		SetResult(&sourceResp).
-		SetError(&Error{}).
 		Put(fmt.Sprintf("/provision/sensory/sources/%s", id))
 
 	if err != nil {
@@ -127,7 +123,6 @@ func (s *Service) DeleteSource(id string) error {
 	}
 
 	resp, err := s.client.R().
-		SetError(&Error{}).
 		Delete(fmt.Sprintf("/provision/sensory/sources/%s", id))
 
 	if err != nil {

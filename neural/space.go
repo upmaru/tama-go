@@ -15,7 +15,6 @@ func (s *Service) GetSpace(id string) (*Space, error) {
 	var spaceResp SpaceResponse
 	resp, err := s.client.R().
 		SetResult(&spaceResp).
-		SetError(&Error{}).
 		Get(fmt.Sprintf("/provision/neural/spaces/%s", id))
 
 	if err != nil {
@@ -46,7 +45,6 @@ func (s *Service) CreateSpace(req CreateSpaceRequest) (*Space, error) {
 	resp, err := s.client.R().
 		SetBody(req).
 		SetResult(&spaceResp).
-		SetError(&Error{}).
 		Post("/provision/neural/spaces")
 
 	if err != nil {
@@ -71,7 +69,6 @@ func (s *Service) UpdateSpace(id string, req UpdateSpaceRequest) (*Space, error)
 	resp, err := s.client.R().
 		SetBody(req).
 		SetResult(&spaceResp).
-		SetError(&Error{}).
 		Patch(fmt.Sprintf("/provision/neural/spaces/%s", id))
 
 	if err != nil {
@@ -96,7 +93,6 @@ func (s *Service) ReplaceSpace(id string, req UpdateSpaceRequest) (*Space, error
 	resp, err := s.client.R().
 		SetBody(req).
 		SetResult(&spaceResp).
-		SetError(&Error{}).
 		Put(fmt.Sprintf("/provision/neural/spaces/%s", id))
 
 	if err != nil {
@@ -118,7 +114,6 @@ func (s *Service) DeleteSpace(id string) error {
 	}
 
 	resp, err := s.client.R().
-		SetError(&Error{}).
 		Delete(fmt.Sprintf("/provision/neural/spaces/%s", id))
 
 	if err != nil {

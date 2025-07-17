@@ -3,6 +3,7 @@ package tama_test
 import (
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 	"time"
 
@@ -78,28 +79,65 @@ func TestSetDebug(_ *testing.T) {
 }
 
 func TestErrorStruct(t *testing.T) {
-	// Test neural Error
+	// Test neural Error with only status code
 	neuralErr := &neural.Error{
 		StatusCode: 404,
-		Message:    "Not found",
-		Details:    "Resource does not exist",
 	}
 
-	expectedErrorMsg := "API error 404: Not found - Resource does not exist"
+	expectedErrorMsg := "API error 404"
 	if neuralErr.Error() != expectedErrorMsg {
 		t.Errorf("Expected error message %s, got %s", expectedErrorMsg, neuralErr.Error())
 	}
 
-	// Test error without details
-	neuralErrNoDetails := &neural.Error{
-		StatusCode: 500,
-		Message:    "Internal server error",
+	// Test error without status code
+	neuralErrNoStatus := &neural.Error{}
+
+	expectedErrorMsgNoStatus := "API error"
+	if neuralErrNoStatus.Error() != expectedErrorMsgNoStatus {
+		t.Errorf("Expected error message %s, got %s", expectedErrorMsgNoStatus, neuralErrNoStatus.Error())
 	}
 
-	expectedErrorMsgNoDetails := "API error 500: Internal server error"
-	if neuralErrNoDetails.Error() != expectedErrorMsgNoDetails {
-		t.Errorf("Expected error message %s, got %s", expectedErrorMsgNoDetails, neuralErrNoDetails.Error())
+	// Test field-specific errors
+	fieldErr := &neural.Error{
+		StatusCode: 422,
+		Errors: map[string][]string{
+			"source_id": {"has already been taken"},
+			"name":      {"is required", "must be at least 3 characters"},
+		},
 	}
+
+	errorMsg := fieldErr.Error()
+	// Check that all field errors are included
+	if !contains(errorMsg, "source_id has already been taken") {
+		t.Errorf("Expected error message to contain 'source_id has already been taken', got %s", errorMsg)
+	}
+	if !contains(errorMsg, "name is required") {
+		t.Errorf("Expected error message to contain 'name is required', got %s", errorMsg)
+	}
+	if !contains(errorMsg, "name must be at least 3 characters") {
+		t.Errorf("Expected error message to contain 'name must be at least 3 characters', got %s", errorMsg)
+	}
+	if !contains(errorMsg, "API error 422:") {
+		t.Errorf("Expected error message to contain status code, got %s", errorMsg)
+	}
+
+	// Test field-specific errors without status code
+	fieldErrNoStatus := &neural.Error{
+		Errors: map[string][]string{
+			"email": {"is invalid"},
+		},
+	}
+
+	errorMsgNoStatus := fieldErrNoStatus.Error()
+	expectedNoStatus := "API error: email is invalid"
+	if errorMsgNoStatus != expectedNoStatus {
+		t.Errorf("Expected error message %s, got %s", expectedNoStatus, errorMsgNoStatus)
+	}
+}
+
+// Helper function to check if a string contains a substring
+func contains(s, substr string) bool {
+	return strings.Contains(s, substr)
 }
 
 func TestEmptyIDValidation(t *testing.T) {

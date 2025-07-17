@@ -379,28 +379,94 @@ The client returns structured errors of type `*Error`:
 
 ```go
 type Error struct {
-    StatusCode int    `json:"status_code"`
-    Message    string `json:"message"`
-    Details    string `json:"details,omitempty"`
+    StatusCode int                 `json:"status_code"`
+    Errors     map[string][]string `json:"errors,omitempty"`
 }
 ```
 
-### Error Handling Example
+### Error Types
+
+The API returns errors with field-specific validation messages:
+
+#### Field Validation Errors
+For validation errors, the response includes field-specific error messages:
+
+```json
+{
+    "errors": {
+        "source_id": ["has already been taken"],
+        "name": ["is required", "must be at least 3 characters"],
+        "endpoint": ["is invalid URL", "must use HTTPS"]
+    }
+}
+```
+
+### Error Handling Examples
+
+#### General Error Handling
 
 ```go
 space, err := client.Neural.GetSpace("invalid-id")
 if err != nil {
     if apiErr, ok := err.(*tama.Error); ok {
         // API error
-        fmt.Printf("API Error %d: %s\n", apiErr.StatusCode, apiErr.Message)
-        if apiErr.Details != "" {
-            fmt.Printf("Details: %s\n", apiErr.Details)
+        fmt.Printf("API Error %d\n", apiErr.StatusCode)
+    } else {
+        // Client/network error
+        fmt.Printf("Client Error: %v\n", err)
+    }
+}
+```
+
+#### Field Validation Error Handling
+
+```go
+source, err := client.Sensory.CreateSource("space-123", createReq)
+if err != nil {
+    if apiErr, ok := err.(*sensory.Error); ok {
+        if apiErr.Errors != nil {
+            // Field validation errors
+            fmt.Printf("Validation errors:\n")
+            for field, messages := range apiErr.Errors {
+                for _, message := range messages {
+                    fmt.Printf("  %s: %s\n", field, message)
+                }
+            }
+        } else {
+            // General API error
+            fmt.Printf("API Error %d\n", apiErr.StatusCode)
         }
     } else {
         // Client/network error
         fmt.Printf("Client Error: %v\n", err)
     }
 }
+```
+
+#### Complete Error Handling
+
+```go
+result, err := client.Sensory.CreateSource("space-123", createReq)
+if err != nil {
+    if apiErr, ok := err.(*sensory.Error); ok {
+        if apiErr.Errors != nil {
+            // Handle field validation errors
+            fmt.Printf("Validation failed:\n")
+            for field, messages := range apiErr.Errors {
+                fmt.Printf("  %s: %s\n", field, strings.Join(messages, ", "))
+            }
+        } else {
+            // Handle general API errors
+            fmt.Printf("API Error %d\n", apiErr.StatusCode)
+        }
+    } else {
+        // Handle client/network errors
+        fmt.Printf("Client Error: %v\n", err)
+    }
+    return
+}
+// Success - use result
+fmt.Printf("Created source: %+v\n", result)
 ```
 
 ## Data Types

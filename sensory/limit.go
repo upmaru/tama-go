@@ -21,7 +21,6 @@ func (s *Service) GetLimit(id string) (*Limit, error) {
 	var limitResp LimitResponse
 	resp, err := s.client.R().
 		SetResult(&limitResp).
-		SetError(&Error{}).
 		Get(fmt.Sprintf("/provision/sensory/limits/%s", id))
 
 	if err != nil {
@@ -55,7 +54,6 @@ func (s *Service) CreateLimit(sourceID string, req CreateLimitRequest) (*Limit, 
 	resp, err := s.client.R().
 		SetBody(req).
 		SetResult(&limitResp).
-		SetError(&Error{}).
 		Post(fmt.Sprintf("/provision/sensory/sources/%s/limits", sourceID))
 
 	if err != nil {
@@ -80,7 +78,6 @@ func (s *Service) UpdateLimit(id string, req UpdateLimitRequest) (*Limit, error)
 	resp, err := s.client.R().
 		SetBody(req).
 		SetResult(&limitResp).
-		SetError(&Error{}).
 		Patch(fmt.Sprintf("/provision/sensory/limits/%s", id))
 
 	if err != nil {
@@ -105,7 +102,6 @@ func (s *Service) ReplaceLimit(id string, req UpdateLimitRequest) (*Limit, error
 	resp, err := s.client.R().
 		SetBody(req).
 		SetResult(&limitResp).
-		SetError(&Error{}).
 		Put(fmt.Sprintf("/provision/sensory/limits/%s", id))
 
 	if err != nil {
@@ -127,7 +123,6 @@ func (s *Service) DeleteLimit(id string) error {
 	}
 
 	resp, err := s.client.R().
-		SetError(&Error{}).
 		Delete(fmt.Sprintf("/provision/sensory/limits/%s", id))
 
 	if err != nil {

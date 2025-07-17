@@ -3,6 +3,7 @@ package tama_test
 import (
 	"encoding/json"
 	"net/http"
+	"strings"
 	"testing"
 	"time"
 
@@ -977,5 +978,112 @@ func TestSensoryReplaceModel_EmptyIDValidation(t *testing.T) {
 	_, err := client.Sensory.ReplaceModel("", replaceReq)
 	if err == nil {
 		t.Error("Expected validation error for empty model ID in ReplaceModel")
+	}
+}
+
+func TestSensoryFieldSpecificErrors(t *testing.T) {
+	// Test sensory field-specific errors
+	fieldErr := &sensory.Error{
+		StatusCode: 422,
+		Errors: map[string][]string{
+			"source_id": {"has already been taken"},
+			"name":      {"is required", "must be at least 3 characters"},
+		},
+	}
+
+	errorMsg := fieldErr.Error()
+	// Check that all field errors are included
+	if !strings.Contains(errorMsg, "source_id has already been taken") {
+		t.Errorf("Expected error message to contain 'source_id has already been taken', got %s", errorMsg)
+	}
+	if !strings.Contains(errorMsg, "name is required") {
+		t.Errorf("Expected error message to contain 'name is required', got %s", errorMsg)
+	}
+	if !strings.Contains(errorMsg, "name must be at least 3 characters") {
+		t.Errorf("Expected error message to contain 'name must be at least 3 characters', got %s", errorMsg)
+	}
+	if !strings.Contains(errorMsg, "API error 422:") {
+		t.Errorf("Expected error message to contain status code, got %s", errorMsg)
+	}
+
+	// Test error with only status code
+	statusOnlyErr := &sensory.Error{
+		StatusCode: 404,
+	}
+
+	expectedStatusMsg := "API error 404"
+	if statusOnlyErr.Error() != expectedStatusMsg {
+		t.Errorf("Expected error message %s, got %s", expectedStatusMsg, statusOnlyErr.Error())
+	}
+
+	// Test field-specific errors without status code
+	fieldErrNoStatus := &sensory.Error{
+		Errors: map[string][]string{
+			"endpoint": {"is invalid URL"},
+		},
+	}
+
+	errorMsgNoStatus := fieldErrNoStatus.Error()
+	expectedNoStatus := "API error: endpoint is invalid URL"
+	if errorMsgNoStatus != expectedNoStatus {
+		t.Errorf("Expected error message %s, got %s", expectedNoStatus, errorMsgNoStatus)
+	}
+}
+
+func TestSensoryCreateSourceWithFieldErrors(t *testing.T) {
+	// Test API response with field validation errors
+	server := createMockServer(t, func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			t.Errorf("Expected POST request, got %s", r.Method)
+		}
+
+		if r.URL.Path != "/provision/sensory/spaces/space-123/sources" {
+			t.Errorf("Expected path /provision/sensory/spaces/space-123/sources, got %s", r.URL.Path)
+		}
+
+		// Return field validation errors
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusUnprocessableEntity)
+		errorResponse := map[string]interface{}{
+			"errors": map[string][]string{
+				"name":     {"is required"},
+				"endpoint": {"is invalid URL", "must use HTTPS"},
+			},
+		}
+		json.NewEncoder(w).Encode(errorResponse)
+	})
+	defer server.Close()
+
+	client := tama.NewClient(tama.Config{
+		BaseURL: server.URL,
+		APIKey:  "test-key",
+	})
+
+	createReq := sensory.CreateSourceRequest{
+		Source: sensory.SourceRequestData{
+			Name:     "test-source", // Valid name to bypass client validation
+			Type:     "ollama",
+			Endpoint: "https://valid-endpoint.com", // Valid endpoint to bypass client validation
+			Credential: sensory.SourceCredential{
+				APIKey: "test-key",
+			},
+		},
+	}
+
+	_, err := client.Sensory.CreateSource("space-123", createReq)
+	if err == nil {
+		t.Fatal("Expected error for invalid source data")
+	}
+
+	// Check that the error contains field-specific messages
+	errorMsg := err.Error()
+	if !strings.Contains(errorMsg, "name is required") {
+		t.Errorf("Expected error to contain 'name is required', got %s", errorMsg)
+	}
+	if !strings.Contains(errorMsg, "endpoint is invalid URL") {
+		t.Errorf("Expected error to contain 'endpoint is invalid URL', got %s", errorMsg)
+	}
+	if !strings.Contains(errorMsg, "endpoint must use HTTPS") {
+		t.Errorf("Expected error to contain 'endpoint must use HTTPS', got %s", errorMsg)
 	}
 }

@@ -20,7 +20,6 @@ func (s *Service) GetModel(id string) (*Model, error) {
 	var modelResp ModelResponse
 	resp, err := s.client.R().
 		SetResult(&modelResp).
-		SetError(&Error{}).
 		Get(fmt.Sprintf("/provision/sensory/models/%s", id))
 
 	if err != nil {
@@ -51,7 +50,6 @@ func (s *Service) CreateModel(sourceID string, req CreateModelRequest) (*Model, 
 	resp, err := s.client.R().
 		SetBody(req).
 		SetResult(&modelResp).
-		SetError(&Error{}).
 		Post(fmt.Sprintf("/provision/sensory/sources/%s/models", sourceID))
 
 	if err != nil {
@@ -76,7 +74,6 @@ func (s *Service) UpdateModel(id string, req UpdateModelRequest) (*Model, error)
 	resp, err := s.client.R().
 		SetBody(req).
 		SetResult(&modelResp).
-		SetError(&Error{}).
 		Patch(fmt.Sprintf("/provision/sensory/models/%s", id))
 
 	if err != nil {
@@ -101,7 +98,6 @@ func (s *Service) ReplaceModel(id string, req UpdateModelRequest) (*Model, error
 	resp, err := s.client.R().
 		SetBody(req).
 		SetResult(&modelResp).
-		SetError(&Error{}).
 		Put(fmt.Sprintf("/provision/sensory/models/%s", id))
 
 	if err != nil {
@@ -123,7 +119,6 @@ func (s *Service) DeleteModel(id string) error {
 	}
 
 	resp, err := s.client.R().
-		SetError(&Error{}).
 		Delete(fmt.Sprintf("/provision/sensory/models/%s", id))
 
 	if err != nil {

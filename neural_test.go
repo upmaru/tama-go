@@ -66,8 +66,9 @@ func TestNeuralGetSpaceError(t *testing.T) {
 		w.WriteHeader(http.StatusNotFound)
 		errorResp := neural.Error{
 			StatusCode: 404,
-			Message:    "Space not found",
-			Details:    "The requested space does not exist",
+			Errors: map[string][]string{
+				"space": {"not found"},
+			},
 		}
 		json.NewEncoder(w).Encode(errorResp)
 	})
@@ -91,8 +92,8 @@ func TestNeuralGetSpaceError(t *testing.T) {
 		if neuralErr.StatusCode != http.StatusNotFound {
 			t.Errorf("Expected status code 404, got %d", neuralErr.StatusCode)
 		}
-		if neuralErr.Message != "Space not found" {
-			t.Errorf("Expected message 'Space not found', got %s", neuralErr.Message)
+		if neuralErr.Errors == nil || len(neuralErr.Errors["space"]) == 0 || neuralErr.Errors["space"][0] != "not found" {
+			t.Errorf("Expected error 'space not found', got %v", neuralErr.Errors)
 		}
 	} else {
 		t.Errorf("Expected neural.Error, got %T", err)
