@@ -1,7 +1,9 @@
 package neural
 
 import (
+	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/go-resty/resty/v2"
 )
@@ -20,16 +22,28 @@ func NewService(client *resty.Client) *Service {
 
 // Error represents an API error response.
 type Error struct {
-	StatusCode int    `json:"status_code"`
-	Message    string `json:"message"`
-	Details    string `json:"details,omitempty"`
+	StatusCode int                 `json:"status_code"`
+	Errors     map[string][]string `json:"errors,omitempty"`
 }
 
 func (e *Error) Error() string {
-	if e.Details != "" {
-		return fmt.Sprintf("API error %d: %s - %s", e.StatusCode, e.Message, e.Details)
+	if len(e.Errors) > 0 {
+		var errorParts []string
+		for field, messages := range e.Errors {
+			for _, message := range messages {
+				errorParts = append(errorParts, fmt.Sprintf("%s %s", field, message))
+			}
+		}
+		if e.StatusCode > 0 {
+			return fmt.Sprintf("API error %d: %s", e.StatusCode, strings.Join(errorParts, ", "))
+		}
+		return fmt.Sprintf("API error: %s", strings.Join(errorParts, ", "))
 	}
-	return fmt.Sprintf("API error %d: %s", e.StatusCode, e.Message)
+
+	if e.StatusCode > 0 {
+		return fmt.Sprintf("API error %d", e.StatusCode)
+	}
+	return "API error"
 }
 
 // Space represents a neural space resource.
@@ -75,13 +89,55 @@ func (s *Service) handleAPIError(resp interface{}) error {
 		Error() interface{}
 		StatusCode() int
 		Status() string
+		Body() []byte
 	}
 
 	if errResp, ok := resp.(errorResponse); ok && errResp.IsError() {
+		// Always try to parse the raw JSON body first for better error handling
+		if body := errResp.Body(); len(body) > 0 {
+			// First try to parse as map[string][]string (array format)
+			var rawArrayError struct {
+				Errors map[string][]string `json:"errors"`
+			}
+
+			if err := json.Unmarshal(body, &rawArrayError); err == nil && rawArrayError.Errors != nil {
+				return &Error{
+					StatusCode: errResp.StatusCode(),
+					Errors:     rawArrayError.Errors,
+				}
+			}
+
+			// If that fails, try to parse as map[string]string (single string format)
+			var rawStringError struct {
+				Errors map[string]string `json:"errors"`
+			}
+
+			if err := json.Unmarshal(body, &rawStringError); err == nil && rawStringError.Errors != nil {
+				// Convert string values to string arrays
+				convertedErrors := make(map[string][]string)
+				for field, message := range rawStringError.Errors {
+					convertedErrors[field] = []string{message}
+				}
+				return &Error{
+					StatusCode: errResp.StatusCode(),
+					Errors:     convertedErrors,
+				}
+			}
+
+			// Fallback: try to parse as a general error response
+			var generalError Error
+			if err := json.Unmarshal(body, &generalError); err == nil {
+				generalError.StatusCode = errResp.StatusCode()
+				return &generalError
+			}
+		}
+
+		// Fallback: try to get the structured error from resty
 		if apiErrorResp, isError := errResp.Error().(*Error); isError {
 			apiErrorResp.StatusCode = errResp.StatusCode()
 			return apiErrorResp
 		}
+
 		return fmt.Errorf("API error: %s", errResp.Status())
 	}
 	return nil
