@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"log"
 	"strings"
 	"time"
@@ -300,7 +301,8 @@ func handleEnhancedError(operation string, err error) {
 	log.Printf("Error in %s operation:", operation)
 
 	// Check if it's a sensory API error
-	if sensoryErr, ok := err.(*sensory.Error); ok {
+	var sensoryErr *sensory.Error
+	if errors.As(err, &sensoryErr) {
 		if len(sensoryErr.Errors) > 0 {
 			// Handle field validation errors
 			log.Printf("  Field validation errors (Status: %d):", sensoryErr.StatusCode)
@@ -315,7 +317,8 @@ func handleEnhancedError(operation string, err error) {
 	}
 
 	// Check if it's a neural API error
-	if neuralErr, ok := err.(*neural.Error); ok {
+	var neuralErr *neural.Error
+	if errors.As(err, &neuralErr) {
 		if len(neuralErr.Errors) > 0 {
 			// Handle field validation errors
 			log.Printf("  Field validation errors (Status: %d):", neuralErr.StatusCode)

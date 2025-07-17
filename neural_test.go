@@ -92,7 +92,8 @@ func TestNeuralGetSpaceError(t *testing.T) {
 		if neuralErr.StatusCode != http.StatusNotFound {
 			t.Errorf("Expected status code 404, got %d", neuralErr.StatusCode)
 		}
-		if neuralErr.Errors == nil || len(neuralErr.Errors["space"]) == 0 || neuralErr.Errors["space"][0] != "not found" {
+		if neuralErr.Errors == nil || len(neuralErr.Errors["space"]) == 0 ||
+			neuralErr.Errors["space"][0] != "not found" {
 			t.Errorf("Expected error 'space not found', got %v", neuralErr.Errors)
 		}
 	} else {
