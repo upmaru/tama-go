@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"strings"
 	"time"
 
 	tama "github.com/upmaru/tama-go"
@@ -24,10 +25,14 @@ func main() {
 	client := initializeClient()
 
 	// Run examples in separate functions to reduce complexity
+	// Run examples
 	runNeuralSpaceOperations(client)
 	runSensorySourceOperations(client)
 	runSensoryModelOperations(client)
 	runSensoryLimitOperations(client)
+
+	// Demonstrate enhanced error handling
+	demonstrateErrorHandling(client)
 	runDeleteOperations(client)
 
 	log.Printf("Example completed!")
@@ -36,8 +41,8 @@ func main() {
 // initializeClient creates and configures the Tama client.
 func initializeClient() *tama.Client {
 	config := tama.Config{
-		BaseURL: "https://api.tama.io", // Replace with your actual API base URL
-		APIKey:  "your-api-key",        // Replace with your actual API key
+		BaseURL: "http://localhost:4000", // Local development server
+		APIKey:  "your-api-key",          // Replace with your actual API key
 		Timeout: defaultTimeout * time.Second,
 	}
 
@@ -242,6 +247,90 @@ func runSensoryLimitOperations(client *tama.Client) {
 	} else {
 		log.Printf("Updated limit: %+v", limit)
 	}
+}
+
+// demonstrateErrorHandling shows examples of the enhanced error handling
+// for both general API errors and field-specific validation errors.
+func demonstrateErrorHandling(client *tama.Client) {
+	log.Printf("=== Enhanced Error Handling Examples ===")
+
+	// Example 1: Field validation errors
+	log.Printf("--- Example 1: Field Validation Errors ---")
+	invalidSource := sensory.CreateSourceRequest{
+		Source: sensory.SourceRequestData{
+			Name:     "",             // Invalid: empty name
+			Type:     "invalid-type", // Invalid: unsupported type
+			Endpoint: "not-a-url",    // Invalid: malformed URL
+			Credential: sensory.SourceCredential{
+				APIKey: "", // Invalid: empty API key
+			},
+		},
+	}
+
+	_, err := client.Sensory.CreateSource("invalid-space-id", invalidSource)
+	if err != nil {
+		handleEnhancedError("CreateSource", err)
+	}
+
+	// Example 2: General API error (resource not found)
+	log.Printf("--- Example 2: General API Error ---")
+	_, err = client.Sensory.GetSource("non-existent-source-id")
+	if err != nil {
+		handleEnhancedError("GetSource", err)
+	}
+
+	// Example 3: Neural service field validation
+	log.Printf("--- Example 3: Neural Service Validation ---")
+	invalidSpace := neural.CreateSpaceRequest{
+		Space: neural.SpaceRequestData{
+			Name: "",        // Invalid: empty name
+			Type: "invalid", // Invalid: unsupported type
+		},
+	}
+
+	_, err = client.Neural.CreateSpace(invalidSpace)
+	if err != nil {
+		handleEnhancedError("CreateSpace", err)
+	}
+}
+
+// handleEnhancedError demonstrates comprehensive error handling
+// for the new API error structure with field-specific validation.
+func handleEnhancedError(operation string, err error) {
+	log.Printf("Error in %s operation:", operation)
+
+	// Check if it's a sensory API error
+	if sensoryErr, ok := err.(*sensory.Error); ok {
+		if len(sensoryErr.Errors) > 0 {
+			// Handle field validation errors
+			log.Printf("  Field validation errors (Status: %d):", sensoryErr.StatusCode)
+			for field, messages := range sensoryErr.Errors {
+				log.Printf("    %s: %s", field, strings.Join(messages, ", "))
+			}
+		} else {
+			// Handle general API errors
+			log.Printf("  API Error %d", sensoryErr.StatusCode)
+		}
+		return
+	}
+
+	// Check if it's a neural API error
+	if neuralErr, ok := err.(*neural.Error); ok {
+		if len(neuralErr.Errors) > 0 {
+			// Handle field validation errors
+			log.Printf("  Field validation errors (Status: %d):", neuralErr.StatusCode)
+			for field, messages := range neuralErr.Errors {
+				log.Printf("    %s: %s", field, strings.Join(messages, ", "))
+			}
+		} else {
+			// Handle general API errors
+			log.Printf("  API Error %d", neuralErr.StatusCode)
+		}
+		return
+	}
+
+	// Handle client/network errors
+	log.Printf("  Client/Network Error: %v", err)
 }
 
 // runDeleteOperations demonstrates delete operations.

@@ -319,10 +319,7 @@ import "github.com/upmaru/tama-go/neural"
 space, err := client.Neural.GetSpace("invalid-id")
 if err != nil {
     if apiErr, ok := err.(*neural.Error); ok {
-        fmt.Printf("Neural API Error %d: %s\n", apiErr.StatusCode, apiErr.Message)
-        if apiErr.Details != "" {
-            fmt.Printf("Details: %s\n", apiErr.Details)
-        }
+        fmt.Printf("Neural API Error %d\n", apiErr.StatusCode)
     } else {
         fmt.Printf("Client Error: %v\n", err)
     }
@@ -337,10 +334,7 @@ import "github.com/upmaru/tama-go/sensory"
 source, err := client.Sensory.GetSource("invalid-id")
 if err != nil {
     if apiErr, ok := err.(*sensory.Error); ok {
-        fmt.Printf("Sensory API Error %d: %s\n", apiErr.StatusCode, apiErr.Message)
-        if apiErr.Details != "" {
-            fmt.Printf("Details: %s\n", apiErr.Details)
-        }
+        fmt.Printf("Sensory API Error %d\n", apiErr.StatusCode)
     } else {
         fmt.Printf("Client Error: %v\n", err)
     }
