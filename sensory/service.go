@@ -48,8 +48,10 @@ type Source struct {
 
 // Model represents a sensory model resource.
 type Model struct {
-	ID         string `json:"id,omitempty"`
-	Identifier string `json:"identifier"`
+	ID           string `json:"id,omitempty"`
+	Identifier   string `json:"identifier"`
+	Path         string `json:"path"`
+	CurrentState string `json:"current_state"`
 }
 
 // Limit represents a sensory limit resource.

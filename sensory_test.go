@@ -233,8 +233,10 @@ func TestSensoryGetSource_EmptyIDValidation(t *testing.T) {
 
 func TestSensoryGetModel(t *testing.T) {
 	expectedModel := sensory.Model{
-		ID:         "model-123",
-		Identifier: "mistral-small-latest",
+		ID:           "model-123",
+		Identifier:   "mistral-small-latest",
+		Path:         "/chat/completions",
+		CurrentState: "active",
 	}
 
 	expectedResponse := sensory.ModelResponse{
@@ -272,12 +274,22 @@ func TestSensoryGetModel(t *testing.T) {
 	if model.Identifier != expectedModel.Identifier {
 		t.Errorf("Expected model identifier %s, got %s", expectedModel.Identifier, model.Identifier)
 	}
+
+	if model.Path != expectedModel.Path {
+		t.Errorf("Expected model path %s, got %s", expectedModel.Path, model.Path)
+	}
+
+	if model.CurrentState != expectedModel.CurrentState {
+		t.Errorf("Expected model current state %s, got %s", expectedModel.CurrentState, model.CurrentState)
+	}
 }
 
 func TestSensoryCreateModel(t *testing.T) {
 	expectedModel := sensory.Model{
-		ID:         "model-789",
-		Identifier: "mistral-large-latest",
+		ID:           "model-789",
+		Identifier:   "mistral-large-latest",
+		Path:         "/chat/completions",
+		CurrentState: "active",
 	}
 
 	expectedResponse := sensory.ModelResponse{
@@ -331,6 +343,18 @@ func TestSensoryCreateModel(t *testing.T) {
 
 	if model.ID != expectedModel.ID {
 		t.Errorf("Expected model ID %s, got %s", expectedModel.ID, model.ID)
+	}
+
+	if model.Identifier != expectedModel.Identifier {
+		t.Errorf("Expected model identifier %s, got %s", expectedModel.Identifier, model.Identifier)
+	}
+
+	if model.Path != expectedModel.Path {
+		t.Errorf("Expected model path %s, got %s", expectedModel.Path, model.Path)
+	}
+
+	if model.CurrentState != expectedModel.CurrentState {
+		t.Errorf("Expected model current state %s, got %s", expectedModel.CurrentState, model.CurrentState)
 	}
 }
 
@@ -771,5 +795,187 @@ func TestSensoryReplaceSource_EmptyIDValidation(t *testing.T) {
 	_, err := client.Sensory.ReplaceSource("", replaceReq)
 	if err == nil {
 		t.Error("Expected validation error for empty source ID in ReplaceSource")
+	}
+}
+
+func TestSensoryUpdateModel(t *testing.T) {
+	expectedModel := sensory.Model{
+		ID:           "model-123",
+		Identifier:   "mistral-large-updated",
+		Path:         "/v1/chat/completions",
+		CurrentState: "active",
+	}
+
+	expectedResponse := sensory.ModelResponse{
+		Data: expectedModel,
+	}
+
+	server := createMockServer(t, func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPatch {
+			t.Errorf("Expected PATCH request, got %s", r.Method)
+		}
+
+		if r.URL.Path != "/provision/sensory/models/model-123" {
+			t.Errorf("Expected path /provision/sensory/models/model-123, got %s", r.URL.Path)
+		}
+
+		var req sensory.UpdateModelRequest
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			t.Fatalf("Failed to decode request body: %v", err)
+		}
+
+		if req.Model.Identifier != "mistral-large-updated" {
+			t.Errorf("Expected request identifier 'mistral-large-updated', got %s", req.Model.Identifier)
+		}
+
+		if req.Model.Path != "/v1/chat/completions" {
+			t.Errorf("Expected request path '/v1/chat/completions', got %s", req.Model.Path)
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(expectedResponse)
+	})
+	defer server.Close()
+
+	client := tama.NewClient(tama.Config{
+		BaseURL: server.URL,
+		APIKey:  "test-key",
+	})
+
+	updateReq := sensory.UpdateModelRequest{
+		Model: sensory.UpdateModelData{
+			Identifier: "mistral-large-updated",
+			Path:       "/v1/chat/completions",
+		},
+	}
+
+	model, err := client.Sensory.UpdateModel("model-123", updateReq)
+	if err != nil {
+		t.Fatalf("Unexpected error: %v", err)
+	}
+
+	if model.ID != expectedModel.ID {
+		t.Errorf("Expected model ID %s, got %s", expectedModel.ID, model.ID)
+	}
+
+	if model.Identifier != expectedModel.Identifier {
+		t.Errorf("Expected model identifier %s, got %s", expectedModel.Identifier, model.Identifier)
+	}
+
+	if model.Path != expectedModel.Path {
+		t.Errorf("Expected model path %s, got %s", expectedModel.Path, model.Path)
+	}
+
+	if model.CurrentState != expectedModel.CurrentState {
+		t.Errorf("Expected model current state %s, got %s", expectedModel.CurrentState, model.CurrentState)
+	}
+}
+
+func TestSensoryUpdateModel_EmptyIDValidation(t *testing.T) {
+	client := tama.NewClient(tama.Config{
+		BaseURL: "https://api.example.com",
+		APIKey:  "test-key",
+	})
+
+	updateReq := sensory.UpdateModelRequest{
+		Model: sensory.UpdateModelData{
+			Identifier: "updated-model",
+		},
+	}
+
+	_, err := client.Sensory.UpdateModel("", updateReq)
+	if err == nil {
+		t.Error("Expected validation error for empty model ID in UpdateModel")
+	}
+}
+
+func TestSensoryReplaceModel(t *testing.T) {
+	expectedModel := sensory.Model{
+		ID:           "model-123",
+		Identifier:   "mistral-large-replaced",
+		Path:         "/v2/chat/completions",
+		CurrentState: "active",
+	}
+
+	expectedResponse := sensory.ModelResponse{
+		Data: expectedModel,
+	}
+
+	server := createMockServer(t, func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPut {
+			t.Errorf("Expected PUT request, got %s", r.Method)
+		}
+
+		if r.URL.Path != "/provision/sensory/models/model-123" {
+			t.Errorf("Expected path /provision/sensory/models/model-123, got %s", r.URL.Path)
+		}
+
+		var req sensory.UpdateModelRequest
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			t.Fatalf("Failed to decode request body: %v", err)
+		}
+
+		if req.Model.Identifier != "mistral-large-replaced" {
+			t.Errorf("Expected request identifier 'mistral-large-replaced', got %s", req.Model.Identifier)
+		}
+
+		if req.Model.Path != "/v2/chat/completions" {
+			t.Errorf("Expected request path '/v2/chat/completions', got %s", req.Model.Path)
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(expectedResponse)
+	})
+	defer server.Close()
+
+	client := tama.NewClient(tama.Config{
+		BaseURL: server.URL,
+		APIKey:  "test-key",
+	})
+
+	replaceReq := sensory.UpdateModelRequest{
+		Model: sensory.UpdateModelData{
+			Identifier: "mistral-large-replaced",
+			Path:       "/v2/chat/completions",
+		},
+	}
+
+	model, err := client.Sensory.ReplaceModel("model-123", replaceReq)
+	if err != nil {
+		t.Fatalf("Unexpected error: %v", err)
+	}
+
+	if model.ID != expectedModel.ID {
+		t.Errorf("Expected model ID %s, got %s", expectedModel.ID, model.ID)
+	}
+
+	if model.Identifier != expectedModel.Identifier {
+		t.Errorf("Expected model identifier %s, got %s", expectedModel.Identifier, model.Identifier)
+	}
+
+	if model.Path != expectedModel.Path {
+		t.Errorf("Expected model path %s, got %s", expectedModel.Path, model.Path)
+	}
+
+	if model.CurrentState != expectedModel.CurrentState {
+		t.Errorf("Expected model current state %s, got %s", expectedModel.CurrentState, model.CurrentState)
+	}
+}
+
+func TestSensoryReplaceModel_EmptyIDValidation(t *testing.T) {
+	client := tama.NewClient(tama.Config{
+		BaseURL: "https://api.example.com",
+		APIKey:  "test-key",
+	})
+
+	replaceReq := sensory.UpdateModelRequest{
+		Model: sensory.UpdateModelData{
+			Identifier: "replaced-model",
+		},
+	}
+
+	_, err := client.Sensory.ReplaceModel("", replaceReq)
+	if err == nil {
+		t.Error("Expected validation error for empty model ID in ReplaceModel")
 	}
 }

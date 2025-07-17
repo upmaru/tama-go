@@ -233,6 +233,22 @@ Retrieves a specific model by ID.
 
 **Endpoint:** `GET /provision/sensory/models/:id`
 
+**Parameters:**
+- `id` (string): Model ID (required)
+
+**Returns:**
+- `*Model`: Model object with ID, Identifier, Path, and server-managed CurrentState
+- `error`: Error if request fails
+
+**Example:**
+```go
+model, err := client.Sensory.GetModel("model-123")
+if err != nil {
+    log.Fatal(err)
+}
+fmt.Printf("Model: %+v\n", model)
+```
+
 #### CreateModel(sourceID string, req CreateModelRequest) (*Model, error)
 
 Creates a new model for a specific source.
@@ -246,11 +262,41 @@ Creates a new model for a specific source.
     - `Identifier` (string): Model identifier (required)
     - `Path` (string): Model path (required)
 
+**Returns:**
+- `*Model`: Created model object with ID, Identifier, Path, and server-managed CurrentState
+- `error`: Error if request fails
+
+**Note:** The `CurrentState` field is managed server-side and cannot be set during creation.
+
+**Example:**
+```go
+req := sensory.CreateModelRequest{
+    Model: sensory.ModelRequestData{
+        Identifier: "mistral-large-latest",
+        Path:       "/chat/completions",
+    },
+}
+model, err := client.Sensory.CreateModel("source-123", req)
+```
+
 #### UpdateModel(id string, req UpdateModelRequest) (*Model, error)
 
 Updates an existing model using PATCH.
 
 **Endpoint:** `PATCH /provision/sensory/models/:id`
+
+**Parameters:**
+- `id` (string): Model ID (required)
+- `req` (UpdateModelRequest): Update request
+  - `Model` (UpdateModelData): Model update data (required)
+    - `Identifier` (string): New model identifier (optional)
+    - `Path` (string): New model path (optional)
+
+**Returns:**
+- `*Model`: Updated model object with all fields including server-managed CurrentState
+- `error`: Error if request fails
+
+**Note:** The `CurrentState` field cannot be updated via API calls - it is managed server-side.
 
 #### ReplaceModel(id string, req UpdateModelRequest) (*Model, error)
 
@@ -258,11 +304,30 @@ Replaces an existing model using PUT.
 
 **Endpoint:** `PUT /provision/sensory/models/:id`
 
+**Parameters:**
+- `id` (string): Model ID (required)
+- `req` (UpdateModelRequest): Replacement request
+  - `Model` (UpdateModelData): Model update data (required)
+    - `Identifier` (string): New model identifier (optional)
+    - `Path` (string): New model path (optional)
+
+**Returns:**
+- `*Model`: Updated model object with all fields including server-managed CurrentState
+- `error`: Error if request fails
+
+**Note:** The `CurrentState` field cannot be updated via API calls - it is managed server-side.
+
 #### DeleteModel(id string) error
 
 Deletes a model by ID.
 
 **Endpoint:** `DELETE /provision/sensory/models/:id`
+
+**Parameters:**
+- `id` (string): Model ID (required)
+
+**Returns:**
+- `error`: Error if request fails
 
 ### Limit Operations
 
@@ -370,8 +435,10 @@ type Source struct {
 
 ```go
 type Model struct {
-    ID         string `json:"id,omitempty"`
-    Identifier string `json:"identifier"`
+    ID           string `json:"id,omitempty"`
+    Identifier   string `json:"identifier"`
+    Path         string `json:"path"`
+    CurrentState string `json:"current_state"`
 }
 ```
 
@@ -561,6 +628,8 @@ type UpdateModelData struct {
     Path       string `json:"path,omitempty"`
 }
 ```
+
+**Note:** The `CurrentState` field cannot be updated via API calls - it is managed server-side.
 
 #### ModelResponse
 
