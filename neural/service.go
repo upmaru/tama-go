@@ -84,6 +84,22 @@ type UpdateSpaceData struct {
 
 // handleAPIError processes API error responses.
 func (s *Service) handleAPIError(resp interface{}) error {
+	errResp, ok := s.extractErrorResponse(resp)
+	if !ok {
+		return nil
+	}
+
+	if body := errResp.Body(); len(body) > 0 {
+		if err := s.parseErrorFromBody(body, errResp.StatusCode()); err != nil {
+			return err
+		}
+	}
+
+	return s.fallbackError(errResp)
+}
+
+// extractErrorResponse extracts error response interface from resp.
+func (s *Service) extractErrorResponse(resp interface{}) (errorResponse, bool) {
 	type errorResponse interface {
 		IsError() bool
 		Error() interface{}
@@ -93,52 +109,85 @@ func (s *Service) handleAPIError(resp interface{}) error {
 	}
 
 	if errResp, ok := resp.(errorResponse); ok && errResp.IsError() {
-		// Always try to parse the raw JSON body first for better error handling
-		if body := errResp.Body(); len(body) > 0 {
-			// First try to parse as map[string][]string (array format)
-			var rawArrayError struct {
-				Errors map[string][]string `json:"errors"`
-			}
+		return errResp, true
+	}
+	return nil, false
+}
 
-			if err := json.Unmarshal(body, &rawArrayError); err == nil && rawArrayError.Errors != nil {
-				return &Error{
-					StatusCode: errResp.StatusCode(),
-					Errors:     rawArrayError.Errors,
-				}
-			}
+// parseErrorFromBody attempts to parse error from response body.
+func (s *Service) parseErrorFromBody(body []byte, statusCode int) error {
+	// Try to parse as map[string][]string (array format)
+	if err := s.parseArrayError(body, statusCode); err != nil {
+		return err
+	}
 
-			// If that fails, try to parse as map[string]string (single string format)
-			var rawStringError struct {
-				Errors map[string]string `json:"errors"`
-			}
+	// Try to parse as map[string]string (single string format)
+	if err := s.parseStringError(body, statusCode); err != nil {
+		return err
+	}
 
-			if err := json.Unmarshal(body, &rawStringError); err == nil && rawStringError.Errors != nil {
-				// Convert string values to string arrays
-				convertedErrors := make(map[string][]string)
-				for field, message := range rawStringError.Errors {
-					convertedErrors[field] = []string{message}
-				}
-				return &Error{
-					StatusCode: errResp.StatusCode(),
-					Errors:     convertedErrors,
-				}
-			}
+	// Try to parse as a general error response
+	return s.parseGeneralError(body, statusCode)
+}
 
-			// Fallback: try to parse as a general error response
-			var generalError Error
-			if err := json.Unmarshal(body, &generalError); err == nil {
-				generalError.StatusCode = errResp.StatusCode()
-				return &generalError
-			}
+// parseArrayError parses errors in array format.
+func (s *Service) parseArrayError(body []byte, statusCode int) error {
+	var rawArrayError struct {
+		Errors map[string][]string `json:"errors"`
+	}
+
+	if err := json.Unmarshal(body, &rawArrayError); err == nil && rawArrayError.Errors != nil {
+		return &Error{
+			StatusCode: statusCode,
+			Errors:     rawArrayError.Errors,
 		}
-
-		// Fallback: try to get the structured error from resty
-		if apiErrorResp, isError := errResp.Error().(*Error); isError {
-			apiErrorResp.StatusCode = errResp.StatusCode()
-			return apiErrorResp
-		}
-
-		return fmt.Errorf("API error: %s", errResp.Status())
 	}
 	return nil
+}
+
+// parseStringError parses errors in string format and converts to array format.
+func (s *Service) parseStringError(body []byte, statusCode int) error {
+	var rawStringError struct {
+		Errors map[string]string `json:"errors"`
+	}
+
+	if err := json.Unmarshal(body, &rawStringError); err == nil && rawStringError.Errors != nil {
+		convertedErrors := make(map[string][]string)
+		for field, message := range rawStringError.Errors {
+			convertedErrors[field] = []string{message}
+		}
+		return &Error{
+			StatusCode: statusCode,
+			Errors:     convertedErrors,
+		}
+	}
+	return nil
+}
+
+// parseGeneralError parses general error response format.
+func (s *Service) parseGeneralError(body []byte, statusCode int) error {
+	var generalError Error
+	if err := json.Unmarshal(body, &generalError); err == nil {
+		generalError.StatusCode = statusCode
+		return &generalError
+	}
+	return nil
+}
+
+// fallbackError handles fallback error cases.
+func (s *Service) fallbackError(errResp errorResponse) error {
+	if apiErrorResp, isError := errResp.Error().(*Error); isError {
+		apiErrorResp.StatusCode = errResp.StatusCode()
+		return apiErrorResp
+	}
+	return fmt.Errorf("API error: %s", errResp.Status())
+}
+
+// errorResponse interface for type assertion.
+type errorResponse interface {
+	IsError() bool
+	Error() interface{}
+	StatusCode() int
+	Status() string
+	Body() []byte
 }
