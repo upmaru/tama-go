@@ -237,7 +237,7 @@ Retrieves a specific model by ID.
 - `id` (string): Model ID (required)
 
 **Returns:**
-- `*Model`: Model object with ID, Identifier, Path, and server-managed CurrentState
+- `*Model`: Model object with ID, Identifier, Path, Parameters, and server-managed CurrentState
 - `error`: Error if request fails
 
 **Example:**
@@ -261,9 +261,10 @@ Creates a new model for a specific source.
   - `Model` (ModelRequestData): Model data (required)
     - `Identifier` (string): Model identifier (required)
     - `Path` (string): Model path (required)
+    - `Parameters` (map[string]any): Model parameters (optional)
 
 **Returns:**
-- `*Model`: Created model object with ID, Identifier, Path, and server-managed CurrentState
+- `*Model`: Created model object with ID, Identifier, Path, Parameters, and server-managed CurrentState
 - `error`: Error if request fails
 
 **Note:** The `CurrentState` field is managed server-side and cannot be set during creation.
@@ -274,10 +275,29 @@ req := sensory.CreateModelRequest{
     Model: sensory.ModelRequestData{
         Identifier: "mistral-large-latest",
         Path:       "/chat/completions",
+        Parameters: map[string]any{
+            "reasoning_effort": "low",
+            "temperature":      1.0,
+            "max_tokens":       2000,
+            "stream":           true,
+            "stop":             []string{"\n", "###"},
+            "config": map[string]any{
+                "timeout":      30,
+                "enable_cache": true,
+            },
+        },
     },
 }
 model, err := client.Sensory.CreateModel("source-123", req)
 ```
+
+**Parameters Field:**
+The `Parameters` field accepts any valid JSON values:
+- Strings: `"reasoning_effort": "low"`
+- Numbers: `"temperature": 1.0`, `"max_tokens": 2000`
+- Booleans: `"stream": true`
+- Arrays: `"stop": []string{"\n", "###"}`
+- Objects: `"config": map[string]any{...}`
 
 #### UpdateModel(id string, req UpdateModelRequest) (*Model, error)
 
@@ -291,9 +311,10 @@ Updates an existing model using PATCH.
   - `Model` (UpdateModelData): Model update data (required)
     - `Identifier` (string): New model identifier (optional)
     - `Path` (string): New model path (optional)
+    - `Parameters` (map[string]any): New model parameters (optional)
 
 **Returns:**
-- `*Model`: Updated model object with all fields including server-managed CurrentState
+- `*Model`: Updated model object with all fields including Parameters and server-managed CurrentState
 - `error`: Error if request fails
 
 **Note:** The `CurrentState` field cannot be updated via API calls - it is managed server-side.
@@ -310,9 +331,10 @@ Replaces an existing model using PUT.
   - `Model` (UpdateModelData): Model update data (required)
     - `Identifier` (string): New model identifier (optional)
     - `Path` (string): New model path (optional)
+    - `Parameters` (map[string]any): New model parameters (optional)
 
 **Returns:**
-- `*Model`: Updated model object with all fields including server-managed CurrentState
+- `*Model`: Updated model object with all fields including Parameters and server-managed CurrentState
 - `error`: Error if request fails
 
 **Note:** The `CurrentState` field cannot be updated via API calls - it is managed server-side.
@@ -501,10 +523,11 @@ type Source struct {
 
 ```go
 type Model struct {
-    ID           string `json:"id,omitempty"`
-    Identifier   string `json:"identifier"`
-    Path         string `json:"path"`
-    CurrentState string `json:"current_state"`
+    ID           string         `json:"id,omitempty"`
+    Identifier   string         `json:"identifier"`
+    Path         string         `json:"path"`
+    Parameters   map[string]any `json:"parameters,omitempty"`
+    CurrentState string         `json:"current_state"`
 }
 ```
 
@@ -681,8 +704,9 @@ type SourceCredential struct {
 
 ```go
 type ModelRequestData struct {
-    Identifier string `json:"identifier"`
-    Path       string `json:"path"`
+    Identifier string         `json:"identifier"`
+    Path       string         `json:"path"`
+    Parameters map[string]any `json:"parameters,omitempty"`
 }
 ```
 
@@ -690,8 +714,9 @@ type ModelRequestData struct {
 
 ```go
 type UpdateModelData struct {
-    Identifier string `json:"identifier,omitempty"`
-    Path       string `json:"path,omitempty"`
+    Identifier string         `json:"identifier,omitempty"`
+    Path       string         `json:"path,omitempty"`
+    Parameters map[string]any `json:"parameters,omitempty"`
 }
 ```
 

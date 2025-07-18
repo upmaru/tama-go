@@ -228,6 +228,17 @@ model, err := client.Sensory.CreateModel("source-123", sensory.CreateModelReques
     Model: sensory.ModelRequestData{
         Identifier: "mistral-small-latest",
         Path:       "/chat/completions",
+        Parameters: map[string]any{
+            "reasoning_effort": "low",
+            "temperature":      1.0,
+            "max_tokens":       2000,
+            "stream":           true,
+            "stop":             []string{"\n", "###"},
+            "config": map[string]any{
+                "timeout":      30,
+                "enable_cache": true,
+            },
+        },
     },
 })
 
@@ -239,11 +250,44 @@ model, err := client.Sensory.UpdateModel("model-123", sensory.UpdateModelRequest
     Model: sensory.UpdateModelData{
         Identifier: "mistral-large-latest",
         Path:       "/chat/completions",
+        Parameters: map[string]any{
+            "temperature": 0.8,
+            "max_tokens":  1500,
+        },
     },
 })
 
 // Delete a model
 err := client.Sensory.DeleteModel("model-123")
+```
+
+#### Model Parameters
+
+The `Parameters` field in models accepts any valid JSON values, allowing flexible configuration:
+
+```go
+Parameters: map[string]any{
+    // String values
+    "reasoning_effort": "low",
+    
+    // Numeric values
+    "temperature":       0.8,
+    "max_tokens":        1500,
+    "frequency_penalty": 0.1,
+    
+    // Boolean values
+    "stream": true,
+    
+    // Array values
+    "stop": []string{"\n", "###", "END"},
+    
+    // Object values
+    "config": map[string]any{
+        "timeout":      30,
+        "enable_cache": true,
+        "retries":      3,
+    },
+}
 ```
 
 ### Sensory Service - Limits
@@ -356,7 +400,7 @@ if err != nil {
 ### Sensory Package Types
 
 - **sensory.Source**: Sensory data source with type and connection details
-- **sensory.Model**: Machine learning model with version and parameters
+- **sensory.Model**: Machine learning model with identifier, path, and configurable parameters
 - **sensory.Limit**: Resource limits with counts, scale units, current state, and source association
 - **sensory.CreateSourceRequest**: For creating new sources
 - **sensory.UpdateSourceRequest**: For updating existing sources

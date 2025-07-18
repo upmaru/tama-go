@@ -234,9 +234,13 @@ func TestSensoryGetSource_EmptyIDValidation(t *testing.T) {
 
 func TestSensoryGetModel(t *testing.T) {
 	expectedModel := sensory.Model{
-		ID:           "model-123",
-		Identifier:   "mistral-small-latest",
-		Path:         "/chat/completions",
+		ID:         "model-123",
+		Identifier: "mistral-small-latest",
+		Path:       "/chat/completions",
+		Parameters: map[string]any{
+			"temperature": 0.7,
+			"max_tokens":  1000.0,
+		},
 		CurrentState: "active",
 	}
 
@@ -283,13 +287,29 @@ func TestSensoryGetModel(t *testing.T) {
 	if model.CurrentState != expectedModel.CurrentState {
 		t.Errorf("Expected model current state %s, got %s", expectedModel.CurrentState, model.CurrentState)
 	}
+
+	if len(model.Parameters) != len(expectedModel.Parameters) {
+		t.Errorf("Expected %d parameters, got %d", len(expectedModel.Parameters), len(model.Parameters))
+	}
+
+	for key, expectedValue := range expectedModel.Parameters {
+		if actualValue, exists := model.Parameters[key]; !exists {
+			t.Errorf("Expected parameter %s not found", key)
+		} else if actualValue != expectedValue {
+			t.Errorf("Expected parameter %s to be %v, got %v", key, expectedValue, actualValue)
+		}
+	}
 }
 
 func TestSensoryCreateModel(t *testing.T) {
 	expectedModel := sensory.Model{
-		ID:           "model-789",
-		Identifier:   "mistral-large-latest",
-		Path:         "/chat/completions",
+		ID:         "model-789",
+		Identifier: "mistral-large-latest",
+		Path:       "/chat/completions",
+		Parameters: map[string]any{
+			"reasoning_effort": "low",
+			"temperature":      1.0,
+		},
 		CurrentState: "active",
 	}
 
@@ -311,13 +331,16 @@ func TestSensoryCreateModel(t *testing.T) {
 			t.Fatalf("Failed to decode request body: %v", err)
 		}
 
-		if req.Model.Identifier != "mistral-large-latest" {
-			t.Errorf("Expected request identifier 'mistral-large-latest', got %s", req.Model.Identifier)
-		}
+		validateModelRequest(t, req, "mistral-large-latest", "/chat/completions")
 
-		if req.Model.Path != "/chat/completions" {
-			t.Errorf("Expected request path '/chat/completions', got %s", req.Model.Path)
+		expectedParams := map[string]any{
+			"reasoning_effort": "low",
+			"temperature":      1.0,
 		}
+		if len(req.Model.Parameters) != len(expectedParams) {
+			t.Errorf("Expected %d parameters, got %d", len(expectedParams), len(req.Model.Parameters))
+		}
+		validateModelParameters(t, req.Model.Parameters, expectedParams)
 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusCreated)
@@ -334,6 +357,10 @@ func TestSensoryCreateModel(t *testing.T) {
 		Model: sensory.ModelRequestData{
 			Identifier: "mistral-large-latest",
 			Path:       "/chat/completions",
+			Parameters: map[string]any{
+				"reasoning_effort": "low",
+				"temperature":      1.0,
+			},
 		},
 	}
 
@@ -342,21 +369,8 @@ func TestSensoryCreateModel(t *testing.T) {
 		t.Fatalf("Unexpected error: %v", err)
 	}
 
-	if model.ID != expectedModel.ID {
-		t.Errorf("Expected model ID %s, got %s", expectedModel.ID, model.ID)
-	}
-
-	if model.Identifier != expectedModel.Identifier {
-		t.Errorf("Expected model identifier %s, got %s", expectedModel.Identifier, model.Identifier)
-	}
-
-	if model.Path != expectedModel.Path {
-		t.Errorf("Expected model path %s, got %s", expectedModel.Path, model.Path)
-	}
-
-	if model.CurrentState != expectedModel.CurrentState {
-		t.Errorf("Expected model current state %s, got %s", expectedModel.CurrentState, model.CurrentState)
-	}
+	validateModelResponse(t, *model, expectedModel)
+	validateModelParameters(t, model.Parameters, expectedModel.Parameters)
 }
 
 func TestSensoryCreateModelValidation(t *testing.T) {
@@ -801,9 +815,13 @@ func TestSensoryReplaceSource_EmptyIDValidation(t *testing.T) {
 
 func TestSensoryUpdateModel(t *testing.T) {
 	expectedModel := sensory.Model{
-		ID:           "model-123",
-		Identifier:   "mistral-large-updated",
-		Path:         "/v1/chat/completions",
+		ID:         "model-123",
+		Identifier: "mistral-large-updated",
+		Path:       "/v1/chat/completions",
+		Parameters: map[string]any{
+			"max_tokens": 2000.0,
+			"top_p":      0.95,
+		},
 		CurrentState: "active",
 	}
 
@@ -833,6 +851,12 @@ func TestSensoryUpdateModel(t *testing.T) {
 			t.Errorf("Expected request path '/v1/chat/completions', got %s", req.Model.Path)
 		}
 
+		expectedParams := map[string]any{
+			"max_tokens": 2000.0,
+			"top_p":      0.95,
+		}
+		validateModelParameters(t, req.Model.Parameters, expectedParams)
+
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(expectedResponse)
 	})
@@ -847,6 +871,10 @@ func TestSensoryUpdateModel(t *testing.T) {
 		Model: sensory.UpdateModelData{
 			Identifier: "mistral-large-updated",
 			Path:       "/v1/chat/completions",
+			Parameters: map[string]any{
+				"max_tokens": 2000.0,
+				"top_p":      0.95,
+			},
 		},
 	}
 
@@ -855,21 +883,8 @@ func TestSensoryUpdateModel(t *testing.T) {
 		t.Fatalf("Unexpected error: %v", err)
 	}
 
-	if model.ID != expectedModel.ID {
-		t.Errorf("Expected model ID %s, got %s", expectedModel.ID, model.ID)
-	}
-
-	if model.Identifier != expectedModel.Identifier {
-		t.Errorf("Expected model identifier %s, got %s", expectedModel.Identifier, model.Identifier)
-	}
-
-	if model.Path != expectedModel.Path {
-		t.Errorf("Expected model path %s, got %s", expectedModel.Path, model.Path)
-	}
-
-	if model.CurrentState != expectedModel.CurrentState {
-		t.Errorf("Expected model current state %s, got %s", expectedModel.CurrentState, model.CurrentState)
-	}
+	validateModelResponse(t, *model, expectedModel)
+	validateModelParameters(t, model.Parameters, expectedModel.Parameters)
 }
 
 func TestSensoryUpdateModel_EmptyIDValidation(t *testing.T) {
@@ -892,9 +907,13 @@ func TestSensoryUpdateModel_EmptyIDValidation(t *testing.T) {
 
 func TestSensoryReplaceModel(t *testing.T) {
 	expectedModel := sensory.Model{
-		ID:           "model-123",
-		Identifier:   "mistral-large-replaced",
-		Path:         "/v2/chat/completions",
+		ID:         "model-123",
+		Identifier: "mistral-large-replaced",
+		Path:       "/v2/chat/completions",
+		Parameters: map[string]any{
+			"stream":      true,
+			"temperature": 0.5,
+		},
 		CurrentState: "active",
 	}
 
@@ -924,6 +943,12 @@ func TestSensoryReplaceModel(t *testing.T) {
 			t.Errorf("Expected request path '/v2/chat/completions', got %s", req.Model.Path)
 		}
 
+		expectedParams := map[string]any{
+			"stream":      true,
+			"temperature": 0.5,
+		}
+		validateModelParameters(t, req.Model.Parameters, expectedParams)
+
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(expectedResponse)
 	})
@@ -938,6 +963,10 @@ func TestSensoryReplaceModel(t *testing.T) {
 		Model: sensory.UpdateModelData{
 			Identifier: "mistral-large-replaced",
 			Path:       "/v2/chat/completions",
+			Parameters: map[string]any{
+				"stream":      true,
+				"temperature": 0.5,
+			},
 		},
 	}
 
@@ -946,21 +975,32 @@ func TestSensoryReplaceModel(t *testing.T) {
 		t.Fatalf("Unexpected error: %v", err)
 	}
 
-	if model.ID != expectedModel.ID {
-		t.Errorf("Expected model ID %s, got %s", expectedModel.ID, model.ID)
+	validateModelResponse(t, *model, expectedModel)
+	validateModelParameters(t, model.Parameters, expectedModel.Parameters)
+}
+
+func TestSensoryModelParameters(t *testing.T) {
+	expectedModel := createTestModelWithParameters()
+	expectedResponse := sensory.ModelResponse{Data: expectedModel}
+
+	server := createMockServer(t, func(w http.ResponseWriter, r *http.Request) {
+		validateParametersRequest(t, r, w, expectedResponse)
+	})
+	defer server.Close()
+
+	client := tama.NewClient(tama.Config{
+		BaseURL: server.URL,
+		APIKey:  "test-key",
+	})
+
+	createReq := createTestModelRequest()
+	model, err := client.Sensory.CreateModel("source-123", createReq)
+	if err != nil {
+		t.Fatalf("Unexpected error: %v", err)
 	}
 
-	if model.Identifier != expectedModel.Identifier {
-		t.Errorf("Expected model identifier %s, got %s", expectedModel.Identifier, model.Identifier)
-	}
-
-	if model.Path != expectedModel.Path {
-		t.Errorf("Expected model path %s, got %s", expectedModel.Path, model.Path)
-	}
-
-	if model.CurrentState != expectedModel.CurrentState {
-		t.Errorf("Expected model current state %s, got %s", expectedModel.CurrentState, model.CurrentState)
-	}
+	validateModelResponse(t, *model, expectedModel)
+	validateComplexParameters(t, model.Parameters, expectedModel.Parameters)
 }
 
 func TestSensoryReplaceModel_EmptyIDValidation(t *testing.T) {
@@ -1027,6 +1067,201 @@ func TestSensoryFieldSpecificErrors(t *testing.T) {
 	expectedNoStatus := "API error: endpoint is invalid URL"
 	if errorMsgNoStatus != expectedNoStatus {
 		t.Errorf("Expected error message %s, got %s", expectedNoStatus, errorMsgNoStatus)
+	}
+}
+
+// Helper functions to reduce cognitive complexity
+
+func validateModelRequest(t *testing.T, req sensory.CreateModelRequest, expectedIdentifier, expectedPath string) {
+	if req.Model.Identifier != expectedIdentifier {
+		t.Errorf("Expected request identifier '%s', got %s", expectedIdentifier, req.Model.Identifier)
+	}
+	if req.Model.Path != expectedPath {
+		t.Errorf("Expected request path '%s', got %s", expectedPath, req.Model.Path)
+	}
+}
+
+func validateModelResponse(t *testing.T, actual, expected sensory.Model) {
+	if actual.ID != expected.ID {
+		t.Errorf("Expected model ID %s, got %s", expected.ID, actual.ID)
+	}
+	if actual.Identifier != expected.Identifier {
+		t.Errorf("Expected model identifier %s, got %s", expected.Identifier, actual.Identifier)
+	}
+	if actual.Path != expected.Path {
+		t.Errorf("Expected model path %s, got %s", expected.Path, actual.Path)
+	}
+	if actual.CurrentState != expected.CurrentState {
+		t.Errorf("Expected model current state %s, got %s", expected.CurrentState, actual.CurrentState)
+	}
+}
+
+func validateModelParameters(t *testing.T, actual map[string]any, expected map[string]any) {
+	if len(actual) != len(expected) {
+		t.Errorf("Expected %d parameters, got %d", len(expected), len(actual))
+	}
+	for key, expectedValue := range expected {
+		if actualValue, exists := actual[key]; !exists {
+			t.Errorf("Expected parameter %s not found", key)
+		} else if actualValue != expectedValue {
+			t.Errorf("Expected parameter %s to be %v, got %v", key, expectedValue, actualValue)
+		}
+	}
+}
+
+func validateComplexParameters(t *testing.T, actual map[string]any, expected map[string]any) {
+	for key, expectedValue := range expected {
+		actualValue, exists := actual[key]
+		if !exists {
+			t.Errorf("Expected parameter %s not found in response", key)
+			continue
+		}
+
+		switch key {
+		case "stop":
+			validateArrayParameter(t, key, actualValue, expectedValue)
+		case "config":
+			validateObjectParameter(t, key, actualValue, expectedValue)
+		default:
+			if actualValue != expectedValue {
+				t.Errorf("Expected parameter %s to be %v, got %v", key, expectedValue, actualValue)
+			}
+		}
+	}
+}
+
+func validateArrayParameter(t *testing.T, key string, actual any, expected any) {
+	expectedSlice := expected.([]string)
+	actualSlice, ok := actual.([]interface{})
+	if !ok {
+		t.Errorf("Expected %s to be array, got %T", key, actual)
+		return
+	}
+	if len(actualSlice) != len(expectedSlice) {
+		t.Errorf("Expected %s array length %d, got %d", key, len(expectedSlice), len(actualSlice))
+		return
+	}
+	for i, expectedItem := range expectedSlice {
+		if actualSlice[i] != expectedItem {
+			t.Errorf("Expected %s[%d] to be %v, got %v", key, i, expectedItem, actualSlice[i])
+		}
+	}
+}
+
+func validateObjectParameter(t *testing.T, key string, actual any, expected any) {
+	expectedMap := expected.(map[string]any)
+	actualMap, ok := actual.(map[string]interface{})
+	if !ok {
+		t.Errorf("Expected %s to be object, got %T", key, actual)
+		return
+	}
+	for configKey, configExpected := range expectedMap {
+		if actualMap[configKey] != configExpected {
+			t.Errorf("Expected %s.%s to be %v, got %v", key, configKey, configExpected, actualMap[configKey])
+		}
+	}
+}
+
+func createTestModelWithParameters() sensory.Model {
+	return sensory.Model{
+		ID:         "model-params-123",
+		Identifier: "test-model-with-params",
+		Path:       "/test/completions",
+		Parameters: map[string]any{
+			"temperature":       0.8,
+			"max_tokens":        1500.0,
+			"top_p":             0.9,
+			"frequency_penalty": 0.1,
+			"presence_penalty":  0.2,
+			"stream":            true,
+			"stop":              []string{"\\n", "###"},
+			"reasoning_effort":  "medium",
+			"config": map[string]any{
+				"enable_cache": true,
+				"timeout":      30.0,
+			},
+		},
+		CurrentState: "active",
+	}
+}
+
+func createTestModelRequest() sensory.CreateModelRequest {
+	return sensory.CreateModelRequest{
+		Model: sensory.ModelRequestData{
+			Identifier: "test-model-with-params",
+			Path:       "/test/completions",
+			Parameters: map[string]any{
+				"temperature":       0.8,
+				"max_tokens":        1500.0,
+				"top_p":             0.9,
+				"frequency_penalty": 0.1,
+				"presence_penalty":  0.2,
+				"stream":            true,
+				"stop":              []string{"\\n", "###"},
+				"reasoning_effort":  "medium",
+				"config": map[string]any{
+					"enable_cache": true,
+					"timeout":      30.0,
+				},
+			},
+		},
+	}
+}
+
+func validateParametersRequest(t *testing.T, r *http.Request, w http.ResponseWriter,
+	expectedResponse sensory.ModelResponse) {
+	if r.Method != http.MethodPost {
+		t.Errorf("Expected POST request, got %s", r.Method)
+	}
+
+	var req sensory.CreateModelRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		t.Fatalf("Failed to decode request body: %v", err)
+	}
+
+	validateRequestBasicParams(t, req.Model.Parameters)
+	validateRequestArrayParam(t, req.Model.Parameters)
+	validateRequestObjectParam(t, req.Model.Parameters)
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(expectedResponse)
+}
+
+func validateRequestBasicParams(t *testing.T, params map[string]any) {
+	basicParams := map[string]any{
+		"temperature":      0.8,
+		"max_tokens":       1500.0,
+		"stream":           true,
+		"reasoning_effort": "medium",
+	}
+	for key, expected := range basicParams {
+		if params[key] != expected {
+			t.Errorf("Expected %s %v, got %v", key, expected, params[key])
+		}
+	}
+}
+
+func validateRequestArrayParam(t *testing.T, params map[string]any) {
+	stop, ok := params["stop"].([]interface{})
+	if !ok {
+		t.Errorf("Expected stop to be an array, got %T", params["stop"])
+	} else if len(stop) != 2 || stop[0] != "\\n" || stop[1] != "###" {
+		t.Errorf("Expected stop array ['\\n', '###'], got %v", stop)
+	}
+}
+
+func validateRequestObjectParam(t *testing.T, params map[string]any) {
+	config, ok := params["config"].(map[string]interface{})
+	if !ok {
+		t.Errorf("Expected config to be an object, got %T", params["config"])
+		return
+	}
+	if config["enable_cache"] != true {
+		t.Errorf("Expected config.enable_cache true, got %v", config["enable_cache"])
+	}
+	if config["timeout"] != 30.0 {
+		t.Errorf("Expected config.timeout 30.0, got %v", config["timeout"])
 	}
 }
 
