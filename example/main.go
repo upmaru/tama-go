@@ -7,6 +7,7 @@ import (
 	"time"
 
 	tama "github.com/upmaru/tama-go"
+	"github.com/upmaru/tama-go/memory"
 	"github.com/upmaru/tama-go/neural"
 	"github.com/upmaru/tama-go/sensory"
 )
@@ -16,6 +17,7 @@ const (
 	exampleSourceID   = "source-123"
 	exampleModelID    = "model-123"
 	exampleLimitID    = "limit-123"
+	examplePromptID   = "prompt-123"
 	defaultTimeout    = 30
 	defaultLimitCount = 32
 	scaleCountValue   = 5
@@ -28,6 +30,7 @@ func main() {
 	// Run examples in separate functions to reduce complexity
 	// Run examples
 	runNeuralSpaceOperations(client)
+	runMemoryPromptOperations(client)
 	runSensorySourceOperations(client)
 	runSensoryModelOperations(client)
 	runSensoryLimitOperations(client)
@@ -95,6 +98,75 @@ func runNeuralSpaceOperations(client *tama.Client) {
 		log.Printf("Error updating space: %v", err)
 	} else {
 		log.Printf("Updated space: %+v", space)
+	}
+}
+
+// runMemoryPromptOperations demonstrates memory prompt operations.
+func runMemoryPromptOperations(client *tama.Client) {
+	log.Printf("=== Memory Prompt Operations ===")
+
+	spaceID := exampleSpaceID
+
+	// Create a new prompt
+	newPrompt := memory.CreatePromptRequest{
+		Prompt: memory.PromptRequestData{
+			Name:    "Assistant Helper",
+			Content: "You are a helpful assistant that provides clear and concise answers.",
+			Role:    "system",
+		},
+	}
+
+	prompt, err := client.Memory.CreatePrompt(spaceID, newPrompt)
+	if err != nil {
+		log.Printf("Error creating prompt: %v", err)
+	} else {
+		log.Printf("Created prompt: ID=%s, Name=%s, Role=%s, SpaceID=%s, State=%s",
+			prompt.ID, prompt.Name, prompt.Role, prompt.SpaceID, prompt.CurrentState)
+		log.Printf("Content: %s", prompt.Content)
+	}
+
+	// Get a prompt by ID (replace with actual ID)
+	promptID := examplePromptID
+	prompt, err = client.Memory.GetPrompt(promptID)
+	if err != nil {
+		log.Printf("Error getting prompt: %v", err)
+	} else {
+		log.Printf("Retrieved prompt: ID=%s, Name=%s, Role=%s, SpaceID=%s, State=%s",
+			prompt.ID, prompt.Name, prompt.Role, prompt.SpaceID, prompt.CurrentState)
+		log.Printf("Slug: %s, Content: %s", prompt.Slug, prompt.Content)
+	}
+
+	// Update a prompt
+	updatePrompt := memory.UpdatePromptRequest{
+		Prompt: memory.UpdatePromptData{
+			Name:    "Updated Assistant Helper",
+			Content: "You are an updated helpful assistant that provides detailed explanations.",
+		},
+	}
+
+	prompt, err = client.Memory.UpdatePrompt(promptID, updatePrompt)
+	if err != nil {
+		log.Printf("Error updating prompt: %v", err)
+	} else {
+		log.Printf("Updated prompt: ID=%s, Name=%s, Content=%s",
+			prompt.ID, prompt.Name, prompt.Content)
+	}
+
+	// Replace a prompt (full replacement)
+	replacePrompt := memory.UpdatePromptRequest{
+		Prompt: memory.UpdatePromptData{
+			Name:    "Completely New Assistant",
+			Content: "You are a completely new assistant with different capabilities.",
+			Role:    "assistant",
+		},
+	}
+
+	prompt, err = client.Memory.ReplacePrompt(promptID, replacePrompt)
+	if err != nil {
+		log.Printf("Error replacing prompt: %v", err)
+	} else {
+		log.Printf("Replaced prompt: ID=%s, Name=%s, Role=%s, Content=%s",
+			prompt.ID, prompt.Name, prompt.Role, prompt.Content)
 	}
 }
 
@@ -293,6 +365,21 @@ func demonstrateErrorHandling(client *tama.Client) {
 	if err != nil {
 		handleEnhancedError("CreateSpace", err)
 	}
+
+	// Example 4: Memory service field validation
+	log.Printf("--- Example 4: Memory Service Validation ---")
+	invalidPrompt := memory.CreatePromptRequest{
+		Prompt: memory.PromptRequestData{
+			Name:    "",        // Invalid: empty name
+			Content: "Short",   // Invalid: too short
+			Role:    "invalid", // Invalid: unsupported role
+		},
+	}
+
+	_, err = client.Memory.CreatePrompt("invalid-space-id", invalidPrompt)
+	if err != nil {
+		handleEnhancedError("CreatePrompt", err)
+	}
 }
 
 // handleEnhancedError demonstrates comprehensive error handling
@@ -332,6 +419,22 @@ func handleEnhancedError(operation string, err error) {
 		return
 	}
 
+	// Check if it's a memory API error
+	var memoryErr *memory.Error
+	if errors.As(err, &memoryErr) {
+		if len(memoryErr.Errors) > 0 {
+			// Handle field validation errors
+			log.Printf("  Field validation errors (Status: %d):", memoryErr.StatusCode)
+			for field, messages := range memoryErr.Errors {
+				log.Printf("    %s: %s", field, strings.Join(messages, ", "))
+			}
+		} else {
+			// Handle general API errors
+			log.Printf("  API Error %d", memoryErr.StatusCode)
+		}
+		return
+	}
+
 	// Handle client/network errors
 	log.Printf("  Client/Network Error: %v", err)
 }
@@ -342,12 +445,20 @@ func runDeleteOperations(_ *tama.Client) {
 
 	// Delete resources (uncomment to test)
 	/*
+		promptID := examplePromptID
 		limitID := exampleLimitID
 		modelID := exampleModelID
 		sourceID := exampleSourceID
 		spaceID := exampleSpaceID
 
-		err := client.Sensory.DeleteLimit(limitID)
+		err := client.Memory.DeletePrompt(promptID)
+		if err != nil {
+			log.Printf("Error deleting prompt: %v", err)
+		} else {
+			log.Printf("Deleted prompt successfully")
+		}
+
+		err = client.Sensory.DeleteLimit(limitID)
 		if err != nil {
 			log.Printf("Error deleting limit: %v", err)
 		} else {

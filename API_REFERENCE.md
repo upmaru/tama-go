@@ -6,6 +6,7 @@ This document provides a comprehensive reference for all methods available in th
 
 - [Client Configuration](#client-configuration)
 - [Neural Service](#neural-service)
+- [Memory Service](#memory-service)
 - [Sensory Service](#sensory-service)
 - [Error Handling](#error-handling)
 - [Data Types](#data-types)
@@ -143,6 +144,95 @@ Deletes a space by ID.
 
 **Parameters:**
 - `id` (string): Space ID (required)
+
+**Returns:**
+- `error`: Error if request fails
+
+## Memory Service
+
+Access via `client.Memory.*`
+
+### Prompt Operations
+
+#### GetPrompt(id string) (*Prompt, error)
+
+Retrieves a specific prompt by ID.
+
+**Parameters:**
+- `id` (string): Prompt ID (required)
+
+**Returns:**
+- `*Prompt`: The prompt resource
+- `error`: Error if request fails
+
+**Example:**
+```go
+prompt, err := client.Memory.GetPrompt("prompt-123")
+if err != nil {
+    log.Fatal(err)
+}
+fmt.Printf("Prompt: %s - %s\n", prompt.Name, prompt.Role)
+```
+
+#### CreatePrompt(spaceID string, req CreatePromptRequest) (*Prompt, error)
+
+Creates a new prompt in a specific space.
+
+**Parameters:**
+- `spaceID` (string): Space ID where the prompt will be created (required)
+- `req` (CreatePromptRequest): Prompt creation request (required)
+
+**Returns:**
+- `*Prompt`: The created prompt resource
+- `error`: Error if request fails
+
+**Example:**
+```go
+req := memory.CreatePromptRequest{
+    Prompt: memory.PromptRequestData{
+        Name:    "Assistant Prompt",
+        Content: "You are a helpful assistant.",
+        Role:    "system",
+    },
+}
+
+prompt, err := client.Memory.CreatePrompt("space-123", req)
+if err != nil {
+    log.Fatal(err)
+}
+fmt.Printf("Created prompt: %s\n", prompt.ID)
+```
+
+#### UpdatePrompt(id string, req UpdatePromptRequest) (*Prompt, error)
+
+Updates an existing prompt using PATCH (partial update).
+
+**Parameters:**
+- `id` (string): Prompt ID (required)
+- `req` (UpdatePromptRequest): Prompt update request (required)
+
+**Returns:**
+- `*Prompt`: The updated prompt resource
+- `error`: Error if request fails
+
+#### ReplacePrompt(id string, req UpdatePromptRequest) (*Prompt, error)
+
+Replaces an existing prompt using PUT (full replacement).
+
+**Parameters:**
+- `id` (string): Prompt ID (required)
+- `req` (UpdatePromptRequest): Prompt replacement request (required)
+
+**Returns:**
+- `*Prompt`: The replaced prompt resource
+- `error`: Error if request fails
+
+#### DeletePrompt(id string) error
+
+Deletes a prompt by ID.
+
+**Parameters:**
+- `id` (string): Prompt ID (required)
 
 **Returns:**
 - `error`: Error if request fails
@@ -507,6 +597,20 @@ type Space struct {
 }
 ```
 
+#### Prompt
+
+```go
+type Prompt struct {
+    ID           string `json:"id,omitempty"`
+    Name         string `json:"name"`
+    Slug         string `json:"slug,omitempty"`
+    Content      string `json:"content"`
+    Role         string `json:"role"`
+    SpaceID      string `json:"space_id"`
+    CurrentState string `json:"current_state"`
+}
+```
+
 #### Source
 
 ```go
@@ -546,11 +650,27 @@ type Limit struct {
 
 ### Request Types
 
+#### CreatePromptRequest
+
+```go
+type CreatePromptRequest struct {
+    Prompt PromptRequestData `json:"prompt"`
+}
+```
+
+#### UpdatePromptRequest
+
+```go
+type UpdatePromptRequest struct {
+    Prompt UpdatePromptData `json:"prompt"`
+}
+```
+
 #### CreateSpaceRequest
 
 ```go
 type CreateSpaceRequest struct {
-    Space SpaceRequest `json:"space"`
+    Space SpaceRequestData `json:"space"`
 }
 ```
 
@@ -683,6 +803,34 @@ type UpdateSourceData struct {
 ```
 
 **Note:** The `CurrentState` and `SpaceID` fields cannot be updated via API calls - they are managed server-side.
+
+#### PromptResponse
+
+```go
+type PromptResponse struct {
+    Data Prompt `json:"data"`
+}
+```
+
+#### PromptRequestData
+
+```go
+type PromptRequestData struct {
+    Name    string `json:"name"`
+    Content string `json:"content"`
+    Role    string `json:"role"`
+}
+```
+
+#### UpdatePromptData
+
+```go
+type UpdatePromptData struct {
+    Name    string `json:"name,omitempty"`
+    Content string `json:"content,omitempty"`
+    Role    string `json:"role,omitempty"`
+}
+```
 
 #### SourceResponse
 
