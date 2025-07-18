@@ -390,53 +390,40 @@ func handleEnhancedError(operation string, err error) {
 	// Check if it's a sensory API error
 	var sensoryErr *sensory.Error
 	if errors.As(err, &sensoryErr) {
-		if len(sensoryErr.Errors) > 0 {
-			// Handle field validation errors
-			log.Printf("  Field validation errors (Status: %d):", sensoryErr.StatusCode)
-			for field, messages := range sensoryErr.Errors {
-				log.Printf("    %s: %s", field, strings.Join(messages, ", "))
-			}
-		} else {
-			// Handle general API errors
-			log.Printf("  API Error %d", sensoryErr.StatusCode)
-		}
+		handleAPIError(sensoryErr.StatusCode, sensoryErr.Errors)
 		return
 	}
 
 	// Check if it's a neural API error
 	var neuralErr *neural.Error
 	if errors.As(err, &neuralErr) {
-		if len(neuralErr.Errors) > 0 {
-			// Handle field validation errors
-			log.Printf("  Field validation errors (Status: %d):", neuralErr.StatusCode)
-			for field, messages := range neuralErr.Errors {
-				log.Printf("    %s: %s", field, strings.Join(messages, ", "))
-			}
-		} else {
-			// Handle general API errors
-			log.Printf("  API Error %d", neuralErr.StatusCode)
-		}
+		handleAPIError(neuralErr.StatusCode, neuralErr.Errors)
 		return
 	}
 
 	// Check if it's a memory API error
 	var memoryErr *memory.Error
 	if errors.As(err, &memoryErr) {
-		if len(memoryErr.Errors) > 0 {
-			// Handle field validation errors
-			log.Printf("  Field validation errors (Status: %d):", memoryErr.StatusCode)
-			for field, messages := range memoryErr.Errors {
-				log.Printf("    %s: %s", field, strings.Join(messages, ", "))
-			}
-		} else {
-			// Handle general API errors
-			log.Printf("  API Error %d", memoryErr.StatusCode)
-		}
+		handleAPIError(memoryErr.StatusCode, memoryErr.Errors)
 		return
 	}
 
 	// Handle client/network errors
 	log.Printf("  Client/Network Error: %v", err)
+}
+
+// handleAPIError processes API errors with field validation support.
+func handleAPIError(statusCode int, errors map[string][]string) {
+	if len(errors) > 0 {
+		// Handle field validation errors
+		log.Printf("  Field validation errors (Status: %d):", statusCode)
+		for field, messages := range errors {
+			log.Printf("    %s: %s", field, strings.Join(messages, ", "))
+		}
+	} else {
+		// Handle general API errors
+		log.Printf("  API Error %d", statusCode)
+	}
 }
 
 // runDeleteOperations demonstrates delete operations.

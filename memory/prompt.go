@@ -1,4 +1,3 @@
-//nolint:dupl // Similar CRUD patterns across resource types are intentional
 package memory
 
 import (

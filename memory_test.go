@@ -11,11 +11,11 @@ import (
 	"github.com/upmaru/tama-go/memory"
 )
 
-func createMockServerForMemory(t *testing.T, handler func(w http.ResponseWriter, r *http.Request)) *httptest.Server {
+func createMockServerForMemory(_ *testing.T, handler func(w http.ResponseWriter, r *http.Request)) *httptest.Server {
 	return httptest.NewServer(http.HandlerFunc(handler))
 }
 
-// TestMemoryGetPrompt tests retrieving a prompt by ID
+// TestMemoryGetPrompt tests retrieving a prompt by ID.
 func TestMemoryGetPrompt(t *testing.T) {
 	expectedPrompt := memory.Prompt{
 		ID:           "prompt-123",
@@ -81,7 +81,7 @@ func TestMemoryGetPrompt(t *testing.T) {
 	}
 }
 
-// TestMemoryCreatePrompt tests creating a new prompt
+// TestMemoryCreatePrompt tests creating a new prompt.
 func TestMemoryCreatePrompt(t *testing.T) {
 	expectedPrompt := memory.Prompt{
 		ID:           "prompt-789",
@@ -172,7 +172,7 @@ func TestMemoryCreatePrompt(t *testing.T) {
 	}
 }
 
-// TestMemoryCreatePromptValidation tests validation for creating a prompt
+// TestMemoryCreatePromptValidation tests validation for creating a prompt.
 func TestMemoryCreatePromptValidation(t *testing.T) {
 	client := tama.NewClient(tama.Config{
 		BaseURL: "http://localhost",
@@ -248,7 +248,7 @@ func TestMemoryCreatePromptValidation(t *testing.T) {
 	}
 }
 
-// TestMemoryGetPrompt_EmptyIDValidation tests validation for empty ID
+// TestMemoryGetPrompt_EmptyIDValidation tests validation for empty ID.
 func TestMemoryGetPrompt_EmptyIDValidation(t *testing.T) {
 	client := tama.NewClient(tama.Config{
 		BaseURL: "http://localhost",
@@ -264,7 +264,7 @@ func TestMemoryGetPrompt_EmptyIDValidation(t *testing.T) {
 	}
 }
 
-// TestMemoryUpdatePrompt tests updating a prompt
+// TestMemoryUpdatePrompt tests updating a prompt.
 func TestMemoryUpdatePrompt(t *testing.T) {
 	expectedPrompt := memory.Prompt{
 		ID:           "prompt-123",
@@ -334,7 +334,7 @@ func TestMemoryUpdatePrompt(t *testing.T) {
 	}
 }
 
-// TestMemoryUpdatePrompt_EmptyIDValidation tests validation for empty ID in update
+// TestMemoryUpdatePrompt_EmptyIDValidation tests validation for empty ID in update.
 func TestMemoryUpdatePrompt_EmptyIDValidation(t *testing.T) {
 	client := tama.NewClient(tama.Config{
 		BaseURL: "http://localhost",
@@ -356,7 +356,7 @@ func TestMemoryUpdatePrompt_EmptyIDValidation(t *testing.T) {
 	}
 }
 
-// TestMemoryReplacePrompt tests replacing a prompt
+// TestMemoryReplacePrompt tests replacing a prompt.
 func TestMemoryReplacePrompt(t *testing.T) {
 	expectedPrompt := memory.Prompt{
 		ID:           "prompt-123",
@@ -435,7 +435,7 @@ func TestMemoryReplacePrompt(t *testing.T) {
 	}
 }
 
-// TestMemoryReplacePrompt_EmptyIDValidation tests validation for empty ID in replace
+// TestMemoryReplacePrompt_EmptyIDValidation tests validation for empty ID in replace.
 func TestMemoryReplacePrompt_EmptyIDValidation(t *testing.T) {
 	client := tama.NewClient(tama.Config{
 		BaseURL: "http://localhost",
@@ -457,7 +457,7 @@ func TestMemoryReplacePrompt_EmptyIDValidation(t *testing.T) {
 	}
 }
 
-// TestMemoryDeletePrompt tests deleting a prompt
+// TestMemoryDeletePrompt tests deleting a prompt.
 func TestMemoryDeletePrompt(t *testing.T) {
 	server := createMockServerForMemory(t, func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodDelete {
@@ -483,7 +483,7 @@ func TestMemoryDeletePrompt(t *testing.T) {
 	}
 }
 
-// TestMemoryDeletePrompt_EmptyIDValidation tests validation for empty ID in delete
+// TestMemoryDeletePrompt_EmptyIDValidation tests validation for empty ID in delete.
 func TestMemoryDeletePrompt_EmptyIDValidation(t *testing.T) {
 	client := tama.NewClient(tama.Config{
 		BaseURL: "http://localhost",
@@ -499,7 +499,7 @@ func TestMemoryDeletePrompt_EmptyIDValidation(t *testing.T) {
 	}
 }
 
-// TestMemoryFieldSpecificErrors tests field-specific error handling
+// TestMemoryFieldSpecificErrors tests field-specific error handling.
 func TestMemoryFieldSpecificErrors(t *testing.T) {
 	// Test memory field-specific errors
 	fieldErr := &memory.Error{
@@ -517,7 +517,8 @@ func TestMemoryFieldSpecificErrors(t *testing.T) {
 		t.Errorf("Expected error message to contain 'name can't be blank', got %s", errorMsg)
 	}
 	if !strings.Contains(errorMsg, "content is too short (minimum is 10 characters)") {
-		t.Errorf("Expected error message to contain 'content is too short (minimum is 10 characters)', got %s", errorMsg)
+		t.Errorf("Expected error message to contain 'content is too short (minimum is 10 characters)', got %s",
+			errorMsg)
 	}
 	if !strings.Contains(errorMsg, "role must be one of: system, user, assistant") {
 		t.Errorf("Expected error message to contain 'role must be one of: system, user, assistant', got %s", errorMsg)
@@ -550,7 +551,7 @@ func TestMemoryFieldSpecificErrors(t *testing.T) {
 	}
 }
 
-// TestMemoryCreatePromptWithFieldErrors tests creating a prompt with field validation errors
+// TestMemoryCreatePromptWithFieldErrors tests creating a prompt with field validation errors.
 func TestMemoryCreatePromptWithFieldErrors(t *testing.T) {
 	// Test API response with field validation errors
 	server := createMockServerForMemory(t, func(w http.ResponseWriter, r *http.Request) {
