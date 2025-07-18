@@ -62,10 +62,11 @@ type Source struct {
 
 // Model represents a sensory model resource.
 type Model struct {
-	ID           string `json:"id,omitempty"`
-	Identifier   string `json:"identifier"`
-	Path         string `json:"path"`
-	CurrentState string `json:"current_state"`
+	ID           string         `json:"id,omitempty"`
+	Identifier   string         `json:"identifier"`
+	Path         string         `json:"path"`
+	Parameters   map[string]any `json:"parameters,omitempty"`
+	CurrentState string         `json:"current_state"`
 }
 
 // Limit represents a sensory limit resource.
@@ -126,8 +127,9 @@ type CreateModelRequest struct {
 
 // ModelRequestData represents the model data in the request.
 type ModelRequestData struct {
-	Identifier string `json:"identifier"`
-	Path       string `json:"path"`
+	Identifier string         `json:"identifier"`
+	Path       string         `json:"path"`
+	Parameters map[string]any `json:"parameters,omitempty"`
 }
 
 // UpdateModelRequest represents the request payload for updating a model.
@@ -137,8 +139,9 @@ type UpdateModelRequest struct {
 
 // UpdateModelData represents the model update data.
 type UpdateModelData struct {
-	Identifier string `json:"identifier,omitempty"`
-	Path       string `json:"path,omitempty"`
+	Identifier string         `json:"identifier,omitempty"`
+	Path       string         `json:"path,omitempty"`
+	Parameters map[string]any `json:"parameters,omitempty"`
 }
 
 // CreateLimitRequest represents the request payload for creating a limit.
