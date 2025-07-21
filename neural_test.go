@@ -309,8 +309,8 @@ func TestNeuralGetProcessor(t *testing.T) {
 			t.Errorf("Expected GET request, got %s", r.Method)
 		}
 
-		if r.URL.Path != "/provision/neural/spaces/space-123/models/model-123/processor" {
-			t.Errorf("Expected path /provision/neural/spaces/space-123/models/model-123/processor, got %s", r.URL.Path)
+		if r.URL.Path != "/provision/neural/spaces/space-123/types/completion/processor" {
+			t.Errorf("Expected path /provision/neural/spaces/space-123/types/completion/processor, got %s", r.URL.Path)
 		}
 
 		w.Header().Set("Content-Type", "application/json")
@@ -325,7 +325,7 @@ func TestNeuralGetProcessor(t *testing.T) {
 	}
 
 	client := tama.NewClient(config)
-	processor, err := client.Neural.GetProcessor("space-123", "model-123")
+	processor, err := client.Neural.GetProcessor("space-123", "completion")
 
 	if err != nil {
 		t.Fatalf("Expected no error, got %v", err)
@@ -411,8 +411,8 @@ func TestNeuralCreateProcessor(t *testing.T) {
 			t.Errorf("Expected POST request, got %s", r.Method)
 		}
 
-		if r.URL.Path != "/provision/neural/spaces/space-123/models/model-123/processor" {
-			t.Errorf("Expected path /provision/neural/spaces/space-123/models/model-123/processor, got %s", r.URL.Path)
+		if r.URL.Path != "/provision/neural/spaces/space-123/types/completion/processor" {
+			t.Errorf("Expected path /provision/neural/spaces/space-123/types/completion/processor, got %s", r.URL.Path)
 		}
 
 		var req neural.CreateProcessorRequest
@@ -452,7 +452,7 @@ func TestNeuralCreateProcessor(t *testing.T) {
 		},
 	}
 
-	processor, err := client.Neural.CreateProcessor("space-123", "model-123", createReq)
+	processor, err := client.Neural.CreateProcessor("space-123", "completion", createReq)
 
 	if err != nil {
 		t.Fatalf("Expected no error, got %v", err)
@@ -477,7 +477,7 @@ func TestNeuralCreateProcessorValidation(t *testing.T) {
 	client := tama.NewClient(config)
 
 	// Test empty space ID validation
-	_, err := client.Neural.CreateProcessor("", "model-123", neural.CreateProcessorRequest{
+	_, err := client.Neural.CreateProcessor("", "completion", neural.CreateProcessorRequest{
 		Processor: neural.ProcessorRequestData{
 			Type: "completion",
 		},
@@ -487,7 +487,7 @@ func TestNeuralCreateProcessorValidation(t *testing.T) {
 		t.Error("Expected validation error for empty space ID")
 	}
 
-	// Test empty model ID validation
+	// Test empty processor type validation
 	_, err = client.Neural.CreateProcessor("space-123", "", neural.CreateProcessorRequest{
 		Processor: neural.ProcessorRequestData{
 			Type: "completion",
@@ -495,11 +495,11 @@ func TestNeuralCreateProcessorValidation(t *testing.T) {
 	})
 
 	if err == nil {
-		t.Error("Expected validation error for empty model ID")
+		t.Error("Expected validation error for empty processor type")
 	}
 
 	// Test empty type validation
-	_, err = client.Neural.CreateProcessor("space-123", "model-123", neural.CreateProcessorRequest{
+	_, err = client.Neural.CreateProcessor("space-123", "completion", neural.CreateProcessorRequest{
 		Processor: neural.ProcessorRequestData{
 			Configuration: map[string]any{"test": "value"},
 		},
@@ -510,7 +510,7 @@ func TestNeuralCreateProcessorValidation(t *testing.T) {
 	}
 
 	// Test invalid type validation
-	_, err = client.Neural.CreateProcessor("space-123", "model-123", neural.CreateProcessorRequest{
+	_, err = client.Neural.CreateProcessor("space-123", "invalid-type", neural.CreateProcessorRequest{
 		Processor: neural.ProcessorRequestData{
 			Type:          "invalid-type",
 			Configuration: map[string]any{"test": "value"},
@@ -524,7 +524,7 @@ func TestNeuralCreateProcessorValidation(t *testing.T) {
 	// Test valid types
 	validTypes := []string{"completion", "embedding", "reranking"}
 	for _, validType := range validTypes {
-		_, err = client.Neural.CreateProcessor("space-123", "model-123", neural.CreateProcessorRequest{
+		_, err = client.Neural.CreateProcessor("space-123", validType, neural.CreateProcessorRequest{
 			Processor: neural.ProcessorRequestData{
 				Type:          validType,
 				Configuration: map[string]any{"test": "value"},
@@ -558,8 +558,8 @@ func TestNeuralUpdateProcessor(t *testing.T) {
 			t.Errorf("Expected PATCH request, got %s", r.Method)
 		}
 
-		if r.URL.Path != "/provision/neural/spaces/space-123/models/model-123/processor" {
-			t.Errorf("Expected path /provision/neural/spaces/space-123/models/model-123/processor, got %s", r.URL.Path)
+		if r.URL.Path != "/provision/neural/spaces/space-123/types/embedding/processor" {
+			t.Errorf("Expected path /provision/neural/spaces/space-123/types/embedding/processor, got %s", r.URL.Path)
 		}
 
 		w.Header().Set("Content-Type", "application/json")
@@ -584,7 +584,7 @@ func TestNeuralUpdateProcessor(t *testing.T) {
 		},
 	}
 
-	processor, err := client.Neural.UpdateProcessor("space-123", "model-123", updateReq)
+	processor, err := client.Neural.UpdateProcessor("space-123", "embedding", updateReq)
 
 	if err != nil {
 		t.Fatalf("Expected no error, got %v", err)
@@ -616,8 +616,8 @@ func TestNeuralReplaceProcessor(t *testing.T) {
 			t.Errorf("Expected PUT request, got %s", r.Method)
 		}
 
-		if r.URL.Path != "/provision/neural/spaces/space-123/models/model-123/processor" {
-			t.Errorf("Expected path /provision/neural/spaces/space-123/models/model-123/processor, got %s", r.URL.Path)
+		if r.URL.Path != "/provision/neural/spaces/space-123/types/reranking/processor" {
+			t.Errorf("Expected path /provision/neural/spaces/space-123/types/reranking/processor, got %s", r.URL.Path)
 		}
 
 		w.Header().Set("Content-Type", "application/json")
@@ -642,7 +642,7 @@ func TestNeuralReplaceProcessor(t *testing.T) {
 		},
 	}
 
-	processor, err := client.Neural.ReplaceProcessor("space-123", "model-123", replaceReq)
+	processor, err := client.Neural.ReplaceProcessor("space-123", "reranking", replaceReq)
 
 	if err != nil {
 		t.Fatalf("Expected no error, got %v", err)
@@ -659,8 +659,8 @@ func TestNeuralDeleteProcessor(t *testing.T) {
 			t.Errorf("Expected DELETE request, got %s", r.Method)
 		}
 
-		if r.URL.Path != "/provision/neural/spaces/space-123/models/model-123/processor" {
-			t.Errorf("Expected path /provision/neural/spaces/space-123/models/model-123/processor, got %s", r.URL.Path)
+		if r.URL.Path != "/provision/neural/spaces/space-123/types/completion/processor" {
+			t.Errorf("Expected path /provision/neural/spaces/space-123/types/completion/processor, got %s", r.URL.Path)
 		}
 
 		w.WriteHeader(http.StatusNoContent)
@@ -675,7 +675,7 @@ func TestNeuralDeleteProcessor(t *testing.T) {
 
 	client := tama.NewClient(config)
 
-	err := client.Neural.DeleteProcessor("space-123", "model-123")
+	err := client.Neural.DeleteProcessor("space-123", "completion")
 
 	if err != nil {
 		t.Fatalf("Expected no error, got %v", err)
