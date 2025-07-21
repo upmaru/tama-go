@@ -1132,7 +1132,7 @@ func validateComplexParameters(t *testing.T, actual map[string]any, expected map
 
 func validateArrayParameter(t *testing.T, key string, actual any, expected any) {
 	expectedSlice := expected.([]string)
-	actualSlice, ok := actual.([]interface{})
+	actualSlice, ok := actual.([]any)
 	if !ok {
 		t.Errorf("Expected %s to be array, got %T", key, actual)
 		return
@@ -1150,7 +1150,7 @@ func validateArrayParameter(t *testing.T, key string, actual any, expected any) 
 
 func validateObjectParameter(t *testing.T, key string, actual any, expected any) {
 	expectedMap := expected.(map[string]any)
-	actualMap, ok := actual.(map[string]interface{})
+	actualMap, ok := actual.(map[string]any)
 	if !ok {
 		t.Errorf("Expected %s to be object, got %T", key, actual)
 		return
@@ -1243,7 +1243,7 @@ func validateRequestBasicParams(t *testing.T, params map[string]any) {
 }
 
 func validateRequestArrayParam(t *testing.T, params map[string]any) {
-	stop, ok := params["stop"].([]interface{})
+	stop, ok := params["stop"].([]any)
 	if !ok {
 		t.Errorf("Expected stop to be an array, got %T", params["stop"])
 	} else if len(stop) != 2 || stop[0] != "\\n" || stop[1] != "###" {
@@ -1252,7 +1252,7 @@ func validateRequestArrayParam(t *testing.T, params map[string]any) {
 }
 
 func validateRequestObjectParam(t *testing.T, params map[string]any) {
-	config, ok := params["config"].(map[string]interface{})
+	config, ok := params["config"].(map[string]any)
 	if !ok {
 		t.Errorf("Expected config to be an object, got %T", params["config"])
 		return
@@ -1279,7 +1279,7 @@ func TestSensoryCreateSourceWithFieldErrors(t *testing.T) {
 		// Return field validation errors
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusUnprocessableEntity)
-		errorResponse := map[string]interface{}{
+		errorResponse := map[string]any{
 			"errors": map[string][]string{
 				"name":     {"is required"},
 				"endpoint": {"is invalid URL", "must use HTTPS"},

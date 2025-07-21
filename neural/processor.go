@@ -1,0 +1,151 @@
+package neural
+
+import (
+	"errors"
+	"fmt"
+)
+
+// GetProcessor retrieves a specific processor by space ID and model ID.
+// GET /provision/neural/spaces/:space_id/models/:model_id/processor.
+func (s *Service) GetProcessor(spaceID, modelID string) (*Processor, error) {
+	if spaceID == "" {
+		return nil, errors.New("space ID is required")
+	}
+	if modelID == "" {
+		return nil, errors.New("model ID is required")
+	}
+
+	var processorResp ProcessorResponse
+	resp, err := s.client.R().
+		SetResult(&processorResp).
+		Get(fmt.Sprintf("/provision/neural/spaces/%s/models/%s/processor", spaceID, modelID))
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to get processor: %w", err)
+	}
+
+	if apiErr := s.handleAPIError(resp); apiErr != nil {
+		return nil, apiErr
+	}
+
+	return &processorResp.Data, nil
+}
+
+// CreateProcessor creates a new processor.
+// POST /provision/neural/spaces/:space_id/models/:model_id/processor.
+func (s *Service) CreateProcessor(
+	spaceID, modelID string, req CreateProcessorRequest,
+) (*Processor, error) {
+	if spaceID == "" {
+		return nil, errors.New("space ID is required")
+	}
+	if modelID == "" {
+		return nil, errors.New("model ID is required")
+	}
+	if req.Processor.Type == "" {
+		return nil, errors.New("processor type is required")
+	}
+	if req.Processor.Type != "completion" &&
+		req.Processor.Type != "embedding" &&
+		req.Processor.Type != "reranking" {
+		return nil, errors.New("processor type must be 'completion', 'embedding', or 'reranking'")
+	}
+
+	var processorResp ProcessorResponse
+	resp, err := s.client.R().
+		SetBody(req).
+		SetResult(&processorResp).
+		Post(fmt.Sprintf("/provision/neural/spaces/%s/models/%s/processor", spaceID, modelID))
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to create processor: %w", err)
+	}
+
+	if apiErr := s.handleAPIError(resp); apiErr != nil {
+		return nil, apiErr
+	}
+
+	return &processorResp.Data, nil
+}
+
+// UpdateProcessor updates an existing processor using PATCH.
+// PATCH /provision/neural/spaces/:space_id/models/:model_id/processor.
+func (s *Service) UpdateProcessor(
+	spaceID, modelID string, req UpdateProcessorRequest,
+) (*Processor, error) {
+	if spaceID == "" {
+		return nil, errors.New("space ID is required")
+	}
+	if modelID == "" {
+		return nil, errors.New("model ID is required")
+	}
+
+	var processorResp ProcessorResponse
+	resp, err := s.client.R().
+		SetBody(req).
+		SetResult(&processorResp).
+		Patch(fmt.Sprintf("/provision/neural/spaces/%s/models/%s/processor", spaceID, modelID))
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to update processor: %w", err)
+	}
+
+	if apiErr := s.handleAPIError(resp); apiErr != nil {
+		return nil, apiErr
+	}
+
+	return &processorResp.Data, nil
+}
+
+// ReplaceProcessor replaces an existing processor using PUT.
+// PUT /provision/neural/spaces/:space_id/models/:model_id/processor.
+func (s *Service) ReplaceProcessor(
+	spaceID, modelID string, req UpdateProcessorRequest,
+) (*Processor, error) {
+	if spaceID == "" {
+		return nil, errors.New("space ID is required")
+	}
+	if modelID == "" {
+		return nil, errors.New("model ID is required")
+	}
+
+	var processorResp ProcessorResponse
+	resp, err := s.client.R().
+		SetBody(req).
+		SetResult(&processorResp).
+		Put(fmt.Sprintf("/provision/neural/spaces/%s/models/%s/processor", spaceID, modelID))
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to replace processor: %w", err)
+	}
+
+	if apiErr := s.handleAPIError(resp); apiErr != nil {
+		return nil, apiErr
+	}
+
+	return &processorResp.Data, nil
+}
+
+// DeleteProcessor deletes a processor by space ID and model ID.
+// DELETE /provision/neural/spaces/:space_id/models/:model_id/processor.
+func (s *Service) DeleteProcessor(spaceID, modelID string) error {
+	if spaceID == "" {
+		return errors.New("space ID is required")
+	}
+	if modelID == "" {
+		return errors.New("model ID is required")
+	}
+
+	resp, err := s.client.R().
+		Delete(fmt.Sprintf("/provision/neural/spaces/%s/models/%s/processor", spaceID, modelID))
+
+	if err != nil {
+		return fmt.Errorf("failed to delete processor: %w", err)
+	}
+
+	if apiErr := s.handleAPIError(resp); apiErr != nil {
+		return apiErr
+	}
+
+	return nil
+}

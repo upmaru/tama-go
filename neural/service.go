@@ -82,8 +82,45 @@ type UpdateSpaceData struct {
 	Type string `json:"type,omitempty"` // "root" or "component"
 }
 
+// Processor represents a neural processor resource.
+type Processor struct {
+	ID            string         `json:"id,omitempty"`
+	SpaceID       string         `json:"space_id,omitempty"`
+	ModelID       string         `json:"model_id,omitempty"`
+	Configuration map[string]any `json:"configuration"`
+	CurrentState  string         `json:"current_state"`
+	Type          string         `json:"type"`
+}
+
+// ProcessorResponse represents the API response for processor operations.
+type ProcessorResponse struct {
+	Data Processor `json:"data"`
+}
+
+// CreateProcessorRequest represents the request payload for creating a processor.
+type CreateProcessorRequest struct {
+	Processor ProcessorRequestData `json:"processor"`
+}
+
+// ProcessorRequestData represents the processor data in the request.
+type ProcessorRequestData struct {
+	Type          string         `json:"type"`
+	Configuration map[string]any `json:"configuration"`
+}
+
+// UpdateProcessorRequest represents the request payload for updating a processor.
+type UpdateProcessorRequest struct {
+	Processor UpdateProcessorData `json:"processor"`
+}
+
+// UpdateProcessorData represents the processor update data.
+type UpdateProcessorData struct {
+	Type          string         `json:"type,omitempty"`
+	Configuration map[string]any `json:"configuration,omitempty"`
+}
+
 // handleAPIError processes API error responses.
-func (s *Service) handleAPIError(resp interface{}) error {
+func (s *Service) handleAPIError(resp any) error {
 	errResp, ok := s.extractErrorResponse(resp)
 	if !ok {
 		return nil
@@ -99,10 +136,10 @@ func (s *Service) handleAPIError(resp interface{}) error {
 }
 
 // extractErrorResponse extracts error response interface from resp.
-func (s *Service) extractErrorResponse(resp interface{}) (errorResponse, bool) {
+func (s *Service) extractErrorResponse(resp any) (errorResponse, bool) {
 	type errorResponse interface {
 		IsError() bool
-		Error() interface{}
+		Error() any
 		StatusCode() int
 		Status() string
 		Body() []byte
@@ -186,7 +223,7 @@ func (s *Service) fallbackError(errResp errorResponse) error {
 // errorResponse interface for type assertion.
 type errorResponse interface {
 	IsError() bool
-	Error() interface{}
+	Error() any
 	StatusCode() int
 	Status() string
 	Body() []byte

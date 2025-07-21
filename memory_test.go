@@ -566,7 +566,7 @@ func TestMemoryCreatePromptWithFieldErrors(t *testing.T) {
 		// Return field validation errors
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusUnprocessableEntity)
-		errorResponse := map[string]interface{}{
+		errorResponse := map[string]any{
 			"errors": map[string][]string{
 				"name":    {"is required"},
 				"content": {"is too short", "must be at least 10 characters"},
