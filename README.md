@@ -93,6 +93,7 @@ The client library is organized into the following packages:
 ### Neural Package (`neural/`)
 - `service.go` - Service definition and neural-related types
 - `space.go` - Space operations (GET, POST, PATCH, PUT, DELETE)
+- `processor.go` - Processor operations (GET, POST, PATCH, PUT, DELETE)
 
 ### Sensory Package (`sensory/`)
 - `service.go` - Service definition and sensory-related types
@@ -117,6 +118,13 @@ The client provides comprehensive coverage of the Tama API endpoints, organized 
 - `PATCH /provision/neural/spaces/:id` - Update space
 - `PUT /provision/neural/spaces/:id` - Replace space
 - `DELETE /provision/neural/spaces/:id` - Delete space
+
+#### Processors
+- `GET /provision/neural/spaces/:space_id/models/:model_id/processor` - Get processor
+- `POST /provision/neural/spaces/:space_id/models/:model_id/processor` - Create processor
+- `PATCH /provision/neural/spaces/:space_id/models/:model_id/processor` - Update processor
+- `PUT /provision/neural/spaces/:space_id/models/:model_id/processor` - Replace processor
+- `DELETE /provision/neural/spaces/:space_id/models/:model_id/processor` - Delete processor
 
 ### Sensory Resources (`/provision/sensory`)
 
@@ -182,6 +190,146 @@ space, err := client.Neural.ReplaceSpace("space-123", neural.UpdateSpaceRequest{
 // Delete a space
 err := client.Neural.DeleteSpace("space-123")
 ```
+
+### Neural Service - Processors
+
+```go
+import "github.com/upmaru/tama-go/neural"
+
+// Create a processor
+processor, err := client.Neural.CreateProcessor("space-123", "model-123", neural.CreateProcessorRequest{
+    Processor: neural.ProcessorRequestData{
+        Type: "completion",
+        Configuration: map[string]any{
+            "temperature":  0.8,
+            "tool_choice": "required",
+            "role_mappings": []map[string]any{
+                {"from": "user", "to": "human"},
+                {"from": "assistant", "to": "ai"},
+            },
+        },
+    },
+})
+// processor will have ID, SpaceID, ModelID, Type, Configuration, and CurrentState populated
+
+// Get a processor
+processor, err := client.Neural.GetProcessor("space-123", "model-123")
+
+// Update a processor (partial update)
+processor, err := client.Neural.UpdateProcessor("space-123", "model-123", neural.UpdateProcessorRequest{
+    Processor: neural.UpdateProcessorData{
+        Type: "embedding",
+        Configuration: map[string]any{
+            "max_tokens": 512,
+            "templates": []map[string]any{
+                {"type": "query", "content": "Query: {text}"},
+            },
+        },
+    },
+})
+// CurrentState cannot be updated via API - it's managed server-side
+
+// Replace a processor (full replacement)
+processor, err := client.Neural.ReplaceProcessor("space-123", "model-123", neural.UpdateProcessorRequest{
+    Processor: neural.UpdateProcessorData{
+        Type: "reranking",
+        Configuration: map[string]any{
+            "top_n": 3,
+        },
+    },
+})
+
+// Delete a processor
+err := client.Neural.DeleteProcessor("space-123", "model-123")
+```
+
+#### Processor Types and Configuration
+
+Processors support three types: `"completion"`, `"embedding"`, and `"reranking"`. Each type has its own configuration schema:
+
+##### Completion Type
+
+For text completion and chat completion tasks:
+
+```go
+processor, err := client.Neural.CreateProcessor("space-123", "model-123", neural.CreateProcessorRequest{
+    Processor: neural.ProcessorRequestData{
+        Type: "completion",
+        Configuration: map[string]any{
+            "temperature":  0.8,  // decimal, default: 0.8
+            "tool_choice": "required", // enum: "required", "auto", "any", default: "required"
+            "role_mappings": []map[string]any{
+                {
+                    "from": "user",
+                    "to":   "human",
+                },
+                {
+                    "from": "assistant", 
+                    "to":   "ai",
+                },
+            },
+        },
+    },
+})
+```
+
+##### Embedding Type
+
+For text embedding and vector generation:
+
+```go
+processor, err := client.Neural.CreateProcessor("space-123", "model-123", neural.CreateProcessorRequest{
+    Processor: neural.ProcessorRequestData{
+        Type: "embedding",
+        Configuration: map[string]any{
+            "max_tokens": 512, // integer, default: 512
+            "templates": []map[string]any{
+                {
+                    "type":    "query",
+                    "content": "Query: {text}",
+                },
+                {
+                    "type":    "document",
+                    "content": "Document: {text}",
+                },
+            },
+        },
+    },
+})
+```
+
+##### Reranking Type
+
+For document reranking and relevance scoring:
+
+```go
+processor, err := client.Neural.CreateProcessor("space-123", "model-123", neural.CreateProcessorRequest{
+    Processor: neural.ProcessorRequestData{
+        Type: "reranking",
+        Configuration: map[string]any{
+            "top_n": 3, // integer, default: 3
+        },
+    },
+})
+```
+
+##### Configuration Field Details
+
+**Completion Configuration:**
+- `temperature` (decimal): Controls randomness in generation, default: 0.8
+- `tool_choice` (string): Tool selection strategy - "required", "auto", or "any", default: "required"
+- `role_mappings` (array): Maps input roles to model-specific roles
+  - `from` (string): Input role name
+  - `to` (string): Model role name
+
+**Embedding Configuration:**
+- `max_tokens` (integer): Maximum tokens to process, default: 512
+- `templates` (array): Text templates for different embedding types
+  - `type` (string): Template type - "query" or "document"
+  - `content` (string): Template string with {text} placeholder
+
+**Reranking Configuration:**
+- `top_n` (integer): Number of top results to return, default: 3
 
 ### Sensory Service - Sources
 
@@ -390,11 +538,17 @@ if err != nil {
 ### Neural Package Types
 
 - **neural.Space**: Neural space resource with configuration, type, and current state
+- **neural.Processor**: Neural processor resource with type-specific configuration
 - **neural.CreateSpaceRequest**: For creating new spaces
 - **neural.UpdateSpaceRequest**: For updating existing spaces
+- **neural.CreateProcessorRequest**: For creating new processors
+- **neural.UpdateProcessorRequest**: For updating existing processors
 - **neural.SpaceRequestData**: Space data in create requests
 - **neural.UpdateSpaceData**: Space data in update requests
+- **neural.ProcessorRequestData**: Processor data in create requests
+- **neural.UpdateProcessorData**: Processor data in update requests
 - **neural.SpaceResponse**: API response wrapper for space operations
+- **neural.ProcessorResponse**: API response wrapper for processor operations
 - **neural.Error**: Neural service specific error type
 
 ### Sensory Package Types

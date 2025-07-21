@@ -170,7 +170,7 @@ type UpdateLimitData struct {
 }
 
 // handleAPIError processes API error responses.
-func (s *Service) handleAPIError(resp interface{}) error {
+func (s *Service) handleAPIError(resp any) error {
 	errResp, ok := s.extractErrorResponse(resp)
 	if !ok {
 		return nil
@@ -186,10 +186,10 @@ func (s *Service) handleAPIError(resp interface{}) error {
 }
 
 // extractErrorResponse extracts error response interface from resp.
-func (s *Service) extractErrorResponse(resp interface{}) (errorResponse, bool) {
+func (s *Service) extractErrorResponse(resp any) (errorResponse, bool) {
 	type errorResponse interface {
 		IsError() bool
-		Error() interface{}
+		Error() any
 		StatusCode() int
 		Status() string
 		Body() []byte
@@ -258,7 +258,7 @@ func (s *Service) fallbackError(errResp errorResponse) error {
 // errorResponse interface for type assertion.
 type errorResponse interface {
 	IsError() bool
-	Error() interface{}
+	Error() any
 	StatusCode() int
 	Status() string
 	Body() []byte

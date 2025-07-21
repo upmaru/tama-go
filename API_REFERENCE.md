@@ -148,6 +148,132 @@ Deletes a space by ID.
 **Returns:**
 - `error`: Error if request fails
 
+### Processor Operations
+
+#### GetProcessor(spaceID, modelID string) (*Processor, error)
+
+Retrieves a specific processor by space ID and model ID.
+
+**Endpoint:** `GET /provision/neural/spaces/:space_id/models/:model_id/processor`
+
+**Parameters:**
+- `spaceID` (string): Space ID (required)
+- `modelID` (string): Model ID (required)
+
+**Returns:**
+- `*Processor`: Processor data
+- `error`: Error if request fails
+
+**Example:**
+```go
+processor, err := client.Neural.GetProcessor("space-123", "model-456")
+if err != nil {
+    log.Fatal(err)
+}
+fmt.Printf("Processor: %+v\n", processor)
+```
+
+#### CreateProcessor(spaceID, modelID string, req CreateProcessorRequest) (*Processor, error)
+
+Creates a new processor for a specific space and model.
+
+**Endpoint:** `POST /provision/neural/spaces/:space_id/models/:model_id/processor`
+
+**Parameters:**
+- `spaceID` (string): Space ID (required)
+- `modelID` (string): Model ID (required)
+- `req` (CreateProcessorRequest): Processor creation data (required)
+
+**Request Structure:**
+```go
+type CreateProcessorRequest struct {
+    Processor ProcessorRequestData `json:"processor"`
+}
+
+type ProcessorRequestData struct {
+    Type          string         `json:"type"`          // "completion", "embedding", or "reranking"
+    Configuration map[string]any `json:"configuration"` // Type-specific configuration
+}
+```
+
+**Returns:**
+- `*Processor`: Created processor
+- `error`: Error if request fails
+
+**Example:**
+```go
+req := neural.CreateProcessorRequest{
+    Processor: neural.ProcessorRequestData{
+        Type: "completion",
+        Configuration: map[string]any{
+            "temperature":  0.8,
+            "tool_choice": "required",
+            "role_mappings": []map[string]any{
+                {"from": "user", "to": "human"},
+                {"from": "assistant", "to": "ai"},
+            },
+        },
+    },
+}
+
+processor, err := client.Neural.CreateProcessor("space-123", "model-456", req)
+```
+
+#### UpdateProcessor(spaceID, modelID string, req UpdateProcessorRequest) (*Processor, error)
+
+Updates an existing processor using PATCH (partial update).
+
+**Endpoint:** `PATCH /provision/neural/spaces/:space_id/models/:model_id/processor`
+
+**Parameters:**
+- `spaceID` (string): Space ID (required)
+- `modelID` (string): Model ID (required)
+- `req` (UpdateProcessorRequest): Processor update data (required)
+
+**Request Structure:**
+```go
+type UpdateProcessorRequest struct {
+    Processor UpdateProcessorData `json:"processor"`
+}
+
+type UpdateProcessorData struct {
+    Type          string         `json:"type,omitempty"`
+    Configuration map[string]any `json:"configuration,omitempty"`
+}
+```
+
+**Returns:**
+- `*Processor`: Updated processor
+- `error`: Error if request fails
+
+#### ReplaceProcessor(spaceID, modelID string, req UpdateProcessorRequest) (*Processor, error)
+
+Replaces an existing processor using PUT (full replacement).
+
+**Endpoint:** `PUT /provision/neural/spaces/:space_id/models/:model_id/processor`
+
+**Parameters:**
+- `spaceID` (string): Space ID (required)
+- `modelID` (string): Model ID (required)
+- `req` (UpdateProcessorRequest): Processor replacement data (required)
+
+**Returns:**
+- `*Processor`: Replaced processor
+- `error`: Error if request fails
+
+#### DeleteProcessor(spaceID, modelID string) error
+
+Deletes a processor by space ID and model ID.
+
+**Endpoint:** `DELETE /provision/neural/spaces/:space_id/models/:model_id/processor`
+
+**Parameters:**
+- `spaceID` (string): Space ID (required)
+- `modelID` (string): Model ID (required)
+
+**Returns:**
+- `error`: Error if request fails
+
 ## Memory Service
 
 Access via `client.Memory.*`
@@ -597,6 +723,19 @@ type Space struct {
 }
 ```
 
+#### Processor
+
+```go
+type Processor struct {
+    ID            string         `json:"id,omitempty"`
+    SpaceID       string         `json:"space_id,omitempty"`
+    ModelID       string         `json:"model_id,omitempty"`
+    Configuration map[string]any `json:"configuration"`
+    CurrentState  string         `json:"current_state"`
+    Type          string         `json:"type"`
+}
+```
+
 #### Prompt
 
 ```go
@@ -727,6 +866,22 @@ type CreateLimitRequest struct {
 ```go
 type UpdateLimitRequest struct {
     Limit UpdateLimitData `json:"limit"`
+}
+```
+
+#### CreateProcessorRequest
+
+```go
+type CreateProcessorRequest struct {
+    Processor ProcessorRequestData `json:"processor"`
+}
+```
+
+#### UpdateProcessorRequest
+
+```go
+type UpdateProcessorRequest struct {
+    Processor UpdateProcessorData `json:"processor"`
 }
 ```
 
@@ -904,6 +1059,32 @@ type UpdateLimitData struct {
 ```go
 type LimitResponse struct {
     Data Limit `json:"data"`
+}
+```
+
+#### ProcessorRequestData
+
+```go
+type ProcessorRequestData struct {
+    Type          string         `json:"type"`          // "completion", "embedding", or "reranking"
+    Configuration map[string]any `json:"configuration"` // Type-specific configuration
+}
+```
+
+#### UpdateProcessorData
+
+```go
+type UpdateProcessorData struct {
+    Type          string         `json:"type,omitempty"`
+    Configuration map[string]any `json:"configuration,omitempty"`
+}
+```
+
+#### ProcessorResponse
+
+```go
+type ProcessorResponse struct {
+    Data Processor `json:"data"`
 }
 ```
 

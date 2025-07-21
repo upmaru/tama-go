@@ -104,7 +104,7 @@ func (e *Error) Error() string {
 
 // Response represents a standard API response wrapper.
 type Response struct {
-	Success bool        `json:"success"`
-	Data    interface{} `json:"data,omitempty"`
-	Error   *Error      `json:"error,omitempty"`
+	Success bool   `json:"success"`
+	Data    any    `json:"data,omitempty"`
+	Error   *Error `json:"error,omitempty"`
 }
