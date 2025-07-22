@@ -191,7 +191,7 @@ type CreateProcessorRequest struct {
 }
 
 type ProcessorRequestData struct {
-    Type          string         `json:"type"`          // "completion", "embedding", or "reranking"
+    ModelID       string         `json:"model_id"`      // Model identifier for the processor
     Configuration map[string]any `json:"configuration"` // Type-specific configuration
 }
 ```
@@ -204,7 +204,7 @@ type ProcessorRequestData struct {
 ```go
 req := neural.CreateProcessorRequest{
     Processor: neural.ProcessorRequestData{
-        Type: "completion",
+        ModelID: "model-456",
         Configuration: map[string]any{
             "temperature":  0.8,
             "tool_choice": "required",
@@ -237,7 +237,7 @@ type UpdateProcessorRequest struct {
 }
 
 type UpdateProcessorData struct {
-    Type          string         `json:"type,omitempty"`
+    ModelID       string         `json:"model_id,omitempty"`
     Configuration map[string]any `json:"configuration,omitempty"`
 }
 ```
@@ -1066,7 +1066,7 @@ type LimitResponse struct {
 
 ```go
 type ProcessorRequestData struct {
-    Type          string         `json:"type"`          // "completion", "embedding", or "reranking"
+    ModelID       string         `json:"model_id"`      // Model identifier for the processor
     Configuration map[string]any `json:"configuration"` // Type-specific configuration
 }
 ```
@@ -1075,7 +1075,7 @@ type ProcessorRequestData struct {
 
 ```go
 type UpdateProcessorData struct {
-    Type          string         `json:"type,omitempty"`
+    ModelID       string         `json:"model_id,omitempty"`
     Configuration map[string]any `json:"configuration,omitempty"`
 }
 ```

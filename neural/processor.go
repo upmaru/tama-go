@@ -42,13 +42,8 @@ func (s *Service) CreateProcessor(
 	if processorType == "" {
 		return nil, errors.New("processor type is required")
 	}
-	if req.Processor.Type == "" {
-		return nil, errors.New("processor type is required")
-	}
-	if req.Processor.Type != "completion" &&
-		req.Processor.Type != "embedding" &&
-		req.Processor.Type != "reranking" {
-		return nil, errors.New("processor type must be 'completion', 'embedding', or 'reranking'")
+	if req.Processor.ModelID == "" {
+		return nil, errors.New("model ID is required")
 	}
 
 	var processorResp ProcessorResponse
