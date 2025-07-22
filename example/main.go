@@ -30,6 +30,7 @@ func main() {
 	// Run examples in separate functions to reduce complexity
 	// Run examples
 	runNeuralSpaceOperations(client)
+	runNeuralClassOperations(client)
 	runMemoryPromptOperations(client)
 	runSensorySourceOperations(client)
 	runSensoryModelOperations(client)
@@ -98,6 +99,162 @@ func runNeuralSpaceOperations(client *tama.Client) {
 		log.Printf("Error updating space: %v", err)
 	} else {
 		log.Printf("Updated space: %+v", space)
+	}
+}
+
+// runNeuralClassOperations demonstrates neural class operations.
+func runNeuralClassOperations(client *tama.Client) {
+	log.Printf("=== Neural Class Operations ===")
+
+	spaceID := exampleSpaceID
+	classID := "class-123"
+
+	// Create, Get, Update, and Replace operations
+	demoCreateClass(client, spaceID)
+	demoGetClass(client, classID)
+	demoUpdateClass(client, classID)
+	demoReplaceClass(client, classID)
+}
+
+// demoCreateClass demonstrates creating a class with a real-world schema.
+func demoCreateClass(client *tama.Client, spaceID string) {
+	newClass := neural.CreateClassRequest{
+		Class: neural.ClassRequestData{
+			Schema: createActionCallSchema(),
+		},
+	}
+
+	class, err := client.Neural.CreateClass(spaceID, newClass)
+	if err != nil {
+		log.Printf("Error creating class: %v", err)
+	} else {
+		log.Printf("Created class: ID=%s, SpaceID=%s, Name=%s, State=%s",
+			class.ID, class.SpaceID, class.Name, class.CurrentState)
+		log.Printf("Description: %s", class.Description)
+		if title, ok := class.Schema["title"].(string); ok {
+			log.Printf("Schema title: %s", title)
+		}
+	}
+}
+
+// demoGetClass demonstrates retrieving a class by ID.
+func demoGetClass(client *tama.Client, classID string) {
+	class, err := client.Neural.GetClass(classID)
+	if err != nil {
+		log.Printf("Error getting class: %v", err)
+	} else {
+		log.Printf("Retrieved class: ID=%s, SpaceID=%s, Name=%s, State=%s",
+			class.ID, class.SpaceID, class.Name, class.CurrentState)
+		log.Printf("Description: %s", class.Description)
+	}
+}
+
+// demoUpdateClass demonstrates updating a class with an enhanced schema.
+func demoUpdateClass(client *tama.Client, classID string) {
+	updateClass := neural.UpdateClassRequest{
+		Class: neural.UpdateClassData{
+			Schema: createEnhancedActionCallSchema(),
+		},
+	}
+
+	class, err := client.Neural.UpdateClass(classID, updateClass)
+	if err != nil {
+		log.Printf("Error updating class: %v", err)
+	} else {
+		log.Printf("Updated class: ID=%s, Name=%s", class.ID, class.Name)
+		if desc, ok := class.Schema["description"].(string); ok {
+			log.Printf("Updated schema description: %s", desc)
+		}
+	}
+}
+
+// demoReplaceClass demonstrates replacing a class with a completely new schema.
+func demoReplaceClass(client *tama.Client, classID string) {
+	replaceClass := neural.UpdateClassRequest{
+		Class: neural.UpdateClassData{
+			Schema: createSimpleMessageSchema(),
+		},
+	}
+
+	class, err := client.Neural.ReplaceClass(classID, replaceClass)
+	if err != nil {
+		log.Printf("Error replacing class: %v", err)
+	} else {
+		log.Printf("Replaced class: ID=%s, Name=%s", class.ID, class.Name)
+		if title, ok := class.Schema["title"].(string); ok {
+			log.Printf("New schema title: %s", title)
+		}
+	}
+}
+
+// createActionCallSchema creates the action-call schema.
+func createActionCallSchema() map[string]any {
+	return map[string]any{
+		"title":       "action-call",
+		"description": "An action call is a request to execute an action.",
+		"type":        "object",
+		"properties": map[string]any{
+			"code": map[string]any{
+				"description": "The status of the action call",
+				"type":        "integer",
+			},
+			"tool_id": map[string]any{
+				"description": "The ID of the tool to execute",
+				"type":        "string",
+			},
+			"parameters": map[string]any{
+				"description": "The parameters to pass to the action",
+				"type":        "object",
+			},
+			"content_type": map[string]any{
+				"description": "The content type of the response",
+				"type":        "string",
+			},
+			"content": map[string]any{
+				"description": "The response from the action",
+				"type":        "object",
+			},
+		},
+		"required": []any{"tool_id", "parameters", "code", "content_type", "content"},
+	}
+}
+
+// createEnhancedActionCallSchema creates an enhanced action-call schema with timestamp.
+func createEnhancedActionCallSchema() map[string]any {
+	schema := createActionCallSchema()
+	schema["description"] = "An updated action call schema with additional fields."
+
+	properties, ok := schema["properties"].(map[string]any)
+	if !ok {
+		return schema
+	}
+	properties["timestamp"] = map[string]any{
+		"description": "When the action was called",
+		"type":        "string",
+		"format":      "date-time",
+	}
+
+	schema["required"] = []any{"tool_id", "parameters", "code", "content_type", "content", "timestamp"}
+	return schema
+}
+
+// createSimpleMessageSchema creates a simple message schema.
+func createSimpleMessageSchema() map[string]any {
+	return map[string]any{
+		"title":       "simple-message",
+		"description": "A simple message schema",
+		"type":        "object",
+		"properties": map[string]any{
+			"text": map[string]any{
+				"description": "The message text",
+				"type":        "string",
+			},
+			"sender": map[string]any{
+				"description": "Who sent the message",
+				"type":        "string",
+			},
+		},
+		"required": []any{"text", "sender"},
 	}
 }
 
@@ -366,6 +523,19 @@ func demonstrateErrorHandling(client *tama.Client) {
 		handleEnhancedError("CreateSpace", err)
 	}
 
+	// Example 3a: Neural class validation
+	log.Printf("--- Example 3a: Neural Class Validation ---")
+	invalidClass := neural.CreateClassRequest{
+		Class: neural.ClassRequestData{
+			Schema: nil, // Invalid: missing schema
+		},
+	}
+
+	_, err = client.Neural.CreateClass("invalid-space-id", invalidClass)
+	if err != nil {
+		handleEnhancedError("CreateClass", err)
+	}
+
 	// Example 4: Memory service field validation
 	log.Printf("--- Example 4: Memory Service Validation ---")
 	invalidPrompt := memory.CreatePromptRequest{
@@ -437,6 +607,7 @@ func runDeleteOperations(_ *tama.Client) {
 		modelID := exampleModelID
 		sourceID := exampleSourceID
 		spaceID := exampleSpaceID
+		classID := "class-123"
 
 		err := client.Memory.DeletePrompt(promptID)
 		if err != nil {
@@ -464,6 +635,13 @@ func runDeleteOperations(_ *tama.Client) {
 			log.Printf("Error deleting source: %v", err)
 		} else {
 			log.Printf("Deleted source successfully")
+		}
+
+		err = client.Neural.DeleteClass(classID)
+		if err != nil {
+			log.Printf("Error deleting class: %v", err)
+		} else {
+			log.Printf("Deleted class successfully")
 		}
 
 		err = client.Neural.DeleteSpace(spaceID)

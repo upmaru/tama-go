@@ -274,6 +274,125 @@ Deletes a processor by space ID and model ID.
 **Returns:**
 - `error`: Error if request fails
 
+### Class Operations
+
+#### GetClass(id string) (*Class, error)
+
+Retrieves a specific class by ID.
+
+**Endpoint:** `GET /provision/neural/classes/:id`
+
+**Parameters:**
+- `id` (string): Class ID (required)
+
+**Returns:**
+- `*Class`: The class object
+- `error`: Error if request fails
+
+#### CreateClass(spaceID string, req CreateClassRequest) (*Class, error)
+
+Creates a new class within a space.
+
+**Endpoint:** `POST /provision/neural/spaces/:space_id/classes`
+
+**Parameters:**
+- `spaceID` (string): Space ID (required)
+- `req` (CreateClassRequest): Request payload
+
+**Example request:**
+```go
+createReq := neural.CreateClassRequest{
+    Class: neural.ClassRequestData{
+        Schema: map[string]any{
+            "title":       "action-call",
+            "description": "An action call is a request to execute an action.",
+            "type":        "object",
+            "properties": map[string]any{
+                "code": map[string]any{
+                    "description": "The status of the action call",
+                    "type":        "integer",
+                },
+                "tool_id": map[string]any{
+                    "description": "The ID of the tool to execute",
+                    "type":        "string",
+                },
+                "parameters": map[string]any{
+                    "description": "The parameters to pass to the action",
+                    "type":        "object",
+                },
+            },
+            "required": []string{"tool_id", "parameters", "code"},
+        },
+    },
+}
+```
+
+**Returns:**
+- `*Class`: Created class
+- `error`: Error if request fails
+
+**Request Structure:**
+```go
+type CreateClassRequest struct {
+    Class ClassRequestData `json:"class"`
+}
+
+type ClassRequestData struct {
+    Schema map[string]any `json:"schema"`
+}
+```
+
+#### UpdateClass(id string, req UpdateClassRequest) (*Class, error)
+
+Updates an existing class using PATCH.
+
+**Endpoint:** `PATCH /provision/neural/classes/:id`
+
+**Parameters:**
+- `id` (string): Class ID (required)
+- `req` (UpdateClassRequest): Request payload
+
+**Returns:**
+- `*Class`: Updated class
+- `error`: Error if request fails
+
+**Request Structure:**
+```go
+type UpdateClassRequest struct {
+    Class UpdateClassData `json:"class"`
+}
+
+type UpdateClassData struct {
+    Schema map[string]any `json:"schema,omitempty"`
+}
+```
+
+#### ReplaceClass(id string, req UpdateClassRequest) (*Class, error)
+
+Replaces an existing class using PUT.
+
+**Endpoint:** `PUT /provision/neural/classes/:id`
+
+**Parameters:**
+- `id` (string): Class ID (required)
+- `req` (UpdateClassRequest): Request payload
+
+**Returns:**
+- `*Class`: Replaced class
+- `error`: Error if request fails
+
+#### DeleteClass(id string) error
+
+Deletes a class by ID.
+
+**Endpoint:** `DELETE /provision/neural/classes/:id`
+
+**Parameters:**
+- `id` (string): Class ID (required)
+
+**Returns:**
+- `error`: Error if request fails
+
 ## Memory Service
 
 Access via `client.Memory.*`
@@ -736,6 +855,19 @@ type Processor struct {
 }
 ```
 
+#### Class
+
+```go
+type Class struct {
+    ID           string         `json:"id,omitempty"`
+    SpaceID      string         `json:"space_id,omitempty"`
+    CurrentState string         `json:"current_state"`
+    Schema       map[string]any `json:"schema"`
+    Name         string         `json:"name"`
+    Description  string         `json:"description"`
+}
+```
+
 #### Prompt
 
 ```go
@@ -882,6 +1014,22 @@ type CreateProcessorRequest struct {
 ```go
 type UpdateProcessorRequest struct {
     Processor UpdateProcessorData `json:"processor"`
+}
+```
+
+#### CreateClassRequest
+
+```go
+type CreateClassRequest struct {
+    Class ClassRequestData `json:"class"`
+}
+```
+
+#### UpdateClassRequest
+
+```go
+type UpdateClassRequest struct {
+    Class UpdateClassData `json:"class"`
 }
 ```
 
@@ -1085,6 +1233,30 @@ type UpdateProcessorData struct {
 ```go
 type ProcessorResponse struct {
     Data Processor `json:"data"`
+}
+```
+
+#### ClassRequestData
+
+```go
+type ClassRequestData struct {
+    Schema map[string]any `json:"schema"`
+}
+```
+
+#### UpdateClassData
+
+```go
+type UpdateClassData struct {
+    Schema map[string]any `json:"schema,omitempty"`
+}
+```
+
+#### ClassResponse
+
+```go
+type ClassResponse struct {
+    Data Class `json:"data"`
 }
 ```
 
