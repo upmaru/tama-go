@@ -37,9 +37,6 @@ func (s *Service) CreateSpace(req CreateSpaceRequest) (*Space, error) {
 	if req.Space.Type == "" {
 		return nil, errors.New("space type is required")
 	}
-	if req.Space.Type != "root" && req.Space.Type != "component" {
-		return nil, errors.New("space type must be 'root' or 'component'")
-	}
 
 	var spaceResp SpaceResponse
 	resp, err := s.client.R().
