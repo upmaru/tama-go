@@ -728,7 +728,7 @@ func TestNeuralGetClass(t *testing.T) {
 }
 
 func TestNeuralGetClassError(t *testing.T) {
-	server := createMockServer(t, func(w http.ResponseWriter, r *http.Request) {
+	server := createMockServer(t, func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusNotFound)
 		json.NewEncoder(w).Encode(map[string]any{
@@ -758,7 +758,7 @@ func TestNeuralGetClassError(t *testing.T) {
 		t.Fatalf("Expected neural.Error, got %T", err)
 	}
 
-	if apiError.StatusCode != 404 {
+	if apiError.StatusCode != http.StatusNotFound {
 		t.Errorf("Expected status code 404, got %d", apiError.StatusCode)
 	}
 }
@@ -1052,158 +1052,147 @@ func TestNeuralDeleteClass(t *testing.T) {
 }
 
 func TestNeuralCreateClassWithRealWorldSchema(t *testing.T) {
-	// Real-world schema example based on the provided action-call schema
-	expectedClass := neural.Class{
-		ID:           "class-action-call",
-		SpaceID:      "space-123",
-		CurrentState: "active",
-		Schema: map[string]any{
-			"title":       "action-call",
-			"description": "An action call is a request to execute an action.",
-			"type":        "object",
-			"properties": map[string]any{
-				"code": map[string]any{
-					"description": "The status of the action call",
-					"type":        "integer",
-				},
-				"tool_id": map[string]any{
-					"description": "The ID of the tool to execute",
-					"type":        "string",
-				},
-				"parameters": map[string]any{
-					"description": "The parameters to pass to the action",
-					"type":        "object",
-				},
-				"content_type": map[string]any{
-					"description": "The content type of the response",
-					"type":        "string",
-				},
-				"content": map[string]any{
-					"description": "The response from the action",
-					"type":        "object",
-				},
-			},
-			"required": []any{"tool_id", "parameters", "code", "content_type", "content"},
-		},
-		Name:        "ActionCall",
-		Description: "Schema for action call requests",
-	}
-
-	expectedResponse := neural.ClassResponse{
-		Data: expectedClass,
-	}
+	expectedClass := createActionCallClass()
+	expectedResponse := neural.ClassResponse{Data: expectedClass}
 
 	server := createMockServer(t, func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			t.Errorf("Expected POST request, got %s", r.Method)
-		}
-
-		if r.URL.Path != "/provision/neural/spaces/space-123/classes" {
-			t.Errorf("Expected path /provision/neural/spaces/space-123/classes, got %s", r.URL.Path)
-		}
-
-		var req neural.CreateClassRequest
-		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-			t.Fatalf("Failed to decode request body: %v", err)
-		}
-
-		// Verify the schema structure
-		if req.Class.Schema == nil {
-			t.Error("Expected schema in request, got nil")
-		}
-
-		if title, ok := req.Class.Schema["title"].(string); !ok || title != "action-call" {
-			t.Errorf("Expected schema title 'action-call', got %v", req.Class.Schema["title"])
-		}
-
-		if desc, ok := req.Class.Schema["description"].(string); !ok || desc != "An action call is a request to execute an action." {
-			t.Errorf("Expected specific description, got %v", req.Class.Schema["description"])
-		}
-
-		// Verify properties exist
-		if props, ok := req.Class.Schema["properties"].(map[string]any); !ok {
-			t.Error("Expected properties to be a map")
-		} else {
-			// Check that required properties exist
-			requiredProps := []string{"code", "tool_id", "parameters", "content_type", "content"}
-			for _, prop := range requiredProps {
-				if _, exists := props[prop]; !exists {
-					t.Errorf("Expected property %s to exist in schema", prop)
-				}
-			}
-		}
-
+		validateCreateClassRequest(t, r)
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusCreated)
 		json.NewEncoder(w).Encode(expectedResponse)
 	})
 	defer server.Close()
 
-	config := tama.Config{
-		BaseURL: server.URL,
-		APIKey:  "test-key",
-		Timeout: 10 * time.Second,
-	}
-
-	client := tama.NewClient(config)
-
+	client := createTestClient(server.URL)
 	createReq := neural.CreateClassRequest{
-		Class: neural.ClassRequestData{
-			Schema: map[string]any{
-				"title":       "action-call",
-				"description": "An action call is a request to execute an action.",
-				"type":        "object",
-				"properties": map[string]any{
-					"code": map[string]any{
-						"description": "The status of the action call",
-						"type":        "integer",
-					},
-					"tool_id": map[string]any{
-						"description": "The ID of the tool to execute",
-						"type":        "string",
-					},
-					"parameters": map[string]any{
-						"description": "The parameters to pass to the action",
-						"type":        "object",
-					},
-					"content_type": map[string]any{
-						"description": "The content type of the response",
-						"type":        "string",
-					},
-					"content": map[string]any{
-						"description": "The response from the action",
-						"type":        "object",
-					},
-				},
-				"required": []any{"tool_id", "parameters", "code", "content_type", "content"},
-			},
-		},
+		Class: neural.ClassRequestData{Schema: createActionCallSchema()},
 	}
 
 	class, err := client.Neural.CreateClass("space-123", createReq)
-
 	if err != nil {
 		t.Fatalf("Expected no error, got %v", err)
 	}
 
-	if class.ID != expectedClass.ID {
-		t.Errorf("Expected class ID %s, got %s", expectedClass.ID, class.ID)
+	validateClassResponse(t, *class, expectedClass)
+}
+
+func createActionCallClass() neural.Class {
+	return neural.Class{
+		ID:           "class-action-call",
+		SpaceID:      "space-123",
+		CurrentState: "active",
+		Schema:       createActionCallSchema(),
+		Name:         "ActionCall",
+		Description:  "Schema for action call requests",
+	}
+}
+
+func createActionCallSchema() map[string]any {
+	return map[string]any{
+		"title":       "action-call",
+		"description": "An action call is a request to execute an action.",
+		"type":        "object",
+		"properties": map[string]any{
+			"code": map[string]any{
+				"description": "The status of the action call",
+				"type":        "integer",
+			},
+			"tool_id": map[string]any{
+				"description": "The ID of the tool to execute",
+				"type":        "string",
+			},
+			"parameters": map[string]any{
+				"description": "The parameters to pass to the action",
+				"type":        "object",
+			},
+			"content_type": map[string]any{
+				"description": "The content type of the response",
+				"type":        "string",
+			},
+			"content": map[string]any{
+				"description": "The response from the action",
+				"type":        "object",
+			},
+		},
+		"required": []any{"tool_id", "parameters", "code", "content_type", "content"},
+	}
+}
+
+func validateCreateClassRequest(t *testing.T, r *http.Request) {
+	if r.Method != http.MethodPost {
+		t.Errorf("Expected POST request, got %s", r.Method)
+	}
+	if r.URL.Path != "/provision/neural/spaces/space-123/classes" {
+		t.Errorf("Expected path /provision/neural/spaces/space-123/classes, got %s", r.URL.Path)
 	}
 
-	if class.SpaceID != expectedClass.SpaceID {
-		t.Errorf("Expected space ID %s, got %s", expectedClass.SpaceID, class.SpaceID)
+	var req neural.CreateClassRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		t.Fatalf("Failed to decode request body: %v", err)
 	}
 
-	if class.Name != expectedClass.Name {
-		t.Errorf("Expected class name %s, got %s", expectedClass.Name, class.Name)
+	validateSchemaStructure(t, req.Class.Schema)
+}
+
+func validateSchemaStructure(t *testing.T, schema map[string]any) {
+	if schema == nil {
+		t.Error("Expected schema in request, got nil")
+		return
 	}
 
-	// Verify schema structure in response
-	if title, ok := class.Schema["title"].(string); !ok || title != "action-call" {
-		t.Errorf("Expected schema title 'action-call', got %v", class.Schema["title"])
+	title, ok := schema["title"].(string)
+	if !ok || title != "action-call" {
+		t.Errorf("Expected schema title 'action-call', got %v", schema["title"])
 	}
 
-	if desc, ok := class.Schema["description"].(string); !ok || desc != "An action call is a request to execute an action." {
-		t.Errorf("Expected specific description, got %v", class.Schema["description"])
+	expectedDesc := "An action call is a request to execute an action."
+	desc, ok := schema["description"].(string)
+	if !ok || desc != expectedDesc {
+		t.Errorf("Expected specific description, got %v", schema["description"])
+	}
+
+	props, ok := schema["properties"].(map[string]any)
+	if !ok {
+		t.Error("Expected properties to be a map")
+		return
+	}
+
+	requiredProps := []string{"code", "tool_id", "parameters", "content_type", "content"}
+	for _, prop := range requiredProps {
+		if _, exists := props[prop]; !exists {
+			t.Errorf("Expected property %s to exist in schema", prop)
+		}
+	}
+}
+
+func createTestClient(baseURL string) *tama.Client {
+	config := tama.Config{
+		BaseURL: baseURL,
+		APIKey:  "test-key",
+		Timeout: 10 * time.Second,
+	}
+	return tama.NewClient(config)
+}
+
+func validateClassResponse(t *testing.T, actual, expected neural.Class) {
+	if actual.ID != expected.ID {
+		t.Errorf("Expected class ID %s, got %s", expected.ID, actual.ID)
+	}
+	if actual.SpaceID != expected.SpaceID {
+		t.Errorf("Expected space ID %s, got %s", expected.SpaceID, actual.SpaceID)
+	}
+	if actual.Name != expected.Name {
+		t.Errorf("Expected class name %s, got %s", expected.Name, actual.Name)
+	}
+
+	title, ok := actual.Schema["title"].(string)
+	if !ok || title != "action-call" {
+		t.Errorf("Expected schema title 'action-call', got %v", actual.Schema["title"])
+	}
+
+	expectedDesc := "An action call is a request to execute an action."
+	desc, ok := actual.Schema["description"].(string)
+	if !ok || desc != expectedDesc {
+		t.Errorf("Expected specific description, got %v", actual.Schema["description"])
 	}
 }

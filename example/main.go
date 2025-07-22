@@ -107,38 +107,20 @@ func runNeuralClassOperations(client *tama.Client) {
 	log.Printf("=== Neural Class Operations ===")
 
 	spaceID := exampleSpaceID
+	classID := "class-123"
 
-	// Create a new class with a real-world schema
+	// Create, Get, Update, and Replace operations
+	demoCreateClass(client, spaceID)
+	demoGetClass(client, classID)
+	demoUpdateClass(client, classID)
+	demoReplaceClass(client, classID)
+}
+
+// demoCreateClass demonstrates creating a class with a real-world schema.
+func demoCreateClass(client *tama.Client, spaceID string) {
 	newClass := neural.CreateClassRequest{
 		Class: neural.ClassRequestData{
-			Schema: map[string]any{
-				"title":       "action-call",
-				"description": "An action call is a request to execute an action.",
-				"type":        "object",
-				"properties": map[string]any{
-					"code": map[string]any{
-						"description": "The status of the action call",
-						"type":        "integer",
-					},
-					"tool_id": map[string]any{
-						"description": "The ID of the tool to execute",
-						"type":        "string",
-					},
-					"parameters": map[string]any{
-						"description": "The parameters to pass to the action",
-						"type":        "object",
-					},
-					"content_type": map[string]any{
-						"description": "The content type of the response",
-						"type":        "string",
-					},
-					"content": map[string]any{
-						"description": "The response from the action",
-						"type":        "object",
-					},
-				},
-				"required": []any{"tool_id", "parameters", "code", "content_type", "content"},
-			},
+			Schema: createActionCallSchema(),
 		},
 	}
 
@@ -153,10 +135,11 @@ func runNeuralClassOperations(client *tama.Client) {
 			log.Printf("Schema title: %s", title)
 		}
 	}
+}
 
-	// Get a class by ID (replace with actual ID)
-	classID := "class-123"
-	class, err = client.Neural.GetClass(classID)
+// demoGetClass demonstrates retrieving a class by ID.
+func demoGetClass(client *tama.Client, classID string) {
+	class, err := client.Neural.GetClass(classID)
 	if err != nil {
 		log.Printf("Error getting class: %v", err)
 	} else {
@@ -164,47 +147,17 @@ func runNeuralClassOperations(client *tama.Client) {
 			class.ID, class.SpaceID, class.Name, class.CurrentState)
 		log.Printf("Description: %s", class.Description)
 	}
+}
 
-	// Update a class with new schema
+// demoUpdateClass demonstrates updating a class with an enhanced schema.
+func demoUpdateClass(client *tama.Client, classID string) {
 	updateClass := neural.UpdateClassRequest{
 		Class: neural.UpdateClassData{
-			Schema: map[string]any{
-				"title":       "action-call",
-				"description": "An updated action call schema with additional fields.",
-				"type":        "object",
-				"properties": map[string]any{
-					"code": map[string]any{
-						"description": "The status of the action call",
-						"type":        "integer",
-					},
-					"tool_id": map[string]any{
-						"description": "The ID of the tool to execute",
-						"type":        "string",
-					},
-					"parameters": map[string]any{
-						"description": "The parameters to pass to the action",
-						"type":        "object",
-					},
-					"content_type": map[string]any{
-						"description": "The content type of the response",
-						"type":        "string",
-					},
-					"content": map[string]any{
-						"description": "The response from the action",
-						"type":        "object",
-					},
-					"timestamp": map[string]any{
-						"description": "When the action was called",
-						"type":        "string",
-						"format":      "date-time",
-					},
-				},
-				"required": []any{"tool_id", "parameters", "code", "content_type", "content", "timestamp"},
-			},
+			Schema: createEnhancedActionCallSchema(),
 		},
 	}
 
-	class, err = client.Neural.UpdateClass(classID, updateClass)
+	class, err := client.Neural.UpdateClass(classID, updateClass)
 	if err != nil {
 		log.Printf("Error updating class: %v", err)
 	} else {
@@ -213,30 +166,17 @@ func runNeuralClassOperations(client *tama.Client) {
 			log.Printf("Updated schema description: %s", desc)
 		}
 	}
+}
 
-	// Replace a class (full replacement)
+// demoReplaceClass demonstrates replacing a class with a completely new schema.
+func demoReplaceClass(client *tama.Client, classID string) {
 	replaceClass := neural.UpdateClassRequest{
 		Class: neural.UpdateClassData{
-			Schema: map[string]any{
-				"title":       "simple-message",
-				"description": "A simple message schema",
-				"type":        "object",
-				"properties": map[string]any{
-					"text": map[string]any{
-						"description": "The message text",
-						"type":        "string",
-					},
-					"sender": map[string]any{
-						"description": "Who sent the message",
-						"type":        "string",
-					},
-				},
-				"required": []any{"text", "sender"},
-			},
+			Schema: createSimpleMessageSchema(),
 		},
 	}
 
-	class, err = client.Neural.ReplaceClass(classID, replaceClass)
+	class, err := client.Neural.ReplaceClass(classID, replaceClass)
 	if err != nil {
 		log.Printf("Error replacing class: %v", err)
 	} else {
@@ -244,6 +184,77 @@ func runNeuralClassOperations(client *tama.Client) {
 		if title, ok := class.Schema["title"].(string); ok {
 			log.Printf("New schema title: %s", title)
 		}
+	}
+}
+
+// createActionCallSchema creates the action-call schema.
+func createActionCallSchema() map[string]any {
+	return map[string]any{
+		"title":       "action-call",
+		"description": "An action call is a request to execute an action.",
+		"type":        "object",
+		"properties": map[string]any{
+			"code": map[string]any{
+				"description": "The status of the action call",
+				"type":        "integer",
+			},
+			"tool_id": map[string]any{
+				"description": "The ID of the tool to execute",
+				"type":        "string",
+			},
+			"parameters": map[string]any{
+				"description": "The parameters to pass to the action",
+				"type":        "object",
+			},
+			"content_type": map[string]any{
+				"description": "The content type of the response",
+				"type":        "string",
+			},
+			"content": map[string]any{
+				"description": "The response from the action",
+				"type":        "object",
+			},
+		},
+		"required": []any{"tool_id", "parameters", "code", "content_type", "content"},
+	}
+}
+
+// createEnhancedActionCallSchema creates an enhanced action-call schema with timestamp.
+func createEnhancedActionCallSchema() map[string]any {
+	schema := createActionCallSchema()
+	schema["description"] = "An updated action call schema with additional fields."
+
+	properties, ok := schema["properties"].(map[string]any)
+	if !ok {
+		return schema
+	}
+	properties["timestamp"] = map[string]any{
+		"description": "When the action was called",
+		"type":        "string",
+		"format":      "date-time",
+	}
+
+	schema["required"] = []any{"tool_id", "parameters", "code", "content_type", "content", "timestamp"}
+	return schema
+}
+
+// createSimpleMessageSchema creates a simple message schema.
+func createSimpleMessageSchema() map[string]any {
+	return map[string]any{
+		"title":       "simple-message",
+		"description": "A simple message schema",
+		"type":        "object",
+		"properties": map[string]any{
+			"text": map[string]any{
+				"description": "The message text",
+				"type":        "string",
+			},
+			"sender": map[string]any{
+				"description": "Who sent the message",
+				"type":        "string",
+			},
+		},
+		"required": []any{"text", "sender"},
 	}
 }
 
