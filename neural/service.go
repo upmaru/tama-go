@@ -104,7 +104,7 @@ type CreateProcessorRequest struct {
 
 // ProcessorRequestData represents the processor data in the request.
 type ProcessorRequestData struct {
-	Type          string         `json:"type"`
+	ModelID       string         `json:"model_id"`
 	Configuration map[string]any `json:"configuration"`
 }
 
@@ -115,7 +115,7 @@ type UpdateProcessorRequest struct {
 
 // UpdateProcessorData represents the processor update data.
 type UpdateProcessorData struct {
-	Type          string         `json:"type,omitempty"`
+	ModelID       string         `json:"model_id,omitempty"`
 	Configuration map[string]any `json:"configuration,omitempty"`
 }
 

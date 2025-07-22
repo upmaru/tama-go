@@ -420,8 +420,8 @@ func TestNeuralCreateProcessor(t *testing.T) {
 			t.Fatalf("Failed to decode request body: %v", err)
 		}
 
-		if req.Processor.Type != "completion" {
-			t.Errorf("Expected request type 'completion', got %s", req.Processor.Type)
+		if req.Processor.ModelID != "model-123" {
+			t.Errorf("Expected request model ID 'model-123', got %s", req.Processor.ModelID)
 		}
 
 		if req.Processor.Configuration["temperature"] != 0.8 {
@@ -444,7 +444,7 @@ func TestNeuralCreateProcessor(t *testing.T) {
 
 	createReq := neural.CreateProcessorRequest{
 		Processor: neural.ProcessorRequestData{
-			Type: "completion",
+			ModelID: "model-123",
 			Configuration: map[string]any{
 				"temperature": 0.8,
 				"tool_choice": "required",
@@ -479,7 +479,7 @@ func TestNeuralCreateProcessorValidation(t *testing.T) {
 	// Test empty space ID validation
 	_, err := client.Neural.CreateProcessor("", "completion", neural.CreateProcessorRequest{
 		Processor: neural.ProcessorRequestData{
-			Type: "completion",
+			ModelID: "model-123",
 		},
 	})
 
@@ -490,7 +490,7 @@ func TestNeuralCreateProcessorValidation(t *testing.T) {
 	// Test empty processor type validation
 	_, err = client.Neural.CreateProcessor("space-123", "", neural.CreateProcessorRequest{
 		Processor: neural.ProcessorRequestData{
-			Type: "completion",
+			ModelID: "model-123",
 		},
 	})
 
@@ -498,7 +498,7 @@ func TestNeuralCreateProcessorValidation(t *testing.T) {
 		t.Error("Expected validation error for empty processor type")
 	}
 
-	// Test empty type validation
+	// Test empty model ID validation
 	_, err = client.Neural.CreateProcessor("space-123", "completion", neural.CreateProcessorRequest{
 		Processor: neural.ProcessorRequestData{
 			Configuration: map[string]any{"test": "value"},
@@ -506,34 +506,19 @@ func TestNeuralCreateProcessorValidation(t *testing.T) {
 	})
 
 	if err == nil {
-		t.Error("Expected validation error for empty type")
+		t.Error("Expected validation error for empty model ID")
 	}
 
-	// Test invalid type validation
-	_, err = client.Neural.CreateProcessor("space-123", "invalid-type", neural.CreateProcessorRequest{
+	// Test valid model ID
+	_, err = client.Neural.CreateProcessor("space-123", "completion", neural.CreateProcessorRequest{
 		Processor: neural.ProcessorRequestData{
-			Type:          "invalid-type",
+			ModelID:       "valid-model-123",
 			Configuration: map[string]any{"test": "value"},
 		},
 	})
-
-	if err == nil {
-		t.Error("Expected validation error for invalid type")
-	}
-
-	// Test valid types
-	validTypes := []string{"completion", "embedding", "reranking"}
-	for _, validType := range validTypes {
-		_, err = client.Neural.CreateProcessor("space-123", validType, neural.CreateProcessorRequest{
-			Processor: neural.ProcessorRequestData{
-				Type:          validType,
-				Configuration: map[string]any{"test": "value"},
-			},
-		})
-		// We expect a network error since we're not mocking this, but not a validation error
-		if err != nil && err.Error() == "processor type must be 'completion', 'embedding', or 'reranking'" {
-			t.Errorf("Valid type %s should not cause validation error", validType)
-		}
+	// We expect a network error since we're not mocking this, but not a validation error
+	if err != nil && err.Error() == "model ID is required" {
+		t.Error("Valid model ID should not cause validation error")
 	}
 }
 
@@ -577,7 +562,7 @@ func TestNeuralUpdateProcessor(t *testing.T) {
 
 	updateReq := neural.UpdateProcessorRequest{
 		Processor: neural.UpdateProcessorData{
-			Type: "embedding",
+			ModelID: "model-123",
 			Configuration: map[string]any{
 				"max_tokens": 512,
 			},
@@ -635,7 +620,7 @@ func TestNeuralReplaceProcessor(t *testing.T) {
 
 	replaceReq := neural.UpdateProcessorRequest{
 		Processor: neural.UpdateProcessorData{
-			Type: "reranking",
+			ModelID: "model-123",
 			Configuration: map[string]any{
 				"top_n": 3,
 			},
