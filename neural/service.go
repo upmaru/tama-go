@@ -119,6 +119,41 @@ type UpdateProcessorData struct {
 	Configuration map[string]any `json:"configuration,omitempty"`
 }
 
+// Class represents a neural class resource.
+type Class struct {
+	ID           string         `json:"id,omitempty"`
+	SpaceID      string         `json:"space_id,omitempty"`
+	CurrentState string         `json:"current_state"`
+	Schema       map[string]any `json:"schema"`
+	Name         string         `json:"name"`
+	Description  string         `json:"description"`
+}
+
+// ClassResponse represents the API response for class operations.
+type ClassResponse struct {
+	Data Class `json:"data"`
+}
+
+// CreateClassRequest represents the request payload for creating a class.
+type CreateClassRequest struct {
+	Class ClassRequestData `json:"class"`
+}
+
+// ClassRequestData represents the class data in the request.
+type ClassRequestData struct {
+	Schema map[string]any `json:"schema"`
+}
+
+// UpdateClassRequest represents the request payload for updating a class.
+type UpdateClassRequest struct {
+	Class UpdateClassData `json:"class"`
+}
+
+// UpdateClassData represents the class update data.
+type UpdateClassData struct {
+	Schema map[string]any `json:"schema,omitempty"`
+}
+
 // handleAPIError processes API error responses.
 func (s *Service) handleAPIError(resp any) error {
 	errResp, ok := s.extractErrorResponse(resp)
