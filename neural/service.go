@@ -68,7 +68,7 @@ type CreateSpaceRequest struct {
 // SpaceRequestData represents the space data in the request.
 type SpaceRequestData struct {
 	Name string `json:"name"`
-	Type string `json:"type"` // "root" or "component"
+	Type string `json:"type"`
 }
 
 // UpdateSpaceRequest represents the request payload for updating a space.
@@ -79,7 +79,7 @@ type UpdateSpaceRequest struct {
 // UpdateSpaceData represents the space update data.
 type UpdateSpaceData struct {
 	Name string `json:"name,omitempty"`
-	Type string `json:"type,omitempty"` // "root" or "component"
+	Type string `json:"type,omitempty"`
 }
 
 // Processor represents a neural processor resource.

@@ -204,6 +204,46 @@ func TestNeuralCreateSpaceValidation(t *testing.T) {
 	}
 }
 
+func TestNeuralCreateSpaceTypeValidationDelegated(t *testing.T) {
+	// This test verifies that type validation is now delegated to the API
+	// Previously invalid types should now pass client validation
+	config := tama.Config{
+		BaseURL: "https://api.example.com",
+		APIKey:  "test-key",
+		Timeout: 10 * time.Second,
+	}
+
+	client := tama.NewClient(config)
+
+	// Test that previously invalid type values now pass client validation
+	// The API will handle the actual validation
+	_, err := client.Neural.CreateSpace(neural.CreateSpaceRequest{
+		Space: neural.SpaceRequestData{
+			Name: "test-space",
+			Type: "invalid-type", // This should not trigger client validation error
+		},
+	})
+
+	// Should not get a client validation error for type
+	// Any error should come from the actual API call (network/API error)
+	if err != nil && err.Error() == "space type must be 'root' or 'component'" {
+		t.Error("Client should not validate specific type values - validation should be delegated to API")
+	}
+
+	// Test another previously invalid type
+	_, err = client.Neural.CreateSpace(neural.CreateSpaceRequest{
+		Space: neural.SpaceRequestData{
+			Name: "test-space",
+			Type: "custom-type",
+		},
+	})
+
+	// Should not get the old client validation error
+	if err != nil && err.Error() == "space type must be 'root' or 'component'" {
+		t.Error("Client should not validate specific type values - validation should be delegated to API")
+	}
+}
+
 func TestNeuralUpdateSpace(t *testing.T) {
 	expectedSpace := neural.Space{
 		ID:           "space-123",

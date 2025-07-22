@@ -88,7 +88,7 @@ Creates a new neural space.
 - `req` (CreateSpaceRequest): Space creation request
   - `Space` (SpaceRequest): Space data (required)
     - `Name` (string): Space name (required)
-    - `Type` (string): Space type - "root" or "component" (required)
+    - `Type` (string): Space type (required)
 
 **Returns:**
 - `*Space`: Created space object with ID, Name, Slug, Type, and CurrentState
@@ -116,7 +116,7 @@ Updates an existing space using PATCH (partial update).
 - `req` (UpdateSpaceRequest): Update request
   - `Space` (UpdateSpaceData): Space update data (required)
     - `Name` (string): New space name (optional)
-    - `Type` (string): New space type - "root" or "component" (optional)
+    - `Type` (string): New space type (optional)
 
 **Returns:**
 - `*Space`: Updated space object with all fields including server-managed CurrentState
@@ -1060,7 +1060,7 @@ type Response struct {
 ```go
 type SpaceRequest struct {
     Name string `json:"name"`
-    Type string `json:"type"` // "root" or "component"
+    Type string `json:"type"`
 }
 ```
 
@@ -1069,7 +1069,7 @@ type SpaceRequest struct {
 ```go
 type UpdateSpaceData struct {
     Name string `json:"name,omitempty"`
-    Type string `json:"type,omitempty"` // "root" or "component"
+    Type string `json:"type,omitempty"`
 }
 ```
 
