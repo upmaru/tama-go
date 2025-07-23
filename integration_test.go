@@ -11,6 +11,7 @@ import (
 
 	tama "github.com/upmaru/tama-go"
 	"github.com/upmaru/tama-go/neural"
+	"github.com/upmaru/tama-go/perception"
 	"github.com/upmaru/tama-go/sensory"
 )
 
@@ -410,4 +411,107 @@ func TestIntegrationFieldValidationErrors(t *testing.T) {
 	}
 
 	t.Log("Field validation error test completed")
+}
+
+func TestIntegrationThoughtInvalidModuleError(t *testing.T) {
+	baseURL := os.Getenv("TAMA_BASE_URL")
+	if baseURL == "" {
+		baseURL = "http://localhost:4000"
+	}
+	apiKey := os.Getenv("TAMA_API_KEY")
+	if apiKey == "" {
+		apiKey = "test-api-key"
+	}
+
+	client := tama.NewClient(tama.Config{
+		BaseURL: baseURL,
+		APIKey:  apiKey,
+		Timeout: 30 * time.Second,
+	})
+
+	// Enable debug to see the actual error responses
+	client.SetDebug(true)
+
+	// Ensure JSON content type and accept headers are set
+	client.SetHeader("Accept", "application/json")
+	client.SetHeader("Content-Type", "application/json")
+
+	// First, create a test space
+	testSpace := neural.CreateSpaceRequest{
+		Space: neural.SpaceRequestData{
+			Name: fmt.Sprintf("Thought Test Space %d", time.Now().Unix()),
+			Type: "root",
+		},
+	}
+
+	createdSpace, err := client.Neural.CreateSpace(testSpace)
+	if err != nil {
+		t.Skipf("Could not create test space for thought test: %v", err)
+	}
+
+	defer func() {
+		// Clean up the test space
+		client.Neural.DeleteSpace(createdSpace.ID)
+	}()
+
+	t.Logf("Created test space with ID: %s", createdSpace.ID)
+
+	// Create a test chain in the space
+	testChain := perception.CreateChainRequest{
+		Chain: perception.ChainRequestData{
+			Name: fmt.Sprintf("Thought Test Chain %d", time.Now().Unix()),
+		},
+	}
+
+	createdChain, err := client.Perception.CreateChain(createdSpace.ID, testChain)
+	if err != nil {
+		t.Skipf("Could not create test chain for thought test: %v", err)
+	}
+
+	t.Logf("Created test chain with ID: %s", createdChain.ID)
+
+	// Now test creating a thought with invalid module name "tama/some/invalid"
+	t.Log("Testing thought creation with invalid module name...")
+
+	invalidThought := perception.CreateThoughtRequest{
+		Thought: perception.ThoughtRequestData{
+			Relation: "description",
+			Module: perception.Module{
+				Reference: "tama/some/invalid", // This should trigger a 422 error
+				Parameters: map[string]any{
+					"temperature": 0.7,
+					"max_tokens":  150,
+				},
+			},
+		},
+	}
+
+	_, err = client.Perception.CreateThought(createdChain.ID, invalidThought)
+	if err != nil {
+		t.Logf("Expected 422 error for invalid module name: %v", err)
+
+		// Check if it's our API error type with detailed field errors
+		if perceptionErr, ok := err.(*perception.Error); ok {
+			t.Logf("Successfully parsed perception error. StatusCode: %d", perceptionErr.StatusCode)
+			if perceptionErr.StatusCode == 422 {
+				t.Logf("Confirmed 422 status code for invalid module")
+				if len(perceptionErr.Errors) > 0 {
+					t.Logf("Field validation errors for invalid module: %+v", perceptionErr.Errors)
+
+					// Log the complete error message as it would appear to the caller
+					t.Logf("Complete error message for caller: %s", perceptionErr.Error())
+				} else {
+					t.Logf("422 error received but no field-specific errors found")
+				}
+			} else {
+				t.Logf("Expected 422 status code, got %d", perceptionErr.StatusCode)
+			}
+		} else {
+			t.Logf("Error type: %T, not our custom perception error", err)
+		}
+	} else {
+		t.Error("Expected error for invalid module name 'tama/some/invalid', but request succeeded")
+	}
+
+	t.Log("Thought invalid module error test completed")
 }
