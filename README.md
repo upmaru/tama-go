@@ -95,7 +95,8 @@ func main() {
     // Create a thought in the chain
     thought, err := client.Perception.CreateThought(chain.ID, perception.CreateThoughtRequest{
         Thought: perception.ThoughtRequestData{
-            Relation: "description",
+            Relation:      "description",
+            OutputClassID: "class-123",
             Module: perception.Module{
                 Reference: "tama/agentic/generate",
                 Parameters: map[string]any{
@@ -557,7 +558,8 @@ err := client.Perception.DeleteChain("chain-123")
 // Create a thought
 thought, err := client.Perception.CreateThought("chain-123", perception.CreateThoughtRequest{
     Thought: perception.ThoughtRequestData{
-        Relation: "description",
+        Relation:      "description",
+        OutputClassID: "class-123",
         Module: perception.Module{
             Reference: "tama/agentic/generate",
             Parameters: map[string]any{
@@ -575,7 +577,8 @@ thought, err := client.Perception.GetThought("thought-123")
 // Update a thought
 thought, err := client.Perception.UpdateThought("thought-123", perception.UpdateThoughtRequest{
     Thought: perception.UpdateThoughtData{
-        Relation: "analysis",
+        Relation:      "analysis",
+        OutputClassID: "class-456",
         Module: perception.Module{
             Reference: "tama/agentic/analyze",
             Parameters: map[string]any{
@@ -764,8 +767,8 @@ if err != nil {
 - **perception.UpdateThoughtRequest**: For updating existing thoughts
 - **perception.ChainRequestData**: Chain data in create requests
 - **perception.UpdateChainData**: Chain data in update requests
-- **perception.ThoughtRequestData**: Thought data in create requests
-- **perception.UpdateThoughtData**: Thought data in update requests
+- **perception.ThoughtRequestData**: Thought data in create requests (includes optional OutputClassID)
+- **perception.UpdateThoughtData**: Thought data in update requests (includes optional OutputClassID)
 - **perception.ChainResponse**: API response wrapper for chain operations
 - **perception.ThoughtResponse**: API response wrapper for thought operations
 - **perception.Error**: Perception service specific error type

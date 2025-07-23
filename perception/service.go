@@ -110,8 +110,9 @@ type CreateThoughtRequest struct {
 
 // ThoughtRequestData represents the thought data in the request.
 type ThoughtRequestData struct {
-	Relation string `json:"relation"`
-	Module   Module `json:"module"`
+	Relation      string `json:"relation"`
+	OutputClassID string `json:"output_class_id,omitempty"`
+	Module        Module `json:"module"`
 }
 
 // UpdateThoughtRequest represents the request payload for updating a thought.
@@ -121,8 +122,9 @@ type UpdateThoughtRequest struct {
 
 // UpdateThoughtData represents the thought update data.
 type UpdateThoughtData struct {
-	Relation string `json:"relation,omitempty"`
-	Module   Module `json:"module,omitempty"`
+	Relation      string `json:"relation,omitempty"`
+	OutputClassID string `json:"output_class_id,omitempty"`
+	Module        Module `json:"module,omitempty"`
 }
 
 // handleAPIError processes API error responses.

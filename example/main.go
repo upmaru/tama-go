@@ -716,7 +716,8 @@ func runPerceptionThoughtOperations(client *tama.Client) {
 	// Create a thought
 	createThought := perception.CreateThoughtRequest{
 		Thought: perception.ThoughtRequestData{
-			Relation: "description",
+			Relation:      "description",
+			OutputClassID: "class-123",
 			Module: perception.Module{
 				Reference: "tama/agentic/generate",
 				Parameters: map[string]any{
@@ -753,7 +754,8 @@ func runPerceptionThoughtOperations(client *tama.Client) {
 	// Update the thought
 	updateThought := perception.UpdateThoughtRequest{
 		Thought: perception.UpdateThoughtData{
-			Relation: "analysis",
+			Relation:      "analysis",
+			OutputClassID: "class-456",
 			Module: perception.Module{
 				Reference: "tama/agentic/analyze",
 				Parameters: map[string]any{
