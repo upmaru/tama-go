@@ -515,3 +515,137 @@ func TestIntegrationThoughtInvalidModuleError(t *testing.T) {
 
 	t.Log("Thought invalid module error test completed")
 }
+
+func TestIntegrationThoughtModuleParametersError(t *testing.T) {
+	baseURL := os.Getenv("TAMA_BASE_URL")
+	if baseURL == "" {
+		baseURL = "http://localhost:4000"
+	}
+	apiKey := os.Getenv("TAMA_API_KEY")
+	if apiKey == "" {
+		apiKey = "test-api-key"
+	}
+
+	client := tama.NewClient(tama.Config{
+		BaseURL: baseURL,
+		APIKey:  apiKey,
+		Timeout: 30 * time.Second,
+	})
+
+	// Enable debug to see the actual error responses
+	client.SetDebug(true)
+
+	// Ensure JSON content type and accept headers are set
+	client.SetHeader("Accept", "application/json")
+	client.SetHeader("Content-Type", "application/json")
+
+	// First, create a test space
+	testSpace := neural.CreateSpaceRequest{
+		Space: neural.SpaceRequestData{
+			Name: fmt.Sprintf("Module Params Test Space %d", time.Now().Unix()),
+			Type: "root",
+		},
+	}
+
+	createdSpace, err := client.Neural.CreateSpace(testSpace)
+	if err != nil {
+		t.Skipf("Could not create test space for module parameters test: %v", err)
+	}
+
+	defer func() {
+		// Clean up the test space
+		client.Neural.DeleteSpace(createdSpace.ID)
+	}()
+
+	t.Logf("Created test space with ID: %s", createdSpace.ID)
+
+	// Create a test chain in the space
+	testChain := perception.CreateChainRequest{
+		Chain: perception.ChainRequestData{
+			Name: fmt.Sprintf("Module Params Test Chain %d", time.Now().Unix()),
+		},
+	}
+
+	createdChain, err := client.Perception.CreateChain(createdSpace.ID, testChain)
+	if err != nil {
+		t.Skipf("Could not create test chain for module parameters test: %v", err)
+	}
+
+	t.Logf("Created test chain with ID: %s", createdChain.ID)
+
+	// Now test creating a thought with specific module parameters
+	t.Log("Testing thought creation with specific module parameters...")
+
+	thoughtWithParams := perception.CreateThoughtRequest{
+		Thought: perception.ThoughtRequestData{
+			Relation: "description",
+			Module: perception.Module{
+				Reference: "tama/agentic/generate", // Use a valid module reference
+				Parameters: map[string]any{
+					"required_fields": []string{"input", "output"},
+					"schema_version":  "v2",
+					"strict_mode":     false,
+				},
+			},
+		},
+	}
+
+	_, err = client.Perception.CreateThought(createdChain.ID, thoughtWithParams)
+	if err != nil {
+		t.Logf("Error for thought with module parameters: %v", err)
+
+		// Check if it's our API error type with detailed field errors
+		if perceptionErr, ok := err.(*perception.Error); ok {
+			t.Logf("Successfully parsed perception error. StatusCode: %d", perceptionErr.StatusCode)
+			if len(perceptionErr.Errors) > 0 {
+				t.Logf("Field validation errors for module parameters: %+v", perceptionErr.Errors)
+				// Log the complete error message as it would appear to the caller
+				t.Logf("Complete error message for caller: %s", perceptionErr.Error())
+			} else {
+				t.Logf("422 error received but no field-specific errors found (empty errors object)")
+			}
+		} else {
+			t.Logf("Error type: %T, not our custom perception error", err)
+		}
+	} else {
+		t.Log("Thought creation with module parameters succeeded")
+	}
+
+	// Test with different parameter combinations to see if we get different errors
+	t.Log("Testing with invalid parameter types...")
+
+	invalidThought := perception.CreateThoughtRequest{
+		Thought: perception.ThoughtRequestData{
+			Relation: "description",
+			Module: perception.Module{
+				Reference: "tama/agentic/generate",
+				Parameters: map[string]any{
+					"temperature":   "invalid_string", // Should be float
+					"max_tokens":    -1,               // Should be positive
+					"invalid_param": "test",           // Unknown parameter
+				},
+			},
+		},
+	}
+
+	_, err = client.Perception.CreateThought(createdChain.ID, invalidThought)
+	if err != nil {
+		t.Logf("Error for invalid parameter types: %v", err)
+
+		if perceptionErr, ok := err.(*perception.Error); ok {
+			t.Logf("Invalid params error - StatusCode: %d", perceptionErr.StatusCode)
+			if len(perceptionErr.Errors) > 0 {
+				t.Logf("Field validation errors for invalid params: %+v", perceptionErr.Errors)
+				t.Logf("Complete error message: %s", perceptionErr.Error())
+			} else {
+				t.Logf("Invalid params: 422 error but no field-specific errors")
+			}
+		} else {
+			t.Logf("Invalid params error type: %T", err)
+		}
+	} else {
+		t.Log("Thought creation with invalid parameters succeeded (unexpected)")
+	}
+
+	t.Log("Thought module parameters error test completed")
+}
