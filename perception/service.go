@@ -84,7 +84,7 @@ type UpdateChainData struct {
 type Module struct {
 	ID         string         `json:"id,omitempty"`
 	Reference  string         `json:"reference"`
-	Parameters map[string]any `json:"parameters"`
+	Parameters map[string]any `json:"parameters,omitempty"`
 }
 
 // Thought represents a perception thought resource.
