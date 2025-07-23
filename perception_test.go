@@ -242,7 +242,7 @@ func TestPerceptionCreateChainNameValidationDelegated(t *testing.T) {
 
 	var perceptionErr *perception.Error
 	if errors.As(err, &perceptionErr) {
-		if perceptionErr.StatusCode != 422 {
+		if perceptionErr.StatusCode != http.StatusUnprocessableEntity {
 			t.Errorf("Expected status code 422, got %d", perceptionErr.StatusCode)
 		}
 		if len(perceptionErr.Errors["name"]) != 2 {
@@ -491,15 +491,6 @@ func TestPerceptionCreateChainWithFieldErrors(t *testing.T) {
 	}
 }
 
-func createTestClientForPerception(baseURL string) *tama.Client {
-	config := tama.Config{
-		BaseURL: baseURL,
-		APIKey:  "test-key",
-		Timeout: 10 * time.Second,
-	}
-	return tama.NewClient(config)
-}
-
 func TestPerceptionGetThought(t *testing.T) {
 	expectedThought := perception.Thought{
 		ID:            "thought-123",
@@ -647,7 +638,11 @@ func TestPerceptionCreateThought(t *testing.T) {
 		}
 
 		if receivedRequest.Thought.Module.Reference != request.Thought.Module.Reference {
-			t.Errorf("Expected module reference %s, got %s", request.Thought.Module.Reference, receivedRequest.Thought.Module.Reference)
+			t.Errorf(
+				"Expected module reference %s, got %s",
+				request.Thought.Module.Reference,
+				receivedRequest.Thought.Module.Reference,
+			)
 		}
 
 		w.Header().Set("Content-Type", "application/json")
@@ -913,28 +908,6 @@ func TestPerceptionCreateThoughtWithFieldErrors(t *testing.T) {
 	}
 	if !strings.Contains(errorMsg, "module reference is invalid") {
 		t.Errorf("Expected error to contain 'module reference is invalid', got %s", errorMsg)
-	}
-}
-
-func validateChainResponse(t *testing.T, actual, expected perception.Chain) {
-	if actual.ID != expected.ID {
-		t.Errorf("Expected chain ID %s, got %s", expected.ID, actual.ID)
-	}
-
-	if actual.SpaceID != expected.SpaceID {
-		t.Errorf("Expected chain space_id %s, got %s", expected.SpaceID, actual.SpaceID)
-	}
-
-	if actual.Name != expected.Name {
-		t.Errorf("Expected chain name %s, got %s", expected.Name, actual.Name)
-	}
-
-	if actual.Slug != expected.Slug {
-		t.Errorf("Expected chain slug %s, got %s", expected.Slug, actual.Slug)
-	}
-
-	if actual.CurrentState != expected.CurrentState {
-		t.Errorf("Expected chain current_state %s, got %s", expected.CurrentState, actual.CurrentState)
 	}
 }
 
