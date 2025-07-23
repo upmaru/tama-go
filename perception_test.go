@@ -667,6 +667,86 @@ func TestPerceptionCreateThought(t *testing.T) {
 	validateThoughtResponse(t, *thought, expectedThought)
 }
 
+func TestPerceptionCreateThoughtWithOutputClassID(t *testing.T) {
+	request := perception.CreateThoughtRequest{
+		Thought: perception.ThoughtRequestData{
+			Relation:      "description",
+			OutputClassID: "class-456",
+			Module: perception.Module{
+				Reference: "tama/agentic/generate",
+				Parameters: map[string]any{
+					"temperature": 0.8,
+					"max_tokens":  150,
+				},
+			},
+		},
+	}
+
+	expectedThought := perception.Thought{
+		ID:            "thought-789",
+		ChainID:       "chain-123",
+		OutputClassID: "class-456",
+		Module: perception.Module{
+			ID:        "module-789",
+			Reference: "tama/agentic/generate",
+			Parameters: map[string]any{
+				"temperature": 0.8,
+				"max_tokens":  150,
+			},
+		},
+		CurrentState: "pending",
+		Relation:     "description",
+		Index:        3,
+	}
+
+	expectedResponse := perception.ThoughtResponse{
+		Data: expectedThought,
+	}
+
+	server := createMockServer(t, func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			t.Errorf("Expected POST request, got %s", r.Method)
+		}
+
+		if r.URL.Path != "/provision/perception/chains/chain-123/thoughts" {
+			t.Errorf("Expected path /provision/perception/chains/chain-123/thoughts, got %s", r.URL.Path)
+		}
+
+		var receivedRequest perception.CreateThoughtRequest
+		if err := json.NewDecoder(r.Body).Decode(&receivedRequest); err != nil {
+			t.Fatalf("Failed to decode request body: %v", err)
+		}
+
+		if receivedRequest.Thought.OutputClassID != request.Thought.OutputClassID {
+			t.Errorf(
+				"Expected output_class_id %s, got %s",
+				request.Thought.OutputClassID,
+				receivedRequest.Thought.OutputClassID,
+			)
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusCreated)
+		json.NewEncoder(w).Encode(expectedResponse)
+	})
+	defer server.Close()
+
+	config := tama.Config{
+		BaseURL: server.URL,
+		APIKey:  "test-key",
+		Timeout: 10 * time.Second,
+	}
+
+	client := tama.NewClient(config)
+	thought, err := client.Perception.CreateThought("chain-123", request)
+
+	if err != nil {
+		t.Fatalf("Expected no error, got %v", err)
+	}
+
+	validateThoughtResponse(t, *thought, expectedThought)
+}
+
 func TestPerceptionCreateThoughtValidation(t *testing.T) {
 	client := tama.NewClient(tama.Config{
 		BaseURL: "https://api.example.com",
@@ -719,11 +799,12 @@ func TestPerceptionCreateThoughtValidation(t *testing.T) {
 func TestPerceptionUpdateThought(t *testing.T) {
 	request := perception.UpdateThoughtRequest{
 		Thought: perception.UpdateThoughtData{
-			Relation: "updated-description",
+			Relation:      "updated-description",
+			OutputClassID: "class-789",
 			Module: perception.Module{
 				Reference: "tama/agentic/analyze",
 				Parameters: map[string]any{
-					"depth": 5,
+					"depth": 3,
 				},
 			},
 		},
@@ -732,12 +813,12 @@ func TestPerceptionUpdateThought(t *testing.T) {
 	expectedThought := perception.Thought{
 		ID:            "thought-123",
 		ChainID:       "chain-123",
-		OutputClassID: "class-123",
+		OutputClassID: "class-789",
 		Module: perception.Module{
 			ID:        "module-123",
 			Reference: "tama/agentic/analyze",
 			Parameters: map[string]any{
-				"depth": 5,
+				"depth": 3,
 			},
 		},
 		CurrentState: "active",

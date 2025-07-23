@@ -860,8 +860,9 @@ type CreateThoughtRequest struct {
 }
 
 type ThoughtRequestData struct {
-    Relation string `json:"relation"`
-    Module   Module `json:"module"`
+    Relation      string `json:"relation"`
+    OutputClassID string `json:"output_class_id,omitempty"`
+    Module        Module `json:"module"`
 }
 
 type Module struct {
@@ -878,7 +879,8 @@ type Module struct {
 ```go
 thought, err := client.Perception.CreateThought("chain-123", perception.CreateThoughtRequest{
     Thought: perception.ThoughtRequestData{
-        Relation: "description",
+        Relation:      "description",
+        OutputClassID: "class-123",
         Module: perception.Module{
             Reference: "tama/agentic/generate",
             Parameters: map[string]any{
@@ -902,8 +904,9 @@ type UpdateThoughtRequest struct {
 }
 
 type UpdateThoughtData struct {
-    Relation string `json:"relation,omitempty"`
-    Module   Module `json:"module,omitempty"`
+    Relation      string `json:"relation,omitempty"`
+    OutputClassID string `json:"output_class_id,omitempty"`
+    Module        Module `json:"module,omitempty"`
 }
 ```
 
@@ -1533,8 +1536,9 @@ type UpdateChainData struct {
 
 ```go
 type ThoughtRequestData struct {
-    Relation string `json:"relation"`
-    Module   Module `json:"module"`
+    Relation      string `json:"relation"`
+    OutputClassID string `json:"output_class_id,omitempty"`
+    Module        Module `json:"module"`
 }
 ```
 
@@ -1542,8 +1546,9 @@ type ThoughtRequestData struct {
 
 ```go
 type UpdateThoughtData struct {
-    Relation string `json:"relation,omitempty"`
-    Module   Module `json:"module,omitempty"`
+    Relation      string `json:"relation,omitempty"`
+    OutputClassID string `json:"output_class_id,omitempty"`
+    Module        Module `json:"module,omitempty"`
 }
 ```
 
