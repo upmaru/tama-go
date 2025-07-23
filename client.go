@@ -21,6 +21,7 @@ type Client struct {
 	Neural     *NeuralService
 	Sensory    *SensoryService
 	Memory     *MemoryService
+	Perception *PerceptionService
 }
 
 // Config holds configuration options for the client.
@@ -56,6 +57,7 @@ func NewClient(config Config) *Client {
 	client.Neural = newNeuralService(client)
 	client.Sensory = newSensoryService(client)
 	client.Memory = newMemoryService(client)
+	client.Perception = newPerceptionService(client)
 
 	return client
 }

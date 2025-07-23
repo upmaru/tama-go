@@ -4,3 +4,4 @@ package tama
 // Service-specific types are defined in their respective subpackages:
 // - neural/: Neural service types (spaces, etc.)
 // - sensory/: Sensory service types (sources, models, limits, etc.)
+// - perception/: Perception service types (chains, etc.)
