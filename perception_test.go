@@ -1025,3 +1025,128 @@ func validateThoughtResponse(t *testing.T, actual, expected perception.Thought) 
 		t.Errorf("Expected thought index %d, got %d", expected.Index, actual.Index)
 	}
 }
+
+func TestPerceptionNestedErrorParsing(t *testing.T) {
+	// Test API response with nested validation errors (e.g., module.reference)
+	server := createMockServer(t, func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			t.Errorf("Expected POST request, got %s", r.Method)
+		}
+
+		if r.URL.Path != "/provision/perception/chains/chain-123/thoughts" {
+			t.Errorf("Expected path /provision/perception/chains/chain-123/thoughts, got %s", r.URL.Path)
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusUnprocessableEntity)
+
+		// Nested error structure like the real API returns
+		errorResponse := map[string]any{
+			"errors": map[string]any{
+				"module": map[string]any{
+					"reference": []string{"is invalid"},
+					"parameters": map[string]any{
+						"temperature": []string{"must be between 0 and 1"},
+						"config": map[string]any{
+							"database": map[string]any{
+								"connection": []string{"cannot be established"},
+							},
+						},
+					},
+				},
+				"relation": []string{"can't be blank"},
+			},
+		}
+		json.NewEncoder(w).Encode(errorResponse)
+	})
+	defer server.Close()
+
+	config := tama.Config{
+		BaseURL: server.URL,
+		APIKey:  "test-key",
+		Timeout: 10 * time.Second,
+	}
+
+	client := tama.NewClient(config)
+	request := perception.CreateThoughtRequest{
+		Thought: perception.ThoughtRequestData{
+			Relation: "description", // Valid to bypass client validation
+			Module: perception.Module{
+				Reference:  "tama/some/invalid", // Valid format to bypass client validation
+				Parameters: map[string]any{},
+			},
+		},
+	}
+
+	_, err := client.Perception.CreateThought("chain-123", request)
+
+	if err == nil {
+		t.Fatal("Expected error, got nil")
+	}
+
+	// Check that it's our custom perception error type
+	var perceptionErr *perception.Error
+	if !errors.As(err, &perceptionErr) {
+		t.Fatalf("Expected *perception.Error, got %T", err)
+	}
+
+	// Verify status code
+	if perceptionErr.StatusCode != http.StatusUnprocessableEntity {
+		t.Errorf("Expected status code %d, got %d", http.StatusUnprocessableEntity, perceptionErr.StatusCode)
+	}
+
+	// Check that nested fields are flattened with dot notation
+	expectedFields := map[string][]string{
+		"module.reference":                             {"is invalid"},
+		"module.parameters.temperature":                {"must be between 0 and 1"},
+		"module.parameters.config.database.connection": {"cannot be established"},
+		"relation": {"can't be blank"},
+	}
+
+	for expectedField, expectedMessages := range expectedFields {
+		actualMessages, exists := perceptionErr.Errors[expectedField]
+		if !exists {
+			t.Errorf("Expected field '%s' not found in error. Available fields: %v",
+				expectedField, getKeys(perceptionErr.Errors))
+			continue
+		}
+
+		if len(actualMessages) != len(expectedMessages) {
+			t.Errorf("Field '%s': expected %d messages, got %d",
+				expectedField, len(expectedMessages), len(actualMessages))
+			continue
+		}
+
+		for i, expectedMsg := range expectedMessages {
+			if actualMessages[i] != expectedMsg {
+				t.Errorf("Field '%s' message %d: expected '%s', got '%s'",
+					expectedField, i, expectedMsg, actualMessages[i])
+			}
+		}
+	}
+
+	// Check the complete error message
+	errorMsg := perceptionErr.Error()
+	expectedSubstrings := []string{
+		"API error 422:",
+		"module.reference is invalid",
+		"module.parameters.temperature must be between 0 and 1",
+		"module.parameters.config.database.connection cannot be established",
+		"relation can't be blank",
+	}
+
+	for _, substring := range expectedSubstrings {
+		if !strings.Contains(errorMsg, substring) {
+			t.Errorf("Expected error message to contain '%s', got: %s", substring, errorMsg)
+		}
+	}
+}
+
+// Helper function to get keys from a map for debugging.
+func getKeys(m map[string][]string) []string {
+	keys := make([]string, 0, len(m))
+	for k := range m {
+		keys = append(keys, k)
+	}
+	return keys
+}
