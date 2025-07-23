@@ -9,6 +9,7 @@ import (
 
 	tama "github.com/upmaru/tama-go"
 	"github.com/upmaru/tama-go/neural"
+	"github.com/upmaru/tama-go/perception"
 )
 
 // createMockServer creates a test HTTP server with the given handler.
@@ -37,6 +38,10 @@ func TestNewClient(t *testing.T) {
 
 	if client.Sensory == nil {
 		t.Error("Expected Sensory service to be initialized")
+	}
+
+	if client.Perception == nil {
+		t.Error("Expected Perception service to be initialized")
 	}
 }
 
@@ -160,5 +165,37 @@ func TestEmptyIDValidation(t *testing.T) {
 	err = client.Neural.DeleteSpace("")
 	if err == nil {
 		t.Error("Expected validation error for empty space ID in DeleteSpace")
+	}
+
+	// Test Perception service validations
+	_, err = client.Perception.GetChain("")
+	if err == nil {
+		t.Error("Expected validation error for empty chain ID in GetChain")
+	}
+
+	_, err = client.Perception.UpdateChain("", perception.UpdateChainRequest{})
+	if err == nil {
+		t.Error("Expected validation error for empty chain ID in UpdateChain")
+	}
+
+	err = client.Perception.DeleteChain("")
+	if err == nil {
+		t.Error("Expected validation error for empty chain ID in DeleteChain")
+	}
+
+	// Test Thought service validations
+	_, err = client.Perception.GetThought("")
+	if err == nil {
+		t.Error("Expected validation error for empty thought ID in GetThought")
+	}
+
+	_, err = client.Perception.UpdateThought("", perception.UpdateThoughtRequest{})
+	if err == nil {
+		t.Error("Expected validation error for empty thought ID in UpdateThought")
+	}
+
+	err = client.Perception.DeleteThought("")
+	if err == nil {
+		t.Error("Expected validation error for empty thought ID in DeleteThought")
 	}
 }
