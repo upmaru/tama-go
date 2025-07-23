@@ -8,6 +8,7 @@ This document provides a comprehensive reference for all methods available in th
 - [Neural Service](#neural-service)
 - [Memory Service](#memory-service)
 - [Sensory Service](#sensory-service)
+- [Perception Service](#perception-service)
 - [Error Handling](#error-handling)
 - [Data Types](#data-types)
 
@@ -728,6 +729,190 @@ Deletes a limit by ID.
 
 **Endpoint:** `DELETE /provision/sensory/limits/:id`
 
+## Perception Service
+
+Access via `client.Perception.*`
+
+### Chain Operations
+
+#### GetChain(id string) (*Chain, error)
+
+Retrieves a specific chain by ID.
+
+**Endpoint:** `GET /provision/perception/chains/:id`
+
+**Parameters:**
+- `id` (string): Chain ID (required)
+
+**Returns:**
+- `*Chain`: Chain object with ID, SpaceID, Name, Slug, and CurrentState
+- `error`: Error if request fails
+
+**Example:**
+```go
+chain, err := client.Perception.GetChain("chain-123")
+if err != nil {
+    log.Printf("Error: %v", err)
+    return
+}
+log.Printf("Chain: %s (%s)", chain.Name, chain.CurrentState)
+```
+
+#### CreateChain(spaceID string, req CreateChainRequest) (*Chain, error)
+
+Creates a new chain within a space.
+
+**Endpoint:** `POST /provision/perception/spaces/:space_id/chains`
+
+**Parameters:**
+- `spaceID` (string): Space ID (required)
+- `req` (CreateChainRequest): Chain creation request (required)
+
+```go
+type CreateChainRequest struct {
+    Chain ChainRequestData `json:"chain"`
+}
+
+type ChainRequestData struct {
+    Name string `json:"name"`
+}
+```
+
+**Returns:**
+- `*Chain`: Created chain object
+- `error`: Error if request fails
+
+**Example:**
+```go
+chain, err := client.Perception.CreateChain("space-123", perception.CreateChainRequest{
+    Chain: perception.ChainRequestData{
+        Name: "Processing Chain",
+    },
+})
+```
+
+#### UpdateChain(id string, req UpdateChainRequest) (*Chain, error)
+
+Updates an existing chain using PATCH.
+
+**Endpoint:** `PATCH /provision/perception/chains/:id`
+
+```go
+type UpdateChainRequest struct {
+    Chain UpdateChainData `json:"chain"`
+}
+
+type UpdateChainData struct {
+    Name string `json:"name,omitempty"`
+}
+```
+
+#### ReplaceChain(id string, req UpdateChainRequest) (*Chain, error)
+
+Replaces an existing chain using PUT.
+
+**Endpoint:** `PUT /provision/perception/chains/:id`
+
+#### DeleteChain(id string) error
+
+Deletes a chain by ID.
+
+**Endpoint:** `DELETE /provision/perception/chains/:id`
+
+### Thought Operations
+
+#### GetThought(id string) (*Thought, error)
+
+Retrieves a specific thought by ID.
+
+**Endpoint:** `GET /provision/perception/thoughts/:id`
+
+**Parameters:**
+- `id` (string): Thought ID (required)
+
+**Returns:**
+- `*Thought`: Thought object with ID, ChainID, Module, Relation, and Index
+- `error`: Error if request fails
+
+**Example:**
+```go
+thought, err := client.Perception.GetThought("thought-123")
+if err != nil {
+    log.Printf("Error: %v", err)
+    return
+}
+log.Printf("Thought: %s (%s)", thought.Relation, thought.CurrentState)
+```
+
+#### CreateThought(chainID string, req CreateThoughtRequest) (*Thought, error)
+
+Creates a new thought within a chain.
+
+**Endpoint:** `POST /provision/perception/chains/:chain_id/thoughts`
+
+**Parameters:**
+- `chainID` (string): Chain ID (required)
+- `req` (CreateThoughtRequest): Thought creation request (required)
+
+```go
+type CreateThoughtRequest struct {
+    Thought ThoughtRequestData `json:"thought"`
+}
+
+type ThoughtRequestData struct {
+    Relation string `json:"relation"`
+    Module   Module `json:"module"`
+}
+
+type Module struct {
+    Reference  string         `json:"reference"`
+    Parameters map[string]any `json:"parameters"`
+}
+```
+
+**Returns:**
+- `*Thought`: Created thought object
+- `error`: Error if request fails
+
+**Example:**
+```go
+thought, err := client.Perception.CreateThought("chain-123", perception.CreateThoughtRequest{
+    Thought: perception.ThoughtRequestData{
+        Relation: "description",
+        Module: perception.Module{
+            Reference: "tama/agentic/generate",
+            Parameters: map[string]any{
+                "temperature": 0.7,
+                "max_tokens":  150,
+            },
+        },
+    },
+})
+```
+
+#### UpdateThought(id string, req UpdateThoughtRequest) (*Thought, error)
+
+Updates an existing thought using PATCH.
+
+**Endpoint:** `PATCH /provision/perception/thoughts/:id`
+
+```go
+type UpdateThoughtRequest struct {
+    Thought UpdateThoughtData `json:"thought"`
+}
+
+type UpdateThoughtData struct {
+    Relation string `json:"relation,omitempty"`
+    Module   Module `json:"module,omitempty"`
+}
+```
+
+#### DeleteThought(id string) error
+
+Deletes a thought by ID.
+
+**Endpoint:** `DELETE /provision/perception/thoughts/:id`
+
 ## Error Handling
 
 ### Error Type
@@ -911,11 +1096,47 @@ type Model struct {
 ```go
 type Limit struct {
     ID           string `json:"id,omitempty"`
-    SourceID     string `json:"source_id"`
+    SourceID     string `json:"source_id,omitempty"`
     Count        int    `json:"count"`
     ScaleUnit    string `json:"scale_unit"`
     ScaleCount   int    `json:"scale_count"`
     CurrentState string `json:"current_state"`
+}
+```
+
+#### Chain
+
+```go
+type Chain struct {
+    ID           string `json:"id,omitempty"`
+    SpaceID      string `json:"space_id,omitempty"`
+    Name         string `json:"name"`
+    Slug         string `json:"slug,omitempty"`
+    CurrentState string `json:"current_state"`
+}
+```
+
+#### Thought
+
+```go
+type Thought struct {
+    ID            string `json:"id,omitempty"`
+    ChainID       string `json:"chain_id,omitempty"`
+    OutputClassID string `json:"output_class_id,omitempty"`
+    Module        Module `json:"module"`
+    CurrentState  string `json:"current_state"`
+    Relation      string `json:"relation"`
+    Index         int    `json:"index"`
+}
+```
+
+#### Module
+
+```go
+type Module struct {
+    ID         string         `json:"id,omitempty"`
+    Reference  string         `json:"reference"`
+    Parameters map[string]any `json:"parameters"`
 }
 ```
 
@@ -1030,6 +1251,38 @@ type CreateClassRequest struct {
 ```go
 type UpdateClassRequest struct {
     Class UpdateClassData `json:"class"`
+}
+```
+
+#### CreateChainRequest
+
+```go
+type CreateChainRequest struct {
+    Chain ChainRequestData `json:"chain"`
+}
+```
+
+#### UpdateChainRequest
+
+```go
+type UpdateChainRequest struct {
+    Chain UpdateChainData `json:"chain"`
+}
+```
+
+#### CreateThoughtRequest
+
+```go
+type CreateThoughtRequest struct {
+    Thought ThoughtRequestData `json:"thought"`
+}
+```
+
+#### UpdateThoughtRequest
+
+```go
+type UpdateThoughtRequest struct {
+    Thought UpdateThoughtData `json:"thought"`
 }
 ```
 
@@ -1257,6 +1510,56 @@ type UpdateClassData struct {
 ```go
 type ClassResponse struct {
     Data Class `json:"data"`
+}
+```
+
+#### ChainRequestData
+
+```go
+type ChainRequestData struct {
+    Name string `json:"name"`
+}
+```
+
+#### UpdateChainData
+
+```go
+type UpdateChainData struct {
+    Name string `json:"name,omitempty"`
+}
+```
+
+#### ThoughtRequestData
+
+```go
+type ThoughtRequestData struct {
+    Relation string `json:"relation"`
+    Module   Module `json:"module"`
+}
+```
+
+#### UpdateThoughtData
+
+```go
+type UpdateThoughtData struct {
+    Relation string `json:"relation,omitempty"`
+    Module   Module `json:"module,omitempty"`
+}
+```
+
+#### ChainResponse
+
+```go
+type ChainResponse struct {
+    Data Chain `json:"data"`
+}
+```
+
+#### ThoughtResponse
+
+```go
+type ThoughtResponse struct {
+    Data Thought `json:"data"`
 }
 ```
 

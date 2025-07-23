@@ -18,6 +18,7 @@ import (
     "time"
     tama "github.com/upmaru/tama-go"
     "github.com/upmaru/tama-go/neural"
+    "github.com/upmaru/tama-go/perception"
     "github.com/upmaru/tama-go/sensory"
 )
 
@@ -77,6 +78,40 @@ func main() {
     
     fmt.Printf("Created limit: ID=%s, SourceID=%s, Count=%d, State=%s\n", 
         limit.ID, limit.SourceID, limit.Count, limit.CurrentState)
+    
+    // Create a perception chain
+    chain, err := client.Perception.CreateChain(space.ID, perception.CreateChainRequest{
+        Chain: perception.ChainRequestData{
+            Name: "AI Processing Chain",
+        },
+    })
+    if err != nil {
+        panic(err)
+    }
+    
+    fmt.Printf("Created chain: ID=%s, Name=%s, SpaceID=%s, State=%s\n", 
+        chain.ID, chain.Name, chain.SpaceID, chain.CurrentState)
+    
+    // Create a thought in the chain
+    thought, err := client.Perception.CreateThought(chain.ID, perception.CreateThoughtRequest{
+        Thought: perception.ThoughtRequestData{
+            Relation: "description",
+            Module: perception.Module{
+                Reference: "tama/agentic/generate",
+                Parameters: map[string]any{
+                    "temperature": 0.7,
+                    "max_tokens":  150,
+                    "model":       "gpt-4",
+                },
+            },
+        },
+    })
+    if err != nil {
+        panic(err)
+    }
+    
+    fmt.Printf("Created thought: ID=%s, ChainID=%s, Relation=%s, State=%s\n", 
+        thought.ID, thought.ChainID, thought.Relation, thought.CurrentState)
 }
 ```
 
@@ -88,6 +123,7 @@ The client library is organized into the following packages:
 - `client.go` - Main client configuration and initialization
 - `neural.go` - Neural service wrapper that uses the neural package
 - `sensory.go` - Sensory service wrapper that uses the sensory package
+- `perception.go` - Perception service wrapper that uses the perception package
 - `types.go` - Shared types and documentation
 
 ### Neural Package (`neural/`)
@@ -100,6 +136,11 @@ The client library is organized into the following packages:
 - `source.go` - Source operations (GET, POST, PATCH, PUT, DELETE)
 - `model.go` - Model operations (GET, POST, PATCH, PUT, DELETE)
 - `limit.go` - Limit operations (GET, POST, PATCH, PUT, DELETE)
+
+### Perception Package (`perception/`)
+- `service.go` - Service definition and perception-related types
+- `chain.go` - Chain operations (GET, POST, PATCH, PUT, DELETE)
+- `thought.go` - Thought operations (GET, POST, PATCH, DELETE)
 
 ### Examples
 - `example/` - Working examples demonstrating all features
@@ -150,6 +191,23 @@ The client provides comprehensive coverage of the Tama API endpoints, organized 
 - `DELETE /provision/sensory/limits/:id` - Delete limit
 
 Note: Limits are associated with sources via the `source_id` field and track resource usage counts with current state.
+
+### Perception Resources (`/provision/perception`)
+
+#### Chains
+- `GET /provision/perception/chains/:id` - Get chain by ID
+- `POST /provision/perception/spaces/:space_id/chains` - Create chain in space
+- `PATCH /provision/perception/chains/:id` - Update chain
+- `PUT /provision/perception/chains/:id` - Replace chain
+- `DELETE /provision/perception/chains/:id` - Delete chain
+
+#### Thoughts
+- `GET /provision/perception/thoughts/:id` - Get thought by ID
+- `POST /provision/perception/chains/:chain_id/thoughts` - Create thought in chain
+- `PATCH /provision/perception/thoughts/:id` - Update thought
+- `DELETE /provision/perception/thoughts/:id` - Delete thought
+
+Note: Thoughts are associated with chains and contain module configurations for AI processing operations.
 
 ## Usage Examples
 
@@ -469,6 +527,122 @@ limit, err := client.Sensory.UpdateLimit("limit-123", sensory.UpdateLimitRequest
 err := client.Sensory.DeleteLimit("limit-123")
 ```
 
+### Perception Service - Chains
+
+```go
+// Create a chain
+chain, err := client.Perception.CreateChain("space-123", perception.CreateChainRequest{
+    Chain: perception.ChainRequestData{
+        Name: "Processing Chain",
+    },
+})
+
+// Get a chain
+chain, err := client.Perception.GetChain("chain-123")
+
+// Update a chain
+chain, err := client.Perception.UpdateChain("chain-123", perception.UpdateChainRequest{
+    Chain: perception.UpdateChainData{
+        Name: "Updated Processing Chain",
+    },
+})
+
+// Delete a chain
+err := client.Perception.DeleteChain("chain-123")
+```
+
+### Perception Service - Thoughts
+
+```go
+// Create a thought
+thought, err := client.Perception.CreateThought("chain-123", perception.CreateThoughtRequest{
+    Thought: perception.ThoughtRequestData{
+        Relation: "description",
+        Module: perception.Module{
+            Reference: "tama/agentic/generate",
+            Parameters: map[string]any{
+                "temperature": 0.7,
+                "max_tokens":  150,
+                "model":       "gpt-4",
+            },
+        },
+    },
+})
+
+// Get a thought
+thought, err := client.Perception.GetThought("thought-123")
+
+// Update a thought
+thought, err := client.Perception.UpdateThought("thought-123", perception.UpdateThoughtRequest{
+    Thought: perception.UpdateThoughtData{
+        Relation: "analysis",
+        Module: perception.Module{
+            Reference: "tama/agentic/analyze",
+            Parameters: map[string]any{
+                "depth":       3,
+                "focus_areas": []string{"sentiment", "intent", "entities"},
+            },
+        },
+    },
+})
+
+// Delete a thought
+err := client.Perception.DeleteThought("thought-123")
+```
+
+#### Thought Module Configuration
+
+Thoughts contain module configurations that define AI processing operations:
+
+##### Generate Module
+```go
+Module: perception.Module{
+    Reference: "tama/agentic/generate",
+    Parameters: map[string]any{
+        "temperature": 0.7,
+        "max_tokens":  150,
+        "model":       "gpt-4",
+        "prompt":      "Generate a summary of the input text",
+    },
+}
+```
+
+##### Analyze Module
+```go
+Module: perception.Module{
+    Reference: "tama/agentic/analyze",
+    Parameters: map[string]any{
+        "depth":       3,
+        "focus_areas": []string{"sentiment", "intent", "entities"},
+        "output_format": "structured",
+    },
+}
+```
+
+##### Preprocess Module
+```go
+Module: perception.Module{
+    Reference: "tama/agentic/preprocess",
+    Parameters: map[string]any{
+        "clean_text":  true,
+        "normalize":   true,
+        "remove_html": true,
+    },
+}
+```
+
+##### Validate Module
+```go
+Module: perception.Module{
+    Reference: "tama/agentic/validate",
+    Parameters: map[string]any{
+        "strict_mode":    false,
+        "schema_version": "v2",
+        "required_fields": []string{"input", "output"},
+    },
+}
+```
+
 ## Configuration
 
 ### Client Configuration
@@ -533,6 +707,21 @@ if err != nil {
 }
 ```
 
+### Perception Service Errors
+
+```go
+import "github.com/upmaru/tama-go/perception"
+
+chain, err := client.Perception.GetChain("invalid-id")
+if err != nil {
+    if apiErr, ok := err.(*perception.Error); ok {
+        fmt.Printf("Perception API Error %d\n", apiErr.StatusCode)
+    } else {
+        fmt.Printf("Client Error: %v\n", err)
+    }
+}
+```
+
 ## Data Types
 
 ### Neural Package Types
@@ -563,6 +752,23 @@ if err != nil {
 - **sensory.CreateLimitRequest**: For creating new limits
 - **sensory.UpdateLimitRequest**: For updating existing limits
 - **sensory.Error**: Sensory service specific error type
+
+### Perception Package Types
+
+- **perception.Chain**: Perception chain resource with name, slug, and current state
+- **perception.Thought**: Thought resource with module configuration, relation, and index
+- **perception.Module**: Module configuration with reference and parameters
+- **perception.CreateChainRequest**: For creating new chains
+- **perception.UpdateChainRequest**: For updating existing chains
+- **perception.CreateThoughtRequest**: For creating new thoughts
+- **perception.UpdateThoughtRequest**: For updating existing thoughts
+- **perception.ChainRequestData**: Chain data in create requests
+- **perception.UpdateChainData**: Chain data in update requests
+- **perception.ThoughtRequestData**: Thought data in create requests
+- **perception.UpdateThoughtData**: Thought data in update requests
+- **perception.ChainResponse**: API response wrapper for chain operations
+- **perception.ThoughtResponse**: API response wrapper for thought operations
+- **perception.Error**: Perception service specific error type
 
 ## Examples
 

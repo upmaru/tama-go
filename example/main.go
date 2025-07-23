@@ -9,6 +9,7 @@ import (
 	tama "github.com/upmaru/tama-go"
 	"github.com/upmaru/tama-go/memory"
 	"github.com/upmaru/tama-go/neural"
+	"github.com/upmaru/tama-go/perception"
 	"github.com/upmaru/tama-go/sensory"
 )
 
@@ -18,10 +19,16 @@ const (
 	exampleModelID    = "model-123"
 	exampleLimitID    = "limit-123"
 	examplePromptID   = "prompt-123"
+	exampleChainID    = "chain-123"
+	exampleThoughtID  = "thought-123"
 	defaultTimeout    = 30
 	defaultLimitCount = 32
 	scaleCountValue   = 5
 	limitCountValue   = 100
+	// AI model parameters.
+	defaultTemperature = 0.7
+	defaultMaxTokens   = 150
+	defaultDepth       = 3
 )
 
 func main() {
@@ -35,6 +42,8 @@ func main() {
 	runSensorySourceOperations(client)
 	runSensoryModelOperations(client)
 	runSensoryLimitOperations(client)
+	runPerceptionChainOperations(client)
+	runPerceptionThoughtOperations(client)
 
 	// Demonstrate enhanced error handling
 	demonstrateErrorHandling(client)
@@ -651,4 +660,157 @@ func runDeleteOperations(_ *tama.Client) {
 			log.Printf("Deleted space successfully")
 		}
 	*/
+}
+
+// runPerceptionChainOperations demonstrates perception chain operations.
+func runPerceptionChainOperations(client *tama.Client) {
+	log.Printf("--- Perception Chain Operations ---")
+
+	// Create a chain
+	createChain := perception.CreateChainRequest{
+		Chain: perception.ChainRequestData{
+			Name: "Example Processing Chain",
+		},
+	}
+
+	chain, err := client.Perception.CreateChain(exampleSpaceID, createChain)
+	if err != nil {
+		log.Printf("Error creating chain: %v", err)
+		return
+	}
+
+	log.Printf("Created chain: ID=%s, Name=%s, State=%s",
+		chain.ID, chain.Name, chain.CurrentState)
+
+	// Get the chain
+	retrievedChain, err := client.Perception.GetChain(chain.ID)
+	if err != nil {
+		log.Printf("Error getting chain: %v", err)
+	} else {
+		log.Printf("Retrieved chain: ID=%s, SpaceID=%s, Name=%s, Slug=%s, State=%s",
+			retrievedChain.ID, retrievedChain.SpaceID, retrievedChain.Name,
+			retrievedChain.Slug, retrievedChain.CurrentState)
+	}
+
+	// Update the chain
+	updateChain := perception.UpdateChainRequest{
+		Chain: perception.UpdateChainData{
+			Name: "Updated Processing Chain",
+		},
+	}
+
+	updatedChain, err := client.Perception.UpdateChain(chain.ID, updateChain)
+	if err != nil {
+		log.Printf("Error updating chain: %v", err)
+	} else {
+		log.Printf("Updated chain: ID=%s, Name=%s", updatedChain.ID, updatedChain.Name)
+	}
+
+	log.Printf("Chain operations completed successfully")
+}
+
+// runPerceptionThoughtOperations demonstrates perception thought operations.
+func runPerceptionThoughtOperations(client *tama.Client) {
+	log.Printf("--- Perception Thought Operations ---")
+
+	// Create a thought
+	createThought := perception.CreateThoughtRequest{
+		Thought: perception.ThoughtRequestData{
+			Relation: "description",
+			Module: perception.Module{
+				Reference: "tama/agentic/generate",
+				Parameters: map[string]any{
+					"temperature": defaultTemperature,
+					"max_tokens":  defaultMaxTokens,
+					"model":       "gpt-4",
+				},
+			},
+		},
+	}
+
+	thought, err := client.Perception.CreateThought(exampleChainID, createThought)
+	if err != nil {
+		log.Printf("Error creating thought: %v", err)
+		return
+	}
+
+	log.Printf("Created thought: ID=%s, ChainID=%s, Relation=%s, State=%s, Index=%d",
+		thought.ID, thought.ChainID, thought.Relation, thought.CurrentState, thought.Index)
+	log.Printf("Module: Reference=%s, ID=%s",
+		thought.Module.Reference, thought.Module.ID)
+
+	// Get the thought
+	retrievedThought, err := client.Perception.GetThought(thought.ID)
+	if err != nil {
+		log.Printf("Error getting thought: %v", err)
+	} else {
+		log.Printf("Retrieved thought: ID=%s, ChainID=%s, OutputClassID=%s",
+			retrievedThought.ID, retrievedThought.ChainID, retrievedThought.OutputClassID)
+		log.Printf("Retrieved thought module: Reference=%s, Parameters=%v",
+			retrievedThought.Module.Reference, retrievedThought.Module.Parameters)
+	}
+
+	// Update the thought
+	updateThought := perception.UpdateThoughtRequest{
+		Thought: perception.UpdateThoughtData{
+			Relation: "analysis",
+			Module: perception.Module{
+				Reference: "tama/agentic/analyze",
+				Parameters: map[string]any{
+					"depth":       defaultDepth,
+					"focus_areas": []string{"sentiment", "intent", "entities"},
+				},
+			},
+		},
+	}
+
+	updatedThought, err := client.Perception.UpdateThought(thought.ID, updateThought)
+	if err != nil {
+		log.Printf("Error updating thought: %v", err)
+	} else {
+		log.Printf("Updated thought: ID=%s, Relation=%s, ModuleRef=%s",
+			updatedThought.ID, updatedThought.Relation, updatedThought.Module.Reference)
+	}
+
+	// Demonstrate creating multiple thoughts in a chain
+	log.Printf("Creating additional thoughts for the chain...")
+
+	thoughts := []perception.CreateThoughtRequest{
+		{
+			Thought: perception.ThoughtRequestData{
+				Relation: "preprocessing",
+				Module: perception.Module{
+					Reference: "tama/agentic/preprocess",
+					Parameters: map[string]any{
+						"clean_text": true,
+						"normalize":  true,
+					},
+				},
+			},
+		},
+		{
+			Thought: perception.ThoughtRequestData{
+				Relation: "validation",
+				Module: perception.Module{
+					Reference: "tama/agentic/validate",
+					Parameters: map[string]any{
+						"strict_mode":    false,
+						"schema_version": "v2",
+					},
+				},
+			},
+		},
+	}
+
+	for i, thoughtReq := range thoughts {
+		newThought, createErr := client.Perception.CreateThought(exampleChainID, thoughtReq)
+		if createErr != nil {
+			log.Printf("Error creating thought %d: %v", i+1, createErr)
+		} else {
+			log.Printf("Created thought %d: ID=%s, Relation=%s, Index=%d",
+				i+1, newThought.ID, newThought.Relation, newThought.Index)
+		}
+	}
+
+	log.Printf("Thought operations completed successfully")
 }
