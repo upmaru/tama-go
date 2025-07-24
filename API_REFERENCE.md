@@ -729,6 +729,120 @@ Deletes a limit by ID.
 
 **Endpoint:** `DELETE /provision/sensory/limits/:id`
 
+### Specification Operations
+
+#### GetSpecification(id string) (*Specification, error)
+
+Retrieves a specific specification by ID.
+
+**Endpoint:** `GET /provision/sensory/specifications/:id`
+
+**Parameters:**
+- `id` (string): Specification ID (required)
+
+**Returns:**
+- `*Specification`: Specification object with ID, SpaceID, Schema, Version, Endpoint, CurrentState, and server-managed ProvisionState
+- `error`: Error if request fails
+
+**Example:**
+```go
+spec, err := client.Sensory.GetSpecification("spec-123")
+if err != nil {
+    log.Fatal(err)
+}
+fmt.Printf("Specification: %+v\n", spec)
+```
+
+#### CreateSpecification(spaceID string, req CreateSpecificationRequest) (*Specification, error)
+
+Creates a new specification in a specific space.
+
+**Endpoint:** `POST /provision/sensory/spaces/:space_id/specifications`
+
+**Parameters:**
+- `spaceID` (string): Space ID (required)
+- `req` (CreateSpecificationRequest): Specification creation request
+  - `Specification` (SpecificationRequestData): Specification data (required)
+    - `Schema` (map[string]any): JSON schema definition (required)
+    - `Version` (string): Specification version (required)
+    - `Endpoint` (string): Specification endpoint URL (required)
+
+**Returns:**
+- `*Specification`: Created specification object with ID, SpaceID, Schema, Version, Endpoint, and server-managed CurrentState and ProvisionState
+- `error`: Error if request fails
+
+**Note:** The `CurrentState` and `ProvisionState` fields are managed server-side and cannot be set during creation.
+
+**Example:**
+```go
+createReq := sensory.CreateSpecificationRequest{
+    Specification: sensory.SpecificationRequestData{
+        Schema: map[string]any{
+            "type": "object",
+            "properties": map[string]any{
+                "message": map[string]any{
+                    "type": "string",
+                },
+            },
+        },
+        Version:  "1.0.0",
+        Endpoint: "https://api.example.com/v1",
+    },
+}
+
+spec, err := client.Sensory.CreateSpecification("space-123", createReq)
+if err != nil {
+    log.Fatal(err)
+}
+fmt.Printf("Created specification: %+v\n", spec)
+```
+
+#### UpdateSpecification(id string, req UpdateSpecificationRequest) (*Specification, error)
+
+Updates an existing specification using PATCH.
+
+**Endpoint:** `PATCH /provision/sensory/specifications/:id`
+
+**Parameters:**
+- `id` (string): Specification ID (required)
+- `req` (UpdateSpecificationRequest): Update request
+  - `Specification` (UpdateSpecificationData): Specification update data
+    - `Schema` (map[string]any): JSON schema definition (optional)
+    - `Version` (string): Specification version (optional)
+    - `Endpoint` (string): Specification endpoint URL (optional)
+
+**Returns:**
+- `*Specification`: Updated specification object with all fields including server-managed CurrentState and ProvisionState
+- `error`: Error if request fails
+
+**Note:** The `CurrentState` and `ProvisionState` fields are managed server-side and cannot be updated via API calls.
+
+#### ReplaceSpecification(id string, req UpdateSpecificationRequest) (*Specification, error)
+
+Replaces an existing specification using PUT.
+
+**Endpoint:** `PUT /provision/sensory/specifications/:id`
+
+**Parameters:**
+- `id` (string): Specification ID (required)
+- `req` (UpdateSpecificationRequest): Replacement request
+
+**Returns:**
+- `*Specification`: Updated specification object with all fields
+- `error`: Error if request fails
+
+#### DeleteSpecification(id string) error
+
+Deletes a specification by ID.
+
+**Endpoint:** `DELETE /provision/sensory/specifications/:id`
+
+**Parameters:**
+- `id` (string): Specification ID (required)
+
+**Returns:**
+- `error`: Error if request fails
+
 ## Perception Service
 
 Access via `client.Perception.*`
@@ -1107,6 +1221,20 @@ type Limit struct {
 }
 ```
 
+#### Specification
+
+```go
+type Specification struct {
+    ID             string         `json:"id,omitempty"`
+    SpaceID        string         `json:"space_id"`
+    Schema         map[string]any `json:"schema"`
+    Version        string         `json:"version"`
+    Endpoint       string         `json:"endpoint"`
+    CurrentState   string         `json:"current_state"`
+    ProvisionState string         `json:"provision_state"`
+}
+```
+
 #### Chain
 
 ```go
@@ -1222,6 +1350,22 @@ type CreateLimitRequest struct {
 ```go
 type UpdateLimitRequest struct {
     Limit UpdateLimitData `json:"limit"`
+}
+```
+
+#### CreateSpecificationRequest
+
+```go
+type CreateSpecificationRequest struct {
+    Specification SpecificationRequestData `json:"specification"`
+}
+```
+
+#### UpdateSpecificationRequest
+
+```go
+type UpdateSpecificationRequest struct {
+    Specification UpdateSpecificationData `json:"specification"`
 }
 ```
 
@@ -1463,6 +1607,34 @@ type UpdateLimitData struct {
 ```go
 type LimitResponse struct {
     Data Limit `json:"data"`
+}
+```
+
+#### SpecificationRequestData
+
+```go
+type SpecificationRequestData struct {
+    Schema   map[string]any `json:"schema"`
+    Version  string         `json:"version"`
+    Endpoint string         `json:"endpoint"`
+}
+```
+
+#### UpdateSpecificationData
+
+```go
+type UpdateSpecificationData struct {
+    Schema   map[string]any `json:"schema,omitempty"`
+    Version  string         `json:"version,omitempty"`
+    Endpoint string         `json:"endpoint,omitempty"`
+}
+```
+
+#### SpecificationResponse
+
+```go
+type SpecificationResponse struct {
+    Data Specification `json:"data"`
 }
 ```
 

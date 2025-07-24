@@ -1,8 +1,11 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
 	"log"
+	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -42,6 +45,7 @@ func main() {
 	runSensorySourceOperations(client)
 	runSensoryModelOperations(client)
 	runSensoryLimitOperations(client)
+	runSensorySpecificationOperations(client)
 	runPerceptionChainOperations(client)
 	runPerceptionThoughtOperations(client)
 
@@ -63,6 +67,33 @@ func initializeClient() *tama.Client {
 	client := tama.NewClient(config)
 	client.SetDebug(true) // Enable debug mode to see HTTP requests/responses (optional)
 	return client
+}
+
+// loadSchemaFromFile loads a JSON schema from a file.
+func loadSchemaFromFile(filename string) (map[string]any, error) {
+	// Get the directory of the current executable or use current working directory
+	dir, err := os.Getwd()
+	if err != nil {
+		return nil, err
+	}
+
+	// Construct the path to the schema file
+	schemaPath := filepath.Join(dir, "example", filename)
+
+	// Read the file
+	data, err := os.ReadFile(schemaPath)
+	if err != nil {
+		return nil, err
+	}
+
+	// Parse JSON
+	var schema map[string]any
+	err = json.Unmarshal(data, &schema)
+	if err != nil {
+		return nil, err
+	}
+
+	return schema, nil
 }
 
 // runNeuralSpaceOperations demonstrates neural space operations.
@@ -485,6 +516,169 @@ func runSensoryLimitOperations(client *tama.Client) {
 		log.Printf("Error updating limit: %v", err)
 	} else {
 		log.Printf("Updated limit: %+v", limit)
+	}
+}
+
+// runSensorySpecificationOperations demonstrates sensory specification operations.
+func runSensorySpecificationOperations(client *tama.Client) {
+	log.Printf("=== Sensory Specification Operations ===")
+
+	spaceID := exampleSpaceID
+
+	// Load the Elasticsearch OpenAPI schema from JSON file
+	elasticsearchSchema, err := loadSchemaFromFile("elasticsearch_schema.json")
+	if err != nil {
+		log.Printf("Error loading schema file: %v", err)
+		// Fallback to a simple schema if file loading fails
+		elasticsearchSchema = map[string]any{
+			"type": "object",
+			"properties": map[string]any{
+				"message": map[string]any{
+					"type":        "string",
+					"description": "The message content",
+				},
+			},
+			"required": []string{"message"},
+		}
+	}
+
+	// Create a new specification using the loaded schema
+	newSpec := sensory.CreateSpecificationRequest{
+		Specification: sensory.SpecificationRequestData{
+			Schema:   elasticsearchSchema,
+			Version:  "1.0.0",
+			Endpoint: "https://elasticsearch.arrakis.upmaru.network",
+		},
+	}
+
+	spec, err := client.Sensory.CreateSpecification(spaceID, newSpec)
+	if err != nil {
+		log.Printf("Error creating specification: %v", err)
+	} else {
+		log.Printf("Created Elasticsearch specification: ID=%s, Version=%s, Endpoint=%s", spec.ID, spec.Version, spec.Endpoint)
+		log.Printf("Schema contains %d top-level properties", len(elasticsearchSchema))
+	}
+
+	// Get a specification by ID (use created spec ID or example ID)
+	specID := "spec-123"
+	if spec != nil {
+		specID = spec.ID
+	}
+
+	retrievedSpec, err := client.Sensory.GetSpecification(specID)
+	if err != nil {
+		log.Printf("Error getting specification: %v", err)
+	} else {
+		log.Printf("Retrieved specification: ID=%s, Version=%s", retrievedSpec.ID, retrievedSpec.Version)
+	}
+
+	// Update a specification - add a new server and bump version
+	updateSpec := sensory.UpdateSpecificationRequest{
+		Specification: sensory.UpdateSpecificationData{
+			Version: "1.1.0",
+			Schema: map[string]any{
+				"openapi": "3.1.0",
+				"info": map[string]any{
+					"title":       "Elasticsearch Index Creation and Alias API",
+					"version":     "1.1.0",
+					"description": "Updated API for creating indexes and managing aliases in Elasticsearch. Connects to https://elasticsearch.arrakis.upmaru.network",
+				},
+				"servers": []map[string]any{
+					{
+						"url":         "https://elasticsearch.arrakis.upmaru.network",
+						"description": "Production Elasticsearch Server",
+					},
+					{
+						"url":         "https://elasticsearch-staging.arrakis.upmaru.network",
+						"description": "Staging Elasticsearch Server",
+					},
+				},
+				"paths":      elasticsearchSchema["paths"],
+				"components": elasticsearchSchema["components"],
+			},
+		},
+	}
+
+	updatedSpec, err := client.Sensory.UpdateSpecification(specID, updateSpec)
+	if err != nil {
+		log.Printf("Error updating specification: %v", err)
+	} else {
+		log.Printf("Updated specification: Version=%s", updatedSpec.Version)
+	}
+
+	// Replace a specification with a completely new OpenAPI spec for a different API
+	replaceSpec := sensory.UpdateSpecificationRequest{
+		Specification: sensory.UpdateSpecificationData{
+			Version:  "2.0.0",
+			Endpoint: "https://api.anthropic.com/v1/messages",
+			Schema: map[string]any{
+				"openapi": "3.1.0",
+				"info": map[string]any{
+					"title":       "Anthropic Claude API",
+					"version":     "2.0.0",
+					"description": "API for interacting with Claude AI models",
+				},
+				"servers": []any{
+					map[string]any{
+						"url":         "https://api.anthropic.com/v1",
+						"description": "Anthropic API Server",
+					},
+				},
+				"paths": map[string]any{
+					"/messages": map[string]any{
+						"post": map[string]any{
+							"summary":     "Create a message",
+							"operationId": "create-message",
+							"requestBody": map[string]any{
+								"required": true,
+								"content": map[string]any{
+									"application/json": map[string]any{
+										"schema": map[string]any{
+											"type": "object",
+											"properties": map[string]any{
+												"model": map[string]any{
+													"type":        "string",
+													"description": "The model to use for generation",
+												},
+												"messages": map[string]any{
+													"type": "array",
+													"items": map[string]any{
+														"type": "object",
+														"properties": map[string]any{
+															"role": map[string]any{
+																"type": "string",
+																"enum": []any{"user", "assistant"},
+															},
+															"content": map[string]any{
+																"type": "string",
+															},
+														},
+														"required": []any{"role", "content"},
+													},
+												},
+												"max_tokens": map[string]any{
+													"type":        "integer",
+													"minimum":     1,
+													"description": "Maximum number of tokens to generate",
+												},
+											},
+											"required": []any{"model", "messages", "max_tokens"},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	replacedSpec, err := client.Sensory.ReplaceSpecification(specID, replaceSpec)
+	if err != nil {
+		log.Printf("Error replacing specification: %v", err)
+	} else {
+		log.Printf("Replaced specification: Version=%s, Endpoint=%s", replacedSpec.Version, replacedSpec.Endpoint)
 	}
 }
 
