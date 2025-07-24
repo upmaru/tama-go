@@ -44,7 +44,7 @@ func main() {
     }
     
     fmt.Printf("Created space: ID=%s, Name=%s, Type=%s, State=%s\n", 
-        space.ID, space.Name, space.Type, space.CurrentState)
+        space.ID, space.Name, space.Type, space.ProvisionState)
     
     // Create a source in the space
     source, err := client.Sensory.CreateSource(space.ID, sensory.CreateSourceRequest{
@@ -62,7 +62,7 @@ func main() {
     }
     
     fmt.Printf("Created source: ID=%s, Name=%s, Endpoint=%s, SpaceID=%s, State=%s\n", 
-        source.ID, source.Name, source.Endpoint, source.SpaceID, source.CurrentState)
+        source.ID, source.Name, source.Endpoint, source.SpaceID, source.ProvisionState)
     
     // Create a limit for the source
     limit, err := client.Sensory.CreateLimit(source.ID, sensory.CreateLimitRequest{
@@ -77,7 +77,7 @@ func main() {
     }
     
     fmt.Printf("Created limit: ID=%s, SourceID=%s, Count=%d, State=%s\n", 
-        limit.ID, limit.SourceID, limit.Count, limit.CurrentState)
+        limit.ID, limit.SourceID, limit.Count, limit.ProvisionState)
     
     // Create a perception chain
     chain, err := client.Perception.CreateChain(space.ID, perception.CreateChainRequest{
@@ -90,7 +90,7 @@ func main() {
     }
     
     fmt.Printf("Created chain: ID=%s, Name=%s, SpaceID=%s, State=%s\n", 
-        chain.ID, chain.Name, chain.SpaceID, chain.CurrentState)
+        chain.ID, chain.Name, chain.SpaceID, chain.ProvisionState)
     
     // Create a thought in the chain
     thought, err := client.Perception.CreateThought(chain.ID, perception.CreateThoughtRequest{
@@ -112,7 +112,7 @@ func main() {
     }
     
     fmt.Printf("Created thought: ID=%s, ChainID=%s, Relation=%s, State=%s\n", 
-        thought.ID, thought.ChainID, thought.Relation, thought.CurrentState)
+        thought.ID, thought.ChainID, thought.Relation, thought.ProvisionState)
 }
 ```
 
@@ -224,7 +224,7 @@ space, err := client.Neural.CreateSpace(neural.CreateSpaceRequest{
         Type: "root",
     },
 })
-// space will have ID, Name, Slug, Type, and CurrentState populated
+// space will have ID, Name, Slug, Type, and ProvisionState populated
 
 // Get a space
 space, err := client.Neural.GetSpace("space-123")
@@ -236,7 +236,7 @@ space, err := client.Neural.UpdateSpace("space-123", neural.UpdateSpaceRequest{
         Type: "component",
     },
 })
-// CurrentState cannot be updated via API - it's managed server-side
+// ProvisionState cannot be updated via API - it's managed server-side
 
 // Replace a space (full replacement)
 space, err := client.Neural.ReplaceSpace("space-123", neural.UpdateSpaceRequest{
@@ -269,7 +269,7 @@ processor, err := client.Neural.CreateProcessor("space-123", "model-123", neural
         },
     },
 })
-// processor will have ID, SpaceID, ModelID, Type, Configuration, and CurrentState populated
+// processor will have ID, SpaceID, ModelID, Type, Configuration, and ProvisionState populated
 
 // Get a processor
 processor, err := client.Neural.GetProcessor("space-123", "model-123")
@@ -286,7 +286,7 @@ processor, err := client.Neural.UpdateProcessor("space-123", "model-123", neural
         },
     },
 })
-// CurrentState cannot be updated via API - it's managed server-side
+// ProvisionState cannot be updated via API - it's managed server-side
 
 // Replace a processor (full replacement)
 processor, err := client.Neural.ReplaceProcessor("space-123", "model-123", neural.UpdateProcessorRequest{
@@ -517,10 +517,10 @@ limit, err := client.Sensory.GetLimit("limit-123")
 // Update a limit
 limit, err := client.Sensory.UpdateLimit("limit-123", sensory.UpdateLimitRequest{
     Limit: sensory.UpdateLimitData{
-        ScaleUnit:    "minutes",
-        ScaleCount:   5,
-        Count:        100,
-        CurrentState: "active",
+        ScaleUnit:      "minutes",
+        ScaleCount:     5,
+        Count:          100,
+        ProvisionState: "active",
     },
 })
 

@@ -53,30 +53,30 @@ type SourceCredential struct {
 
 // Source represents a sensory source resource.
 type Source struct {
-	ID           string `json:"id,omitempty"`
-	Name         string `json:"name"`
-	Endpoint     string `json:"endpoint"`
-	SpaceID      string `json:"space_id"`
-	CurrentState string `json:"current_state"`
+	ID             string `json:"id,omitempty"`
+	Name           string `json:"name"`
+	Endpoint       string `json:"endpoint"`
+	SpaceID        string `json:"space_id"`
+	ProvisionState string `json:"provision_state"`
 }
 
 // Model represents a sensory model resource.
 type Model struct {
-	ID           string         `json:"id,omitempty"`
-	Identifier   string         `json:"identifier"`
-	Path         string         `json:"path"`
-	Parameters   map[string]any `json:"parameters,omitempty"`
-	CurrentState string         `json:"current_state"`
+	ID             string         `json:"id,omitempty"`
+	Identifier     string         `json:"identifier"`
+	Path           string         `json:"path"`
+	Parameters     map[string]any `json:"parameters,omitempty"`
+	ProvisionState string         `json:"provision_state"`
 }
 
 // Limit represents a sensory limit resource.
 type Limit struct {
-	ID           string `json:"id,omitempty"`
-	SourceID     string `json:"source_id"`
-	Count        int    `json:"count"`
-	ScaleUnit    string `json:"scale_unit"`
-	ScaleCount   int    `json:"scale_count"`
-	CurrentState string `json:"current_state"`
+	ID             string `json:"id,omitempty"`
+	SourceID       string `json:"source_id"`
+	Count          int    `json:"count"`
+	ScaleUnit      string `json:"scale_unit"`
+	ScaleCount     int    `json:"scale_count"`
+	ProvisionState string `json:"provision_state"`
 }
 
 // SourceResponse represents the API response for source operations.
@@ -163,10 +163,10 @@ type UpdateLimitRequest struct {
 
 // UpdateLimitData represents the limit update data.
 type UpdateLimitData struct {
-	ScaleUnit    string `json:"scale_unit,omitempty"`
-	ScaleCount   int    `json:"scale_count,omitempty"`
-	Count        int    `json:"count,omitempty"`
-	CurrentState string `json:"current_state,omitempty"`
+	ScaleUnit      string `json:"scale_unit,omitempty"`
+	ScaleCount     int    `json:"scale_count,omitempty"`
+	Count          int    `json:"count,omitempty"`
+	ProvisionState string `json:"provision_state,omitempty"`
 }
 
 // handleAPIError processes API error responses.

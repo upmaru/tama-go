@@ -13,11 +13,11 @@ import (
 
 func TestSensoryGetSource(t *testing.T) {
 	expectedSource := sensory.Source{
-		ID:           "source-123",
-		Name:         "Test Source",
-		Endpoint:     "https://api.test.com/v1",
-		SpaceID:      "space-456",
-		CurrentState: "active",
+		ID:             "source-123",
+		Name:           "Test Source",
+		Endpoint:       "https://api.test.com/v1",
+		SpaceID:        "space-456",
+		ProvisionState: "active",
 	}
 
 	expectedResponse := sensory.SourceResponse{
@@ -60,8 +60,8 @@ func TestSensoryGetSource(t *testing.T) {
 		t.Errorf("Expected source endpoint %s, got %s", expectedSource.Endpoint, source.Endpoint)
 	}
 
-	if source.CurrentState != expectedSource.CurrentState {
-		t.Errorf("Expected source current state %s, got %s", expectedSource.CurrentState, source.CurrentState)
+	if source.ProvisionState != expectedSource.ProvisionState {
+		t.Errorf("Expected source provision state %s, got %s", expectedSource.ProvisionState, source.ProvisionState)
 	}
 
 	if source.SpaceID != expectedSource.SpaceID {
@@ -71,11 +71,11 @@ func TestSensoryGetSource(t *testing.T) {
 
 func TestSensoryCreateSource(t *testing.T) {
 	expectedSource := sensory.Source{
-		ID:           "source-789",
-		Name:         "New Source",
-		Endpoint:     "https://api.mistral.ai/v1",
-		SpaceID:      "space-123",
-		CurrentState: "pending",
+		ID:             "source-789",
+		Name:           "New Source",
+		Endpoint:       "https://api.mistral.ai/v1",
+		SpaceID:        "space-123",
+		ProvisionState: "pending",
 	}
 
 	expectedResponse := sensory.SourceResponse{
@@ -147,8 +147,8 @@ func TestSensoryCreateSource(t *testing.T) {
 		t.Errorf("Expected source endpoint %s, got %s", expectedSource.Endpoint, source.Endpoint)
 	}
 
-	if source.CurrentState != expectedSource.CurrentState {
-		t.Errorf("Expected source current state %s, got %s", expectedSource.CurrentState, source.CurrentState)
+	if source.ProvisionState != expectedSource.ProvisionState {
+		t.Errorf("Expected source provision state %s, got %s", expectedSource.ProvisionState, source.ProvisionState)
 	}
 
 	if source.SpaceID != expectedSource.SpaceID {
@@ -241,7 +241,7 @@ func TestSensoryGetModel(t *testing.T) {
 			"temperature": 0.7,
 			"max_tokens":  1000.0,
 		},
-		CurrentState: "active",
+		ProvisionState: "active",
 	}
 
 	expectedResponse := sensory.ModelResponse{
@@ -284,8 +284,8 @@ func TestSensoryGetModel(t *testing.T) {
 		t.Errorf("Expected model path %s, got %s", expectedModel.Path, model.Path)
 	}
 
-	if model.CurrentState != expectedModel.CurrentState {
-		t.Errorf("Expected model current state %s, got %s", expectedModel.CurrentState, model.CurrentState)
+	if model.ProvisionState != expectedModel.ProvisionState {
+		t.Errorf("Expected model provision state %s, got %s", expectedModel.ProvisionState, model.ProvisionState)
 	}
 
 	if len(model.Parameters) != len(expectedModel.Parameters) {
@@ -310,7 +310,7 @@ func TestSensoryCreateModel(t *testing.T) {
 			"reasoning_effort": "low",
 			"temperature":      1.0,
 		},
-		CurrentState: "active",
+		ProvisionState: "active",
 	}
 
 	expectedResponse := sensory.ModelResponse{
@@ -425,12 +425,12 @@ func TestSensoryGetModel_EmptyIDValidation(t *testing.T) {
 
 func TestSensoryGetLimit(t *testing.T) {
 	expectedLimit := sensory.Limit{
-		ID:           "limit-123",
-		SourceID:     "source-456",
-		Count:        32,
-		ScaleUnit:    "seconds",
-		ScaleCount:   1,
-		CurrentState: "active",
+		ID:             "limit-123",
+		SourceID:       "source-456",
+		Count:          32,
+		ScaleUnit:      "seconds",
+		ScaleCount:     1,
+		ProvisionState: "active",
 	}
 
 	expectedResponse := sensory.LimitResponse{
@@ -480,12 +480,12 @@ func TestSensoryGetLimit(t *testing.T) {
 
 func TestSensoryCreateLimit(t *testing.T) {
 	expectedLimit := sensory.Limit{
-		ID:           "limit-789",
-		SourceID:     "source-123",
-		Count:        64,
-		ScaleUnit:    "minutes",
-		ScaleCount:   5,
-		CurrentState: "active",
+		ID:             "limit-789",
+		SourceID:       "source-123",
+		Count:          64,
+		ScaleUnit:      "minutes",
+		ScaleCount:     5,
+		ProvisionState: "active",
 	}
 
 	expectedResponse := sensory.LimitResponse{
@@ -616,11 +616,11 @@ func TestSensoryGetLimit_EmptyIDValidation(t *testing.T) {
 
 func TestSensoryUpdateSource(t *testing.T) {
 	expectedSource := sensory.Source{
-		ID:           "source-123",
-		Name:         "Updated Source",
-		Endpoint:     "https://api.updated.com/v1",
-		SpaceID:      "space-456",
-		CurrentState: "active",
+		ID:             "source-123",
+		Name:           "Updated Source",
+		Endpoint:       "https://api.updated.com/v1",
+		SpaceID:        "space-456",
+		ProvisionState: "active",
 	}
 
 	expectedResponse := sensory.SourceResponse{
@@ -686,8 +686,8 @@ func TestSensoryUpdateSource(t *testing.T) {
 		t.Errorf("Expected source endpoint %s, got %s", expectedSource.Endpoint, source.Endpoint)
 	}
 
-	if source.CurrentState != expectedSource.CurrentState {
-		t.Errorf("Expected source current state %s, got %s", expectedSource.CurrentState, source.CurrentState)
+	if source.ProvisionState != expectedSource.ProvisionState {
+		t.Errorf("Expected source provision state %s, got %s", expectedSource.ProvisionState, source.ProvisionState)
 	}
 
 	if source.SpaceID != expectedSource.SpaceID {
@@ -715,11 +715,11 @@ func TestSensoryUpdateSource_EmptyIDValidation(t *testing.T) {
 
 func TestSensoryReplaceSource(t *testing.T) {
 	expectedSource := sensory.Source{
-		ID:           "source-123",
-		Name:         "Replaced Source",
-		Endpoint:     "https://api.replaced.com/v1",
-		SpaceID:      "space-456",
-		CurrentState: "pending",
+		ID:             "source-123",
+		Name:           "Replaced Source",
+		Endpoint:       "https://api.replaced.com/v1",
+		SpaceID:        "space-456",
+		ProvisionState: "pending",
 	}
 
 	expectedResponse := sensory.SourceResponse{
@@ -786,8 +786,8 @@ func TestSensoryReplaceSource(t *testing.T) {
 		t.Errorf("Expected source endpoint %s, got %s", expectedSource.Endpoint, source.Endpoint)
 	}
 
-	if source.CurrentState != expectedSource.CurrentState {
-		t.Errorf("Expected source current state %s, got %s", expectedSource.CurrentState, source.CurrentState)
+	if source.ProvisionState != expectedSource.ProvisionState {
+		t.Errorf("Expected source provision state %s, got %s", expectedSource.ProvisionState, source.ProvisionState)
 	}
 
 	if source.SpaceID != expectedSource.SpaceID {
@@ -822,7 +822,7 @@ func TestSensoryUpdateModel(t *testing.T) {
 			"max_tokens": 2000.0,
 			"top_p":      0.95,
 		},
-		CurrentState: "active",
+		ProvisionState: "active",
 	}
 
 	expectedResponse := sensory.ModelResponse{
@@ -914,7 +914,7 @@ func TestSensoryReplaceModel(t *testing.T) {
 			"stream":      true,
 			"temperature": 0.5,
 		},
-		CurrentState: "active",
+		ProvisionState: "active",
 	}
 
 	expectedResponse := sensory.ModelResponse{
@@ -1091,8 +1091,8 @@ func validateModelResponse(t *testing.T, actual, expected sensory.Model) {
 	if actual.Path != expected.Path {
 		t.Errorf("Expected model path %s, got %s", expected.Path, actual.Path)
 	}
-	if actual.CurrentState != expected.CurrentState {
-		t.Errorf("Expected model current state %s, got %s", expected.CurrentState, actual.CurrentState)
+	if actual.ProvisionState != expected.ProvisionState {
+		t.Errorf("Expected model provision state %s, got %s", expected.ProvisionState, actual.ProvisionState)
 	}
 }
 
@@ -1181,7 +1181,7 @@ func createTestModelWithParameters() sensory.Model {
 				"timeout":      30.0,
 			},
 		},
-		CurrentState: "active",
+		ProvisionState: "active",
 	}
 }
 

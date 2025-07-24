@@ -14,11 +14,11 @@ import (
 
 func TestPerceptionGetChain(t *testing.T) {
 	expectedChain := perception.Chain{
-		ID:           "chain-123",
-		SpaceID:      "space-123",
-		Name:         "test-chain",
-		Slug:         "test-chain-slug",
-		CurrentState: "active",
+		ID:             "chain-123",
+		SpaceID:        "space-123",
+		Name:           "test-chain",
+		Slug:           "test-chain-slug",
+		ProvisionState: "active",
 	}
 
 	expectedResponse := perception.ChainResponse{
@@ -68,8 +68,8 @@ func TestPerceptionGetChain(t *testing.T) {
 		t.Errorf("Expected chain slug %s, got %s", expectedChain.Slug, chain.Slug)
 	}
 
-	if chain.CurrentState != expectedChain.CurrentState {
-		t.Errorf("Expected chain current_state %s, got %s", expectedChain.CurrentState, chain.CurrentState)
+	if chain.ProvisionState != expectedChain.ProvisionState {
+		t.Errorf("Expected chain provision_state %s, got %s", expectedChain.ProvisionState, chain.ProvisionState)
 	}
 }
 
@@ -122,11 +122,11 @@ func TestPerceptionCreateChain(t *testing.T) {
 	}
 
 	expectedChain := perception.Chain{
-		ID:           "chain-456",
-		SpaceID:      "space-123",
-		Name:         "new-chain",
-		Slug:         "new-chain-slug",
-		CurrentState: "pending",
+		ID:             "chain-456",
+		SpaceID:        "space-123",
+		Name:           "new-chain",
+		Slug:           "new-chain-slug",
+		ProvisionState: "pending",
 	}
 
 	expectedResponse := perception.ChainResponse{
@@ -261,11 +261,11 @@ func TestPerceptionUpdateChain(t *testing.T) {
 	}
 
 	expectedChain := perception.Chain{
-		ID:           "chain-123",
-		SpaceID:      "space-123",
-		Name:         "updated-chain",
-		Slug:         "updated-chain-slug",
-		CurrentState: "active",
+		ID:             "chain-123",
+		SpaceID:        "space-123",
+		Name:           "updated-chain",
+		Slug:           "updated-chain-slug",
+		ProvisionState: "active",
 	}
 
 	expectedResponse := perception.ChainResponse{
@@ -312,11 +312,11 @@ func TestPerceptionReplaceChain(t *testing.T) {
 	}
 
 	expectedChain := perception.Chain{
-		ID:           "chain-123",
-		SpaceID:      "space-123",
-		Name:         "replaced-chain",
-		Slug:         "replaced-chain-slug",
-		CurrentState: "active",
+		ID:             "chain-123",
+		SpaceID:        "space-123",
+		Name:           "replaced-chain",
+		Slug:           "replaced-chain-slug",
+		ProvisionState: "active",
 	}
 
 	expectedResponse := perception.ChainResponse{
@@ -504,9 +504,9 @@ func TestPerceptionGetThought(t *testing.T) {
 				"max_tokens":  100,
 			},
 		},
-		CurrentState: "active",
-		Relation:     "description",
-		Index:        1,
+		ProvisionState: "active",
+		Relation:       "description",
+		Index:          1,
 	}
 
 	expectedResponse := perception.ThoughtResponse{
@@ -610,9 +610,9 @@ func TestPerceptionCreateThought(t *testing.T) {
 				"max_tokens":  150,
 			},
 		},
-		CurrentState: "pending",
-		Relation:     "description",
-		Index:        2,
+		ProvisionState: "pending",
+		Relation:       "description",
+		Index:          2,
 	}
 
 	expectedResponse := perception.ThoughtResponse{
@@ -694,9 +694,9 @@ func TestPerceptionCreateThoughtWithOutputClassID(t *testing.T) {
 				"max_tokens":  150,
 			},
 		},
-		CurrentState: "pending",
-		Relation:     "description",
-		Index:        3,
+		ProvisionState: "pending",
+		Relation:       "description",
+		Index:          3,
 	}
 
 	expectedResponse := perception.ThoughtResponse{
@@ -821,9 +821,9 @@ func TestPerceptionUpdateThought(t *testing.T) {
 				"depth": 3,
 			},
 		},
-		CurrentState: "active",
-		Relation:     "updated-description",
-		Index:        1,
+		ProvisionState: "active",
+		Relation:       "updated-description",
+		Index:          1,
 	}
 
 	expectedResponse := perception.ThoughtResponse{
@@ -1013,8 +1013,8 @@ func validateThoughtResponse(t *testing.T, actual, expected perception.Thought) 
 		t.Errorf("Expected module reference %s, got %s", expected.Module.Reference, actual.Module.Reference)
 	}
 
-	if actual.CurrentState != expected.CurrentState {
-		t.Errorf("Expected thought current_state %s, got %s", expected.CurrentState, actual.CurrentState)
+	if actual.ProvisionState != expected.ProvisionState {
+		t.Errorf("Expected thought provision_state %s, got %s", expected.ProvisionState, actual.ProvisionState)
 	}
 
 	if actual.Relation != expected.Relation {

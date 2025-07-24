@@ -82,7 +82,7 @@ func runNeuralSpaceOperations(client *tama.Client) {
 		log.Printf("Error creating space: %v", err)
 	} else {
 		log.Printf("Created space: ID=%s, Name=%s, Type=%s, State=%s",
-			space.ID, space.Name, space.Type, space.CurrentState)
+			space.ID, space.Name, space.Type, space.ProvisionState)
 	}
 
 	// Get a space by ID (replace with actual ID)
@@ -92,7 +92,7 @@ func runNeuralSpaceOperations(client *tama.Client) {
 		log.Printf("Error getting space: %v", err)
 	} else {
 		log.Printf("Retrieved space: ID=%s, Name=%s, Type=%s, State=%s",
-			space.ID, space.Name, space.Type, space.CurrentState)
+			space.ID, space.Name, space.Type, space.ProvisionState)
 	}
 
 	// Update a space
@@ -138,7 +138,7 @@ func demoCreateClass(client *tama.Client, spaceID string) {
 		log.Printf("Error creating class: %v", err)
 	} else {
 		log.Printf("Created class: ID=%s, SpaceID=%s, Name=%s, State=%s",
-			class.ID, class.SpaceID, class.Name, class.CurrentState)
+			class.ID, class.SpaceID, class.Name, class.ProvisionState)
 		log.Printf("Description: %s", class.Description)
 		if title, ok := class.Schema["title"].(string); ok {
 			log.Printf("Schema title: %s", title)
@@ -153,7 +153,7 @@ func demoGetClass(client *tama.Client, classID string) {
 		log.Printf("Error getting class: %v", err)
 	} else {
 		log.Printf("Retrieved class: ID=%s, SpaceID=%s, Name=%s, State=%s",
-			class.ID, class.SpaceID, class.Name, class.CurrentState)
+			class.ID, class.SpaceID, class.Name, class.ProvisionState)
 		log.Printf("Description: %s", class.Description)
 	}
 }
@@ -287,7 +287,7 @@ func runMemoryPromptOperations(client *tama.Client) {
 		log.Printf("Error creating prompt: %v", err)
 	} else {
 		log.Printf("Created prompt: ID=%s, Name=%s, Role=%s, SpaceID=%s, State=%s",
-			prompt.ID, prompt.Name, prompt.Role, prompt.SpaceID, prompt.CurrentState)
+			prompt.ID, prompt.Name, prompt.Role, prompt.SpaceID, prompt.ProvisionState)
 		log.Printf("Content: %s", prompt.Content)
 	}
 
@@ -298,7 +298,7 @@ func runMemoryPromptOperations(client *tama.Client) {
 		log.Printf("Error getting prompt: %v", err)
 	} else {
 		log.Printf("Retrieved prompt: ID=%s, Name=%s, Role=%s, SpaceID=%s, State=%s",
-			prompt.ID, prompt.Name, prompt.Role, prompt.SpaceID, prompt.CurrentState)
+			prompt.ID, prompt.Name, prompt.Role, prompt.SpaceID, prompt.ProvisionState)
 		log.Printf("Slug: %s, Content: %s", prompt.Slug, prompt.Content)
 	}
 
@@ -359,7 +359,7 @@ func runSensorySourceOperations(client *tama.Client) {
 		log.Printf("Error creating source: %v", err)
 	} else {
 		log.Printf("Created source: ID=%s, Name=%s, Endpoint=%s, SpaceID=%s, State=%s",
-			source.ID, source.Name, source.Endpoint, source.SpaceID, source.CurrentState)
+			source.ID, source.Name, source.Endpoint, source.SpaceID, source.ProvisionState)
 	}
 
 	// Get a source by ID (replace with actual ID)
@@ -369,7 +369,7 @@ func runSensorySourceOperations(client *tama.Client) {
 		log.Printf("Error getting source: %v", err)
 	} else {
 		log.Printf("Retrieved source: ID=%s, Name=%s, Endpoint=%s, SpaceID=%s, State=%s",
-			source.ID, source.Name, source.Endpoint, source.SpaceID, source.CurrentState)
+			source.ID, source.Name, source.Endpoint, source.SpaceID, source.ProvisionState)
 	}
 
 	// Update a source
@@ -389,7 +389,7 @@ func runSensorySourceOperations(client *tama.Client) {
 		log.Printf("Error updating source: %v", err)
 	} else {
 		log.Printf("Updated source: ID=%s, Name=%s, Endpoint=%s, SpaceID=%s, State=%s",
-			source.ID, source.Name, source.Endpoint, source.SpaceID, source.CurrentState)
+			source.ID, source.Name, source.Endpoint, source.SpaceID, source.ProvisionState)
 	}
 }
 
@@ -473,10 +473,10 @@ func runSensoryLimitOperations(client *tama.Client) {
 	// Update a limit
 	updateLimit := sensory.UpdateLimitRequest{
 		Limit: sensory.UpdateLimitData{
-			ScaleUnit:    "minutes",
-			ScaleCount:   scaleCountValue,
-			Count:        limitCountValue,
-			CurrentState: "active",
+			ScaleUnit:      "minutes",
+			ScaleCount:     scaleCountValue,
+			Count:          limitCountValue,
+			ProvisionState: "active",
 		},
 	}
 
@@ -680,7 +680,7 @@ func runPerceptionChainOperations(client *tama.Client) {
 	}
 
 	log.Printf("Created chain: ID=%s, Name=%s, State=%s",
-		chain.ID, chain.Name, chain.CurrentState)
+		chain.ID, chain.Name, chain.ProvisionState)
 
 	// Get the chain
 	retrievedChain, err := client.Perception.GetChain(chain.ID)
@@ -689,7 +689,7 @@ func runPerceptionChainOperations(client *tama.Client) {
 	} else {
 		log.Printf("Retrieved chain: ID=%s, SpaceID=%s, Name=%s, Slug=%s, State=%s",
 			retrievedChain.ID, retrievedChain.SpaceID, retrievedChain.Name,
-			retrievedChain.Slug, retrievedChain.CurrentState)
+			retrievedChain.Slug, retrievedChain.ProvisionState)
 	}
 
 	// Update the chain
@@ -736,7 +736,7 @@ func runPerceptionThoughtOperations(client *tama.Client) {
 	}
 
 	log.Printf("Created thought: ID=%s, ChainID=%s, Relation=%s, State=%s, Index=%d",
-		thought.ID, thought.ChainID, thought.Relation, thought.CurrentState, thought.Index)
+		thought.ID, thought.ChainID, thought.Relation, thought.ProvisionState, thought.Index)
 	log.Printf("Module: Reference=%s, ID=%s",
 		thought.Module.Reference, thought.Module.ID)
 
