@@ -523,14 +523,22 @@ func runSensoryLimitOperations(client *tama.Client) {
 func runSensorySpecificationOperations(client *tama.Client) {
 	log.Printf("=== Sensory Specification Operations ===")
 
-	spaceID := exampleSpaceID
+	elasticsearchSchema := loadElasticsearchSchema()
+	spec := createSpecificationExample(client, elasticsearchSchema)
+	specID := getSpecificationID(spec)
 
-	// Load the Elasticsearch OpenAPI schema from JSON file
+	getSpecificationExample(client, specID)
+	updateSpecificationExample(client, specID, elasticsearchSchema)
+	replaceSpecificationExample(client, specID)
+}
+
+// loadElasticsearchSchema loads the Elasticsearch schema with fallback.
+func loadElasticsearchSchema() map[string]any {
 	elasticsearchSchema, err := loadSchemaFromFile("elasticsearch_schema.json")
 	if err != nil {
 		log.Printf("Error loading schema file: %v", err)
 		// Fallback to a simple schema if file loading fails
-		elasticsearchSchema = map[string]any{
+		return map[string]any{
 			"type": "object",
 			"properties": map[string]any{
 				"message": map[string]any{
@@ -541,38 +549,51 @@ func runSensorySpecificationOperations(client *tama.Client) {
 			"required": []string{"message"},
 		}
 	}
+	return elasticsearchSchema
+}
 
-	// Create a new specification using the loaded schema
+// createSpecificationExample demonstrates creating a specification.
+func createSpecificationExample(client *tama.Client, schema map[string]any) *sensory.Specification {
 	newSpec := sensory.CreateSpecificationRequest{
 		Specification: sensory.SpecificationRequestData{
-			Schema:   elasticsearchSchema,
+			Schema:   schema,
 			Version:  "1.0.0",
 			Endpoint: "https://elasticsearch.arrakis.upmaru.network",
 		},
 	}
 
-	spec, err := client.Sensory.CreateSpecification(spaceID, newSpec)
+	spec, err := client.Sensory.CreateSpecification(exampleSpaceID, newSpec)
 	if err != nil {
 		log.Printf("Error creating specification: %v", err)
-	} else {
-		log.Printf("Created Elasticsearch specification: ID=%s, Version=%s, Endpoint=%s", spec.ID, spec.Version, spec.Endpoint)
-		log.Printf("Schema contains %d top-level properties", len(elasticsearchSchema))
+		return nil
 	}
 
-	// Get a specification by ID (use created spec ID or example ID)
-	specID := "spec-123"
+	log.Printf("Created Elasticsearch specification: ID=%s, Version=%s, Endpoint=%s",
+		spec.ID, spec.Version, spec.Endpoint)
+	log.Printf("Schema contains %d top-level properties", len(schema))
+	return spec
+}
+
+// getSpecificationID returns the specification ID to use for examples.
+func getSpecificationID(spec *sensory.Specification) string {
 	if spec != nil {
-		specID = spec.ID
+		return spec.ID
 	}
+	return "spec-123"
+}
 
+// getSpecificationExample demonstrates retrieving a specification.
+func getSpecificationExample(client *tama.Client, specID string) {
 	retrievedSpec, err := client.Sensory.GetSpecification(specID)
 	if err != nil {
 		log.Printf("Error getting specification: %v", err)
 	} else {
 		log.Printf("Retrieved specification: ID=%s, Version=%s", retrievedSpec.ID, retrievedSpec.Version)
 	}
+}
 
-	// Update a specification - add a new server and bump version
+// updateSpecificationExample demonstrates updating a specification.
+func updateSpecificationExample(client *tama.Client, specID string, elasticsearchSchema map[string]any) {
 	updateSpec := sensory.UpdateSpecificationRequest{
 		Specification: sensory.UpdateSpecificationData{
 			Version: "1.1.0",
@@ -605,72 +626,15 @@ func runSensorySpecificationOperations(client *tama.Client) {
 	} else {
 		log.Printf("Updated specification: Version=%s", updatedSpec.Version)
 	}
+}
 
-	// Replace a specification with a completely new OpenAPI spec for a different API
+// replaceSpecificationExample demonstrates replacing a specification.
+func replaceSpecificationExample(client *tama.Client, specID string) {
 	replaceSpec := sensory.UpdateSpecificationRequest{
 		Specification: sensory.UpdateSpecificationData{
 			Version:  "2.0.0",
 			Endpoint: "https://api.anthropic.com/v1/messages",
-			Schema: map[string]any{
-				"openapi": "3.1.0",
-				"info": map[string]any{
-					"title":       "Anthropic Claude API",
-					"version":     "2.0.0",
-					"description": "API for interacting with Claude AI models",
-				},
-				"servers": []any{
-					map[string]any{
-						"url":         "https://api.anthropic.com/v1",
-						"description": "Anthropic API Server",
-					},
-				},
-				"paths": map[string]any{
-					"/messages": map[string]any{
-						"post": map[string]any{
-							"summary":     "Create a message",
-							"operationId": "create-message",
-							"requestBody": map[string]any{
-								"required": true,
-								"content": map[string]any{
-									"application/json": map[string]any{
-										"schema": map[string]any{
-											"type": "object",
-											"properties": map[string]any{
-												"model": map[string]any{
-													"type":        "string",
-													"description": "The model to use for generation",
-												},
-												"messages": map[string]any{
-													"type": "array",
-													"items": map[string]any{
-														"type": "object",
-														"properties": map[string]any{
-															"role": map[string]any{
-																"type": "string",
-																"enum": []any{"user", "assistant"},
-															},
-															"content": map[string]any{
-																"type": "string",
-															},
-														},
-														"required": []any{"role", "content"},
-													},
-												},
-												"max_tokens": map[string]any{
-													"type":        "integer",
-													"minimum":     1,
-													"description": "Maximum number of tokens to generate",
-												},
-											},
-											"required": []any{"model", "messages", "max_tokens"},
-										},
-									},
-								},
-							},
-						},
-					},
-				},
-			},
+			Schema:   createAnthropicSchema(),
 		},
 	}
 
@@ -679,6 +643,70 @@ func runSensorySpecificationOperations(client *tama.Client) {
 		log.Printf("Error replacing specification: %v", err)
 	} else {
 		log.Printf("Replaced specification: Version=%s, Endpoint=%s", replacedSpec.Version, replacedSpec.Endpoint)
+	}
+}
+
+// createAnthropicSchema creates the Anthropic API schema for replacement example.
+func createAnthropicSchema() map[string]any {
+	return map[string]any{
+		"openapi": "3.1.0",
+		"info": map[string]any{
+			"title":       "Anthropic Claude API",
+			"version":     "2.0.0",
+			"description": "API for interacting with Claude AI models",
+		},
+		"servers": []any{
+			map[string]any{
+				"url":         "https://api.anthropic.com/v1",
+				"description": "Anthropic API Server",
+			},
+		},
+		"paths": map[string]any{
+			"/messages": map[string]any{
+				"post": map[string]any{
+					"summary":     "Create a message",
+					"operationId": "create-message",
+					"requestBody": map[string]any{
+						"required": true,
+						"content": map[string]any{
+							"application/json": map[string]any{
+								"schema": map[string]any{
+									"type": "object",
+									"properties": map[string]any{
+										"model": map[string]any{
+											"type":        "string",
+											"description": "The model to use for generation",
+										},
+										"messages": map[string]any{
+											"type": "array",
+											"items": map[string]any{
+												"type": "object",
+												"properties": map[string]any{
+													"role": map[string]any{
+														"type": "string",
+														"enum": []any{"user", "assistant"},
+													},
+													"content": map[string]any{
+														"type": "string",
+													},
+												},
+												"required": []any{"role", "content"},
+											},
+										},
+										"max_tokens": map[string]any{
+											"type":        "integer",
+											"minimum":     1,
+											"description": "Maximum number of tokens to generate",
+										},
+									},
+									"required": []any{"model", "messages", "max_tokens"},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
 	}
 }
 
