@@ -1,8 +1,11 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
 	"log"
+	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -42,6 +45,7 @@ func main() {
 	runSensorySourceOperations(client)
 	runSensoryModelOperations(client)
 	runSensoryLimitOperations(client)
+	runSensorySpecificationOperations(client)
 	runPerceptionChainOperations(client)
 	runPerceptionThoughtOperations(client)
 
@@ -65,6 +69,33 @@ func initializeClient() *tama.Client {
 	return client
 }
 
+// loadSchemaFromFile loads a JSON schema from a file.
+func loadSchemaFromFile(filename string) (map[string]any, error) {
+	// Get the directory of the current executable or use current working directory
+	dir, err := os.Getwd()
+	if err != nil {
+		return nil, err
+	}
+
+	// Construct the path to the schema file
+	schemaPath := filepath.Join(dir, "example", filename)
+
+	// Read the file
+	data, err := os.ReadFile(schemaPath)
+	if err != nil {
+		return nil, err
+	}
+
+	// Parse JSON
+	var schema map[string]any
+	err = json.Unmarshal(data, &schema)
+	if err != nil {
+		return nil, err
+	}
+
+	return schema, nil
+}
+
 // runNeuralSpaceOperations demonstrates neural space operations.
 func runNeuralSpaceOperations(client *tama.Client) {
 	log.Printf("=== Neural Space Operations ===")
@@ -82,7 +113,7 @@ func runNeuralSpaceOperations(client *tama.Client) {
 		log.Printf("Error creating space: %v", err)
 	} else {
 		log.Printf("Created space: ID=%s, Name=%s, Type=%s, State=%s",
-			space.ID, space.Name, space.Type, space.CurrentState)
+			space.ID, space.Name, space.Type, space.ProvisionState)
 	}
 
 	// Get a space by ID (replace with actual ID)
@@ -92,7 +123,7 @@ func runNeuralSpaceOperations(client *tama.Client) {
 		log.Printf("Error getting space: %v", err)
 	} else {
 		log.Printf("Retrieved space: ID=%s, Name=%s, Type=%s, State=%s",
-			space.ID, space.Name, space.Type, space.CurrentState)
+			space.ID, space.Name, space.Type, space.ProvisionState)
 	}
 
 	// Update a space
@@ -138,7 +169,7 @@ func demoCreateClass(client *tama.Client, spaceID string) {
 		log.Printf("Error creating class: %v", err)
 	} else {
 		log.Printf("Created class: ID=%s, SpaceID=%s, Name=%s, State=%s",
-			class.ID, class.SpaceID, class.Name, class.CurrentState)
+			class.ID, class.SpaceID, class.Name, class.ProvisionState)
 		log.Printf("Description: %s", class.Description)
 		if title, ok := class.Schema["title"].(string); ok {
 			log.Printf("Schema title: %s", title)
@@ -153,7 +184,7 @@ func demoGetClass(client *tama.Client, classID string) {
 		log.Printf("Error getting class: %v", err)
 	} else {
 		log.Printf("Retrieved class: ID=%s, SpaceID=%s, Name=%s, State=%s",
-			class.ID, class.SpaceID, class.Name, class.CurrentState)
+			class.ID, class.SpaceID, class.Name, class.ProvisionState)
 		log.Printf("Description: %s", class.Description)
 	}
 }
@@ -287,7 +318,7 @@ func runMemoryPromptOperations(client *tama.Client) {
 		log.Printf("Error creating prompt: %v", err)
 	} else {
 		log.Printf("Created prompt: ID=%s, Name=%s, Role=%s, SpaceID=%s, State=%s",
-			prompt.ID, prompt.Name, prompt.Role, prompt.SpaceID, prompt.CurrentState)
+			prompt.ID, prompt.Name, prompt.Role, prompt.SpaceID, prompt.ProvisionState)
 		log.Printf("Content: %s", prompt.Content)
 	}
 
@@ -298,7 +329,7 @@ func runMemoryPromptOperations(client *tama.Client) {
 		log.Printf("Error getting prompt: %v", err)
 	} else {
 		log.Printf("Retrieved prompt: ID=%s, Name=%s, Role=%s, SpaceID=%s, State=%s",
-			prompt.ID, prompt.Name, prompt.Role, prompt.SpaceID, prompt.CurrentState)
+			prompt.ID, prompt.Name, prompt.Role, prompt.SpaceID, prompt.ProvisionState)
 		log.Printf("Slug: %s, Content: %s", prompt.Slug, prompt.Content)
 	}
 
@@ -359,7 +390,7 @@ func runSensorySourceOperations(client *tama.Client) {
 		log.Printf("Error creating source: %v", err)
 	} else {
 		log.Printf("Created source: ID=%s, Name=%s, Endpoint=%s, SpaceID=%s, State=%s",
-			source.ID, source.Name, source.Endpoint, source.SpaceID, source.CurrentState)
+			source.ID, source.Name, source.Endpoint, source.SpaceID, source.ProvisionState)
 	}
 
 	// Get a source by ID (replace with actual ID)
@@ -369,7 +400,7 @@ func runSensorySourceOperations(client *tama.Client) {
 		log.Printf("Error getting source: %v", err)
 	} else {
 		log.Printf("Retrieved source: ID=%s, Name=%s, Endpoint=%s, SpaceID=%s, State=%s",
-			source.ID, source.Name, source.Endpoint, source.SpaceID, source.CurrentState)
+			source.ID, source.Name, source.Endpoint, source.SpaceID, source.ProvisionState)
 	}
 
 	// Update a source
@@ -389,7 +420,7 @@ func runSensorySourceOperations(client *tama.Client) {
 		log.Printf("Error updating source: %v", err)
 	} else {
 		log.Printf("Updated source: ID=%s, Name=%s, Endpoint=%s, SpaceID=%s, State=%s",
-			source.ID, source.Name, source.Endpoint, source.SpaceID, source.CurrentState)
+			source.ID, source.Name, source.Endpoint, source.SpaceID, source.ProvisionState)
 	}
 }
 
@@ -473,10 +504,10 @@ func runSensoryLimitOperations(client *tama.Client) {
 	// Update a limit
 	updateLimit := sensory.UpdateLimitRequest{
 		Limit: sensory.UpdateLimitData{
-			ScaleUnit:    "minutes",
-			ScaleCount:   scaleCountValue,
-			Count:        limitCountValue,
-			CurrentState: "active",
+			ScaleUnit:      "minutes",
+			ScaleCount:     scaleCountValue,
+			Count:          limitCountValue,
+			ProvisionState: "active",
 		},
 	}
 
@@ -485,6 +516,197 @@ func runSensoryLimitOperations(client *tama.Client) {
 		log.Printf("Error updating limit: %v", err)
 	} else {
 		log.Printf("Updated limit: %+v", limit)
+	}
+}
+
+// runSensorySpecificationOperations demonstrates sensory specification operations.
+func runSensorySpecificationOperations(client *tama.Client) {
+	log.Printf("=== Sensory Specification Operations ===")
+
+	elasticsearchSchema := loadElasticsearchSchema()
+	spec := createSpecificationExample(client, elasticsearchSchema)
+	specID := getSpecificationID(spec)
+
+	getSpecificationExample(client, specID)
+	updateSpecificationExample(client, specID, elasticsearchSchema)
+	replaceSpecificationExample(client, specID)
+}
+
+// loadElasticsearchSchema loads the Elasticsearch schema with fallback.
+func loadElasticsearchSchema() map[string]any {
+	elasticsearchSchema, err := loadSchemaFromFile("elasticsearch_schema.json")
+	if err != nil {
+		log.Printf("Error loading schema file: %v", err)
+		// Fallback to a simple schema if file loading fails
+		return map[string]any{
+			"type": "object",
+			"properties": map[string]any{
+				"message": map[string]any{
+					"type":        "string",
+					"description": "The message content",
+				},
+			},
+			"required": []string{"message"},
+		}
+	}
+	return elasticsearchSchema
+}
+
+// createSpecificationExample demonstrates creating a specification.
+func createSpecificationExample(client *tama.Client, schema map[string]any) *sensory.Specification {
+	newSpec := sensory.CreateSpecificationRequest{
+		Specification: sensory.SpecificationRequestData{
+			Schema:   schema,
+			Version:  "1.0.0",
+			Endpoint: "https://elasticsearch.arrakis.upmaru.network",
+		},
+	}
+
+	spec, err := client.Sensory.CreateSpecification(exampleSpaceID, newSpec)
+	if err != nil {
+		log.Printf("Error creating specification: %v", err)
+		return nil
+	}
+
+	log.Printf("Created Elasticsearch specification: ID=%s, Version=%s, Endpoint=%s",
+		spec.ID, spec.Version, spec.Endpoint)
+	log.Printf("Schema contains %d top-level properties", len(schema))
+	return spec
+}
+
+// getSpecificationID returns the specification ID to use for examples.
+func getSpecificationID(spec *sensory.Specification) string {
+	if spec != nil {
+		return spec.ID
+	}
+	return "spec-123"
+}
+
+// getSpecificationExample demonstrates retrieving a specification.
+func getSpecificationExample(client *tama.Client, specID string) {
+	retrievedSpec, err := client.Sensory.GetSpecification(specID)
+	if err != nil {
+		log.Printf("Error getting specification: %v", err)
+	} else {
+		log.Printf("Retrieved specification: ID=%s, Version=%s", retrievedSpec.ID, retrievedSpec.Version)
+	}
+}
+
+// updateSpecificationExample demonstrates updating a specification.
+func updateSpecificationExample(client *tama.Client, specID string, elasticsearchSchema map[string]any) {
+	updateSpec := sensory.UpdateSpecificationRequest{
+		Specification: sensory.UpdateSpecificationData{
+			Version: "1.1.0",
+			Schema: map[string]any{
+				"openapi": "3.1.0",
+				"info": map[string]any{
+					"title":       "Elasticsearch Index Creation and Alias API",
+					"version":     "1.1.0",
+					"description": "Updated API for creating indexes and managing aliases in Elasticsearch. Connects to https://elasticsearch.arrakis.upmaru.network",
+				},
+				"servers": []map[string]any{
+					{
+						"url":         "https://elasticsearch.arrakis.upmaru.network",
+						"description": "Production Elasticsearch Server",
+					},
+					{
+						"url":         "https://elasticsearch-staging.arrakis.upmaru.network",
+						"description": "Staging Elasticsearch Server",
+					},
+				},
+				"paths":      elasticsearchSchema["paths"],
+				"components": elasticsearchSchema["components"],
+			},
+		},
+	}
+
+	updatedSpec, err := client.Sensory.UpdateSpecification(specID, updateSpec)
+	if err != nil {
+		log.Printf("Error updating specification: %v", err)
+	} else {
+		log.Printf("Updated specification: Version=%s", updatedSpec.Version)
+	}
+}
+
+// replaceSpecificationExample demonstrates replacing a specification.
+func replaceSpecificationExample(client *tama.Client, specID string) {
+	replaceSpec := sensory.UpdateSpecificationRequest{
+		Specification: sensory.UpdateSpecificationData{
+			Version:  "2.0.0",
+			Endpoint: "https://api.anthropic.com/v1/messages",
+			Schema:   createAnthropicSchema(),
+		},
+	}
+
+	replacedSpec, err := client.Sensory.ReplaceSpecification(specID, replaceSpec)
+	if err != nil {
+		log.Printf("Error replacing specification: %v", err)
+	} else {
+		log.Printf("Replaced specification: Version=%s, Endpoint=%s", replacedSpec.Version, replacedSpec.Endpoint)
+	}
+}
+
+// createAnthropicSchema creates the Anthropic API schema for replacement example.
+func createAnthropicSchema() map[string]any {
+	return map[string]any{
+		"openapi": "3.1.0",
+		"info": map[string]any{
+			"title":       "Anthropic Claude API",
+			"version":     "2.0.0",
+			"description": "API for interacting with Claude AI models",
+		},
+		"servers": []any{
+			map[string]any{
+				"url":         "https://api.anthropic.com/v1",
+				"description": "Anthropic API Server",
+			},
+		},
+		"paths": map[string]any{
+			"/messages": map[string]any{
+				"post": map[string]any{
+					"summary":     "Create a message",
+					"operationId": "create-message",
+					"requestBody": map[string]any{
+						"required": true,
+						"content": map[string]any{
+							"application/json": map[string]any{
+								"schema": map[string]any{
+									"type": "object",
+									"properties": map[string]any{
+										"model": map[string]any{
+											"type":        "string",
+											"description": "The model to use for generation",
+										},
+										"messages": map[string]any{
+											"type": "array",
+											"items": map[string]any{
+												"type": "object",
+												"properties": map[string]any{
+													"role": map[string]any{
+														"type": "string",
+														"enum": []any{"user", "assistant"},
+													},
+													"content": map[string]any{
+														"type": "string",
+													},
+												},
+												"required": []any{"role", "content"},
+											},
+										},
+										"max_tokens": map[string]any{
+											"type":        "integer",
+											"minimum":     1,
+											"description": "Maximum number of tokens to generate",
+										},
+									},
+									"required": []any{"model", "messages", "max_tokens"},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
 	}
 }
 
@@ -680,7 +902,7 @@ func runPerceptionChainOperations(client *tama.Client) {
 	}
 
 	log.Printf("Created chain: ID=%s, Name=%s, State=%s",
-		chain.ID, chain.Name, chain.CurrentState)
+		chain.ID, chain.Name, chain.ProvisionState)
 
 	// Get the chain
 	retrievedChain, err := client.Perception.GetChain(chain.ID)
@@ -689,7 +911,7 @@ func runPerceptionChainOperations(client *tama.Client) {
 	} else {
 		log.Printf("Retrieved chain: ID=%s, SpaceID=%s, Name=%s, Slug=%s, State=%s",
 			retrievedChain.ID, retrievedChain.SpaceID, retrievedChain.Name,
-			retrievedChain.Slug, retrievedChain.CurrentState)
+			retrievedChain.Slug, retrievedChain.ProvisionState)
 	}
 
 	// Update the chain
@@ -736,7 +958,7 @@ func runPerceptionThoughtOperations(client *tama.Client) {
 	}
 
 	log.Printf("Created thought: ID=%s, ChainID=%s, Relation=%s, State=%s, Index=%d",
-		thought.ID, thought.ChainID, thought.Relation, thought.CurrentState, thought.Index)
+		thought.ID, thought.ChainID, thought.Relation, thought.ProvisionState, thought.Index)
 	log.Printf("Module: Reference=%s, ID=%s",
 		thought.Module.Reference, thought.Module.ID)
 

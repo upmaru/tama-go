@@ -67,7 +67,7 @@ Retrieves a specific neural space by ID.
 - `id` (string): Space ID (required)
 
 **Returns:**
-- `*Space`: Space object with ID, Name, Slug, Type, and CurrentState
+- `*Space`: Space object with ID, Name, Slug, Type, and ProvisionState
 - `error`: Error if request fails
 
 **Example:**
@@ -92,7 +92,7 @@ Creates a new neural space.
     - `Type` (string): Space type (required)
 
 **Returns:**
-- `*Space`: Created space object with ID, Name, Slug, Type, and CurrentState
+- `*Space`: Created space object with ID, Name, Slug, Type, and ProvisionState
 - `error`: Error if request fails
 
 **Example:**
@@ -120,7 +120,7 @@ Updates an existing space using PATCH (partial update).
     - `Type` (string): New space type (optional)
 
 **Returns:**
-- `*Space`: Updated space object with all fields including server-managed CurrentState
+- `*Space`: Updated space object with all fields including server-managed ProvisionState
 - `error`: Error if request fails
 
 ### ReplaceSpace(id string, req UpdateSpaceRequest) (*Space, error)
@@ -134,7 +134,7 @@ Replaces an existing space using PUT (full replacement).
 - `req` (UpdateSpaceRequest): Replacement request
 
 **Returns:**
-- `*Space`: Updated space object with all fields including server-managed CurrentState
+- `*Space`: Updated space object with all fields including server-managed ProvisionState
 - `error`: Error if request fails
 
 ### DeleteSpace(id string) error
@@ -518,10 +518,10 @@ Creates a new source in a specific space.
     - `Credential` (SourceCredential): Source credentials (required)
 
 **Returns:**
-- `*Source`: Created source object with ID, Name, Endpoint, SpaceID, and server-managed CurrentState
+- `*Source`: Created source object with ID, Name, Endpoint, SpaceID, and server-managed ProvisionState
 - `error`: Error if request fails
 
-**Note:** The `CurrentState` and `SpaceID` fields are managed server-side and cannot be set during creation.
+**Note:** The `ProvisionState` and `SpaceID` fields are managed server-side and cannot be set during creation.
 
 #### UpdateSource(id string, req UpdateSourceRequest) (*Source, error)
 
@@ -534,10 +534,10 @@ Updates an existing source using PATCH.
 - `req` (UpdateSourceRequest): Update request
 
 **Returns:**
-- `*Source`: Updated source object with all fields including server-managed CurrentState and SpaceID
+- `*Source`: Updated source object with all fields including server-managed ProvisionState and SpaceID
 - `error`: Error if request fails
 
-**Note:** The `CurrentState` and `SpaceID` fields cannot be updated via API calls - they are managed server-side.
+**Note:** The `ProvisionState` and `SpaceID` fields cannot be updated via API calls - they are managed server-side.
 
 #### ReplaceSource(id string, req UpdateSourceRequest) (*Source, error)
 
@@ -550,10 +550,10 @@ Replaces an existing source using PUT.
 - `req` (UpdateSourceRequest): Replacement request
 
 **Returns:**
-- `*Source`: Updated source object with all fields including server-managed CurrentState and SpaceID
+- `*Source`: Updated source object with all fields including server-managed ProvisionState and SpaceID
 - `error`: Error if request fails
 
-**Note:** The `CurrentState` and `SpaceID` fields cannot be updated via API calls - they are managed server-side.
+**Note:** The `ProvisionState` and `SpaceID` fields cannot be updated via API calls - they are managed server-side.
 
 #### DeleteSource(id string) error
 
@@ -573,7 +573,7 @@ Retrieves a specific model by ID.
 - `id` (string): Model ID (required)
 
 **Returns:**
-- `*Model`: Model object with ID, Identifier, Path, Parameters, and server-managed CurrentState
+- `*Model`: Model object with ID, Identifier, Path, Parameters, and server-managed ProvisionState
 - `error`: Error if request fails
 
 **Example:**
@@ -600,10 +600,10 @@ Creates a new model for a specific source.
     - `Parameters` (map[string]any): Model parameters (optional)
 
 **Returns:**
-- `*Model`: Created model object with ID, Identifier, Path, Parameters, and server-managed CurrentState
+- `*Model`: Created model object with ID, Identifier, Path, Parameters, and server-managed ProvisionState
 - `error`: Error if request fails
 
-**Note:** The `CurrentState` field is managed server-side and cannot be set during creation.
+**Note:** The `ProvisionState` field is managed server-side and cannot be set during creation.
 
 **Example:**
 ```go
@@ -650,10 +650,10 @@ Updates an existing model using PATCH.
     - `Parameters` (map[string]any): New model parameters (optional)
 
 **Returns:**
-- `*Model`: Updated model object with all fields including Parameters and server-managed CurrentState
+- `*Model`: Updated model object with all fields including Parameters and server-managed ProvisionState
 - `error`: Error if request fails
 
-**Note:** The `CurrentState` field cannot be updated via API calls - it is managed server-side.
+**Note:** The `ProvisionState` field cannot be updated via API calls - it is managed server-side.
 
 #### ReplaceModel(id string, req UpdateModelRequest) (*Model, error)
 
@@ -670,10 +670,10 @@ Replaces an existing model using PUT.
     - `Parameters` (map[string]any): New model parameters (optional)
 
 **Returns:**
-- `*Model`: Updated model object with all fields including Parameters and server-managed CurrentState
+- `*Model`: Updated model object with all fields including Parameters and server-managed ProvisionState
 - `error`: Error if request fails
 
-**Note:** The `CurrentState` field cannot be updated via API calls - it is managed server-side.
+**Note:** The `ProvisionState` field cannot be updated via API calls - it is managed server-side.
 
 #### DeleteModel(id string) error
 
@@ -729,6 +729,120 @@ Deletes a limit by ID.
 
 **Endpoint:** `DELETE /provision/sensory/limits/:id`
 
+### Specification Operations
+
+#### GetSpecification(id string) (*Specification, error)
+
+Retrieves a specific specification by ID.
+
+**Endpoint:** `GET /provision/sensory/specifications/:id`
+
+**Parameters:**
+- `id` (string): Specification ID (required)
+
+**Returns:**
+- `*Specification`: Specification object with ID, SpaceID, Schema, Version, Endpoint, CurrentState, and server-managed ProvisionState
+- `error`: Error if request fails
+
+**Example:**
+```go
+spec, err := client.Sensory.GetSpecification("spec-123")
+if err != nil {
+    log.Fatal(err)
+}
+fmt.Printf("Specification: %+v\n", spec)
+```
+
+#### CreateSpecification(spaceID string, req CreateSpecificationRequest) (*Specification, error)
+
+Creates a new specification in a specific space.
+
+**Endpoint:** `POST /provision/sensory/spaces/:space_id/specifications`
+
+**Parameters:**
+- `spaceID` (string): Space ID (required)
+- `req` (CreateSpecificationRequest): Specification creation request
+  - `Specification` (SpecificationRequestData): Specification data (required)
+    - `Schema` (map[string]any): JSON schema definition (required)
+    - `Version` (string): Specification version (required)
+    - `Endpoint` (string): Specification endpoint URL (required)
+
+**Returns:**
+- `*Specification`: Created specification object with ID, SpaceID, Schema, Version, Endpoint, and server-managed CurrentState and ProvisionState
+- `error`: Error if request fails
+
+**Note:** The `CurrentState` and `ProvisionState` fields are managed server-side and cannot be set during creation.
+
+**Example:**
+```go
+createReq := sensory.CreateSpecificationRequest{
+    Specification: sensory.SpecificationRequestData{
+        Schema: map[string]any{
+            "type": "object",
+            "properties": map[string]any{
+                "message": map[string]any{
+                    "type": "string",
+                },
+            },
+        },
+        Version:  "1.0.0",
+        Endpoint: "https://api.example.com/v1",
+    },
+}
+
+spec, err := client.Sensory.CreateSpecification("space-123", createReq)
+if err != nil {
+    log.Fatal(err)
+}
+fmt.Printf("Created specification: %+v\n", spec)
+```
+
+#### UpdateSpecification(id string, req UpdateSpecificationRequest) (*Specification, error)
+
+Updates an existing specification using PATCH.
+
+**Endpoint:** `PATCH /provision/sensory/specifications/:id`
+
+**Parameters:**
+- `id` (string): Specification ID (required)
+- `req` (UpdateSpecificationRequest): Update request
+  - `Specification` (UpdateSpecificationData): Specification update data
+    - `Schema` (map[string]any): JSON schema definition (optional)
+    - `Version` (string): Specification version (optional)
+    - `Endpoint` (string): Specification endpoint URL (optional)
+
+**Returns:**
+- `*Specification`: Updated specification object with all fields including server-managed CurrentState and ProvisionState
+- `error`: Error if request fails
+
+**Note:** The `CurrentState` and `ProvisionState` fields are managed server-side and cannot be updated via API calls.
+
+#### ReplaceSpecification(id string, req UpdateSpecificationRequest) (*Specification, error)
+
+Replaces an existing specification using PUT.
+
+**Endpoint:** `PUT /provision/sensory/specifications/:id`
+
+**Parameters:**
+- `id` (string): Specification ID (required)
+- `req` (UpdateSpecificationRequest): Replacement request
+
+**Returns:**
+- `*Specification`: Updated specification object with all fields
+- `error`: Error if request fails
+
+#### DeleteSpecification(id string) error
+
+Deletes a specification by ID.
+
+**Endpoint:** `DELETE /provision/sensory/specifications/:id`
+
+**Parameters:**
+- `id` (string): Specification ID (required)
+
+**Returns:**
+- `error`: Error if request fails
+
 ## Perception Service
 
 Access via `client.Perception.*`
@@ -745,7 +859,7 @@ Retrieves a specific chain by ID.
 - `id` (string): Chain ID (required)
 
 **Returns:**
-- `*Chain`: Chain object with ID, SpaceID, Name, Slug, and CurrentState
+- `*Chain`: Chain object with ID, SpaceID, Name, Slug, and ProvisionState
 - `error`: Error if request fails
 
 **Example:**
@@ -755,7 +869,7 @@ if err != nil {
     log.Printf("Error: %v", err)
     return
 }
-log.Printf("Chain: %s (%s)", chain.Name, chain.CurrentState)
+log.Printf("Chain: %s (%s)", chain.Name, chain.ProvisionState)
 ```
 
 #### CreateChain(spaceID string, req CreateChainRequest) (*Chain, error)
@@ -841,7 +955,7 @@ if err != nil {
     log.Printf("Error: %v", err)
     return
 }
-log.Printf("Thought: %s (%s)", thought.Relation, thought.CurrentState)
+log.Printf("Thought: %s (%s)", thought.Relation, thought.ProvisionState)
 ```
 
 #### CreateThought(chainID string, req CreateThoughtRequest) (*Thought, error)
@@ -1022,11 +1136,11 @@ fmt.Printf("Created source: %+v\n", result)
 
 ```go
 type Space struct {
-    ID           string `json:"id,omitempty"`
-    Name         string `json:"name"`
-    Slug         string `json:"slug,omitempty"`
-    Type         string `json:"type"`
-    CurrentState string `json:"current_state"`
+    ID             string `json:"id,omitempty"`
+    Name           string `json:"name"`
+    Slug           string `json:"slug,omitempty"`
+    Type           string `json:"type"`
+    ProvisionState string `json:"provision_state"`
 }
 ```
 
@@ -1034,12 +1148,12 @@ type Space struct {
 
 ```go
 type Processor struct {
-    ID            string         `json:"id,omitempty"`
-    SpaceID       string         `json:"space_id,omitempty"`
-    ModelID       string         `json:"model_id,omitempty"`
-    Configuration map[string]any `json:"configuration"`
-    CurrentState  string         `json:"current_state"`
-    Type          string         `json:"type"`
+    ID             string         `json:"id,omitempty"`
+    SpaceID        string         `json:"space_id,omitempty"`
+    ModelID        string         `json:"model_id,omitempty"`
+    Configuration  map[string]any `json:"configuration"`
+    ProvisionState string         `json:"provision_state"`
+    Type           string         `json:"type"`
 }
 ```
 
@@ -1047,12 +1161,12 @@ type Processor struct {
 
 ```go
 type Class struct {
-    ID           string         `json:"id,omitempty"`
-    SpaceID      string         `json:"space_id,omitempty"`
-    CurrentState string         `json:"current_state"`
-    Schema       map[string]any `json:"schema"`
-    Name         string         `json:"name"`
-    Description  string         `json:"description"`
+    ID             string         `json:"id,omitempty"`
+    SpaceID        string         `json:"space_id,omitempty"`
+    ProvisionState string         `json:"provision_state"`
+    Schema         map[string]any `json:"schema"`
+    Name           string         `json:"name"`
+    Description    string         `json:"description"`
 }
 ```
 
@@ -1060,13 +1174,13 @@ type Class struct {
 
 ```go
 type Prompt struct {
-    ID           string `json:"id,omitempty"`
-    Name         string `json:"name"`
-    Slug         string `json:"slug,omitempty"`
-    Content      string `json:"content"`
-    Role         string `json:"role"`
-    SpaceID      string `json:"space_id"`
-    CurrentState string `json:"current_state"`
+    ID             string `json:"id,omitempty"`
+    Name           string `json:"name"`
+    Slug           string `json:"slug,omitempty"`
+    Content        string `json:"content"`
+    Role           string `json:"role"`
+    SpaceID        string `json:"space_id"`
+    ProvisionState string `json:"provision_state"`
 }
 ```
 
@@ -1074,11 +1188,11 @@ type Prompt struct {
 
 ```go
 type Source struct {
-    ID           string `json:"id,omitempty"`
-    Name         string `json:"name"`
-    Endpoint     string `json:"endpoint"`
-    SpaceID      string `json:"space_id"`
-    CurrentState string `json:"current_state"`
+    ID             string `json:"id,omitempty"`
+    Name           string `json:"name"`
+    Endpoint       string `json:"endpoint"`
+    SpaceID        string `json:"space_id"`
+    ProvisionState string `json:"provision_state"`
 }
 ```
 
@@ -1086,11 +1200,11 @@ type Source struct {
 
 ```go
 type Model struct {
-    ID           string         `json:"id,omitempty"`
-    Identifier   string         `json:"identifier"`
-    Path         string         `json:"path"`
-    Parameters   map[string]any `json:"parameters,omitempty"`
-    CurrentState string         `json:"current_state"`
+    ID             string         `json:"id,omitempty"`
+    Identifier     string         `json:"identifier"`
+    Path           string         `json:"path"`
+    Parameters     map[string]any `json:"parameters,omitempty"`
+    ProvisionState string         `json:"provision_state"`
 }
 ```
 
@@ -1098,12 +1212,26 @@ type Model struct {
 
 ```go
 type Limit struct {
-    ID           string `json:"id,omitempty"`
-    SourceID     string `json:"source_id,omitempty"`
-    Count        int    `json:"count"`
-    ScaleUnit    string `json:"scale_unit"`
-    ScaleCount   int    `json:"scale_count"`
-    CurrentState string `json:"current_state"`
+    ID             string `json:"id,omitempty"`
+    SourceID       string `json:"source_id,omitempty"`
+    Count          int    `json:"count"`
+    ScaleUnit      string `json:"scale_unit"`
+    ScaleCount     int    `json:"scale_count"`
+    ProvisionState string `json:"provision_state"`
+}
+```
+
+#### Specification
+
+```go
+type Specification struct {
+    ID             string         `json:"id,omitempty"`
+    SpaceID        string         `json:"space_id"`
+    Schema         map[string]any `json:"schema"`
+    Version        string         `json:"version"`
+    Endpoint       string         `json:"endpoint"`
+    CurrentState   string         `json:"current_state"`
+    ProvisionState string         `json:"provision_state"`
 }
 ```
 
@@ -1111,11 +1239,11 @@ type Limit struct {
 
 ```go
 type Chain struct {
-    ID           string `json:"id,omitempty"`
-    SpaceID      string `json:"space_id,omitempty"`
-    Name         string `json:"name"`
-    Slug         string `json:"slug,omitempty"`
-    CurrentState string `json:"current_state"`
+    ID             string `json:"id,omitempty"`
+    SpaceID        string `json:"space_id,omitempty"`
+    Name           string `json:"name"`
+    Slug           string `json:"slug,omitempty"`
+    ProvisionState string `json:"provision_state"`
 }
 ```
 
@@ -1123,13 +1251,13 @@ type Chain struct {
 
 ```go
 type Thought struct {
-    ID            string `json:"id,omitempty"`
-    ChainID       string `json:"chain_id,omitempty"`
-    OutputClassID string `json:"output_class_id,omitempty"`
-    Module        Module `json:"module"`
-    CurrentState  string `json:"current_state"`
-    Relation      string `json:"relation"`
-    Index         int    `json:"index"`
+    ID             string `json:"id,omitempty"`
+    ChainID        string `json:"chain_id,omitempty"`
+    OutputClassID  string `json:"output_class_id,omitempty"`
+    Module         Module `json:"module"`
+    ProvisionState string `json:"provision_state"`
+    Relation       string `json:"relation"`
+    Index          int    `json:"index"`
 }
 ```
 
@@ -1222,6 +1350,22 @@ type CreateLimitRequest struct {
 ```go
 type UpdateLimitRequest struct {
     Limit UpdateLimitData `json:"limit"`
+}
+```
+
+#### CreateSpecificationRequest
+
+```go
+type CreateSpecificationRequest struct {
+    Specification SpecificationRequestData `json:"specification"`
+}
+```
+
+#### UpdateSpecificationRequest
+
+```go
+type UpdateSpecificationRequest struct {
+    Specification UpdateSpecificationData `json:"specification"`
 }
 ```
 
@@ -1329,7 +1473,7 @@ type UpdateSpaceData struct {
 }
 ```
 
-**Note:** The `CurrentState` field cannot be updated via API calls - it is managed server-side.
+**Note:** The `ProvisionState` field cannot be updated via API calls - it is managed server-side.
 
 #### SpaceResponse
 
@@ -1361,7 +1505,7 @@ type UpdateSourceData struct {
 }
 ```
 
-**Note:** The `CurrentState` and `SpaceID` fields cannot be updated via API calls - they are managed server-side.
+**Note:** The `ProvisionState` and `SpaceID` fields cannot be updated via API calls - they are managed server-side.
 
 #### PromptResponse
 
@@ -1427,7 +1571,7 @@ type UpdateModelData struct {
 }
 ```
 
-**Note:** The `CurrentState` field cannot be updated via API calls - it is managed server-side.
+**Note:** The `ProvisionState` field cannot be updated via API calls - it is managed server-side.
 
 #### ModelResponse
 
@@ -1451,10 +1595,10 @@ type LimitRequestData struct {
 
 ```go
 type UpdateLimitData struct {
-    ScaleUnit    string `json:"scale_unit,omitempty"`
-    ScaleCount   int    `json:"scale_count,omitempty"`
-    Count        int    `json:"count,omitempty"`
-    CurrentState string `json:"current_state,omitempty"`
+    ScaleUnit      string `json:"scale_unit,omitempty"`
+    ScaleCount     int    `json:"scale_count,omitempty"`
+    Count          int    `json:"count,omitempty"`
+    ProvisionState string `json:"provision_state,omitempty"`
 }
 ```
 
@@ -1463,6 +1607,34 @@ type UpdateLimitData struct {
 ```go
 type LimitResponse struct {
     Data Limit `json:"data"`
+}
+```
+
+#### SpecificationRequestData
+
+```go
+type SpecificationRequestData struct {
+    Schema   map[string]any `json:"schema"`
+    Version  string         `json:"version"`
+    Endpoint string         `json:"endpoint"`
+}
+```
+
+#### UpdateSpecificationData
+
+```go
+type UpdateSpecificationData struct {
+    Schema   map[string]any `json:"schema,omitempty"`
+    Version  string         `json:"version,omitempty"`
+    Endpoint string         `json:"endpoint,omitempty"`
+}
+```
+
+#### SpecificationResponse
+
+```go
+type SpecificationResponse struct {
+    Data Specification `json:"data"`
 }
 ```
 

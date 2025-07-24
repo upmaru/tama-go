@@ -48,11 +48,11 @@ func (e *Error) Error() string {
 
 // Space represents a neural space resource.
 type Space struct {
-	ID           string `json:"id,omitempty"`
-	Name         string `json:"name"`
-	Slug         string `json:"slug,omitempty"`
-	Type         string `json:"type"`
-	CurrentState string `json:"current_state"`
+	ID             string `json:"id,omitempty"`
+	Name           string `json:"name"`
+	Slug           string `json:"slug,omitempty"`
+	Type           string `json:"type"`
+	ProvisionState string `json:"provision_state"`
 }
 
 // SpaceResponse represents the API response for space operations.
@@ -84,12 +84,12 @@ type UpdateSpaceData struct {
 
 // Processor represents a neural processor resource.
 type Processor struct {
-	ID            string         `json:"id,omitempty"`
-	SpaceID       string         `json:"space_id,omitempty"`
-	ModelID       string         `json:"model_id,omitempty"`
-	Configuration map[string]any `json:"configuration"`
-	CurrentState  string         `json:"current_state"`
-	Type          string         `json:"type"`
+	ID             string         `json:"id,omitempty"`
+	SpaceID        string         `json:"space_id,omitempty"`
+	ModelID        string         `json:"model_id,omitempty"`
+	Configuration  map[string]any `json:"configuration"`
+	ProvisionState string         `json:"provision_state"`
+	Type           string         `json:"type"`
 }
 
 // ProcessorResponse represents the API response for processor operations.
@@ -121,12 +121,12 @@ type UpdateProcessorData struct {
 
 // Class represents a neural class resource.
 type Class struct {
-	ID           string         `json:"id,omitempty"`
-	SpaceID      string         `json:"space_id,omitempty"`
-	CurrentState string         `json:"current_state"`
-	Schema       map[string]any `json:"schema"`
-	Name         string         `json:"name"`
-	Description  string         `json:"description"`
+	ID             string         `json:"id,omitempty"`
+	SpaceID        string         `json:"space_id,omitempty"`
+	ProvisionState string         `json:"provision_state"`
+	Schema         map[string]any `json:"schema"`
+	Name           string         `json:"name"`
+	Description    string         `json:"description"`
 }
 
 // ClassResponse represents the API response for class operations.

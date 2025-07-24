@@ -48,11 +48,11 @@ func (e *Error) Error() string {
 
 // Chain represents a perception chain resource.
 type Chain struct {
-	ID           string `json:"id,omitempty"`
-	SpaceID      string `json:"space_id,omitempty"`
-	Name         string `json:"name"`
-	Slug         string `json:"slug,omitempty"`
-	CurrentState string `json:"current_state"`
+	ID             string `json:"id,omitempty"`
+	SpaceID        string `json:"space_id,omitempty"`
+	Name           string `json:"name"`
+	Slug           string `json:"slug,omitempty"`
+	ProvisionState string `json:"provision_state"`
 }
 
 // ChainResponse represents the API response for chain operations.
@@ -89,13 +89,13 @@ type Module struct {
 
 // Thought represents a perception thought resource.
 type Thought struct {
-	ID            string `json:"id,omitempty"`
-	ChainID       string `json:"chain_id,omitempty"`
-	OutputClassID string `json:"output_class_id,omitempty"`
-	Module        Module `json:"module"`
-	CurrentState  string `json:"current_state"`
-	Relation      string `json:"relation"`
-	Index         int    `json:"index"`
+	ID             string `json:"id,omitempty"`
+	ChainID        string `json:"chain_id,omitempty"`
+	OutputClassID  string `json:"output_class_id,omitempty"`
+	Module         Module `json:"module"`
+	ProvisionState string `json:"provision_state"`
+	Relation       string `json:"relation"`
+	Index          int    `json:"index"`
 }
 
 // ThoughtResponse represents the API response for thought operations.

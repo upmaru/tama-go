@@ -18,13 +18,13 @@ func createMockServerForMemory(_ *testing.T, handler func(w http.ResponseWriter,
 // TestMemoryGetPrompt tests retrieving a prompt by ID.
 func TestMemoryGetPrompt(t *testing.T) {
 	expectedPrompt := memory.Prompt{
-		ID:           "prompt-123",
-		Name:         "Test Prompt",
-		Slug:         "test-prompt",
-		Content:      "You are a helpful assistant.",
-		Role:         "system",
-		SpaceID:      "space-456",
-		CurrentState: "active",
+		ID:             "prompt-123",
+		Name:           "Test Prompt",
+		Slug:           "test-prompt",
+		Content:        "You are a helpful assistant.",
+		Role:           "system",
+		SpaceID:        "space-456",
+		ProvisionState: "active",
 	}
 
 	expectedResponse := memory.PromptResponse{
@@ -76,21 +76,21 @@ func TestMemoryGetPrompt(t *testing.T) {
 		t.Errorf("Expected prompt space ID %s, got %s", expectedPrompt.SpaceID, prompt.SpaceID)
 	}
 
-	if prompt.CurrentState != expectedPrompt.CurrentState {
-		t.Errorf("Expected prompt current state %s, got %s", expectedPrompt.CurrentState, prompt.CurrentState)
+	if prompt.ProvisionState != expectedPrompt.ProvisionState {
+		t.Errorf("Expected prompt provision state %s, got %s", expectedPrompt.ProvisionState, prompt.ProvisionState)
 	}
 }
 
 // TestMemoryCreatePrompt tests creating a new prompt.
 func TestMemoryCreatePrompt(t *testing.T) {
 	expectedPrompt := memory.Prompt{
-		ID:           "prompt-789",
-		Name:         "New Prompt",
-		Slug:         "new-prompt",
-		Content:      "You are a coding assistant.",
-		Role:         "assistant",
-		SpaceID:      "space-123",
-		CurrentState: "pending",
+		ID:             "prompt-789",
+		Name:           "New Prompt",
+		Slug:           "new-prompt",
+		Content:        "You are a coding assistant.",
+		Role:           "assistant",
+		SpaceID:        "space-123",
+		ProvisionState: "pending",
 	}
 
 	expectedResponse := memory.PromptResponse{
@@ -167,8 +167,8 @@ func TestMemoryCreatePrompt(t *testing.T) {
 		t.Errorf("Expected prompt space ID %s, got %s", expectedPrompt.SpaceID, prompt.SpaceID)
 	}
 
-	if prompt.CurrentState != expectedPrompt.CurrentState {
-		t.Errorf("Expected prompt current state %s, got %s", expectedPrompt.CurrentState, prompt.CurrentState)
+	if prompt.ProvisionState != expectedPrompt.ProvisionState {
+		t.Errorf("Expected prompt provision state %s, got %s", expectedPrompt.ProvisionState, prompt.ProvisionState)
 	}
 }
 
@@ -267,13 +267,13 @@ func TestMemoryGetPrompt_EmptyIDValidation(t *testing.T) {
 // TestMemoryUpdatePrompt tests updating a prompt.
 func TestMemoryUpdatePrompt(t *testing.T) {
 	expectedPrompt := memory.Prompt{
-		ID:           "prompt-123",
-		Name:         "Updated Prompt",
-		Slug:         "updated-prompt",
-		Content:      "You are an updated assistant.",
-		Role:         "system",
-		SpaceID:      "space-456",
-		CurrentState: "active",
+		ID:             "prompt-123",
+		Name:           "Updated Prompt",
+		Slug:           "updated-prompt",
+		Content:        "You are an updated assistant.",
+		Role:           "system",
+		SpaceID:        "space-456",
+		ProvisionState: "active",
 	}
 
 	expectedResponse := memory.PromptResponse{
@@ -359,13 +359,13 @@ func TestMemoryUpdatePrompt_EmptyIDValidation(t *testing.T) {
 // TestMemoryReplacePrompt tests replacing a prompt.
 func TestMemoryReplacePrompt(t *testing.T) {
 	expectedPrompt := memory.Prompt{
-		ID:           "prompt-123",
-		Name:         "Replaced Prompt",
-		Slug:         "replaced-prompt",
-		Content:      "You are a completely new assistant.",
-		Role:         "assistant",
-		SpaceID:      "space-456",
-		CurrentState: "active",
+		ID:             "prompt-123",
+		Name:           "Replaced Prompt",
+		Slug:           "replaced-prompt",
+		Content:        "You are a completely new assistant.",
+		Role:           "assistant",
+		SpaceID:        "space-456",
+		ProvisionState: "active",
 	}
 
 	expectedResponse := memory.PromptResponse{

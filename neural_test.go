@@ -13,11 +13,11 @@ import (
 
 func TestNeuralGetSpace(t *testing.T) {
 	expectedSpace := neural.Space{
-		ID:           "space-123",
-		Name:         "test-space",
-		Slug:         "test-space-slug",
-		Type:         "root",
-		CurrentState: "active",
+		ID:             "space-123",
+		Name:           "test-space",
+		Slug:           "test-space-slug",
+		Type:           "root",
+		ProvisionState: "active",
 	}
 
 	expectedResponse := neural.SpaceResponse{
@@ -103,11 +103,11 @@ func TestNeuralGetSpaceError(t *testing.T) {
 
 func TestNeuralCreateSpace(t *testing.T) {
 	expectedSpace := neural.Space{
-		ID:           "space-789",
-		Name:         "new-space",
-		Slug:         "new-space-slug",
-		Type:         "root",
-		CurrentState: "active",
+		ID:             "space-789",
+		Name:           "new-space",
+		Slug:           "new-space-slug",
+		Type:           "root",
+		ProvisionState: "active",
 	}
 
 	expectedResponse := neural.SpaceResponse{
@@ -246,11 +246,11 @@ func TestNeuralCreateSpaceTypeValidationDelegated(t *testing.T) {
 
 func TestNeuralUpdateSpace(t *testing.T) {
 	expectedSpace := neural.Space{
-		ID:           "space-123",
-		Name:         "updated-space",
-		Slug:         "updated-slug",
-		Type:         "component",
-		CurrentState: "active",
+		ID:             "space-123",
+		Name:           "updated-space",
+		Slug:           "updated-slug",
+		Type:           "component",
+		ProvisionState: "active",
 	}
 
 	expectedResponse := neural.SpaceResponse{
@@ -328,11 +328,11 @@ func TestNeuralDeleteSpace(t *testing.T) {
 
 func TestNeuralGetProcessor(t *testing.T) {
 	expectedProcessor := neural.Processor{
-		ID:           "processor-123",
-		SpaceID:      "space-123",
-		ModelID:      "model-123",
-		Type:         "completion",
-		CurrentState: "active",
+		ID:             "processor-123",
+		SpaceID:        "space-123",
+		ModelID:        "model-123",
+		Type:           "completion",
+		ProvisionState: "active",
 		Configuration: map[string]any{
 			"batch_size":    32,
 			"learning_rate": 0.001,
@@ -431,11 +431,11 @@ func TestNeuralGetProcessorError(t *testing.T) {
 
 func TestNeuralCreateProcessor(t *testing.T) {
 	expectedProcessor := neural.Processor{
-		ID:           "processor-789",
-		SpaceID:      "space-123",
-		ModelID:      "model-123",
-		Type:         "completion",
-		CurrentState: "active",
+		ID:             "processor-789",
+		SpaceID:        "space-123",
+		ModelID:        "model-123",
+		Type:           "completion",
+		ProvisionState: "active",
 		Configuration: map[string]any{
 			"batch_size":    64,
 			"learning_rate": 0.01,
@@ -564,11 +564,11 @@ func TestNeuralCreateProcessorValidation(t *testing.T) {
 
 func TestNeuralUpdateProcessor(t *testing.T) {
 	expectedProcessor := neural.Processor{
-		ID:           "processor-123",
-		SpaceID:      "space-123",
-		ModelID:      "model-123",
-		Type:         "embedding",
-		CurrentState: "active",
+		ID:             "processor-123",
+		SpaceID:        "space-123",
+		ModelID:        "model-123",
+		Type:           "embedding",
+		ProvisionState: "active",
 		Configuration: map[string]any{
 			"max_tokens": 512,
 		},
@@ -622,11 +622,11 @@ func TestNeuralUpdateProcessor(t *testing.T) {
 
 func TestNeuralReplaceProcessor(t *testing.T) {
 	expectedProcessor := neural.Processor{
-		ID:           "processor-123",
-		SpaceID:      "space-123",
-		ModelID:      "model-123",
-		Type:         "reranking",
-		CurrentState: "active",
+		ID:             "processor-123",
+		SpaceID:        "space-123",
+		ModelID:        "model-123",
+		Type:           "reranking",
+		ProvisionState: "active",
 		Configuration: map[string]any{
 			"top_n": 3,
 		},
@@ -709,9 +709,9 @@ func TestNeuralDeleteProcessor(t *testing.T) {
 
 func TestNeuralGetClass(t *testing.T) {
 	expectedClass := neural.Class{
-		ID:           "class-123",
-		SpaceID:      "space-456",
-		CurrentState: "active",
+		ID:             "class-123",
+		SpaceID:        "space-456",
+		ProvisionState: "active",
 		Schema: map[string]any{
 			"type": "object",
 			"properties": map[string]any{
@@ -719,7 +719,7 @@ func TestNeuralGetClass(t *testing.T) {
 			},
 		},
 		Name:        "TestClass",
-		Description: "A test class",
+		Description: "Test class for schema validation",
 	}
 
 	expectedResponse := neural.ClassResponse{
@@ -805,9 +805,9 @@ func TestNeuralGetClassError(t *testing.T) {
 
 func TestNeuralCreateClass(t *testing.T) {
 	expectedClass := neural.Class{
-		ID:           "class-789",
-		SpaceID:      "space-456",
-		CurrentState: "active",
+		ID:             "class-789",
+		SpaceID:        "space-456",
+		ProvisionState: "active",
 		Schema: map[string]any{
 			"type": "object",
 			"properties": map[string]any{
@@ -815,7 +815,7 @@ func TestNeuralCreateClass(t *testing.T) {
 			},
 		},
 		Name:        "NewClass",
-		Description: "A new class",
+		Description: "A new class for testing",
 	}
 
 	expectedResponse := neural.ClassResponse{
@@ -918,9 +918,9 @@ func TestNeuralCreateClassValidation(t *testing.T) {
 
 func TestNeuralUpdateClass(t *testing.T) {
 	expectedClass := neural.Class{
-		ID:           "class-123",
-		SpaceID:      "space-456",
-		CurrentState: "active",
+		ID:             "class-123",
+		SpaceID:        "space-456",
+		ProvisionState: "active",
 		Schema: map[string]any{
 			"type": "object",
 			"properties": map[string]any{
@@ -928,8 +928,8 @@ func TestNeuralUpdateClass(t *testing.T) {
 				"age":  map[string]any{"type": "number"},
 			},
 		},
-		Name:        "UpdatedClass",
-		Description: "An updated class",
+		Name:        "TestClass",
+		Description: "Updated test class",
 	}
 
 	expectedResponse := neural.ClassResponse{
@@ -992,9 +992,9 @@ func TestNeuralUpdateClass(t *testing.T) {
 
 func TestNeuralReplaceClass(t *testing.T) {
 	expectedClass := neural.Class{
-		ID:           "class-123",
-		SpaceID:      "space-456",
-		CurrentState: "active",
+		ID:             "class-123",
+		SpaceID:        "space-456",
+		ProvisionState: "active",
 		Schema: map[string]any{
 			"type": "object",
 			"properties": map[string]any{
@@ -1002,7 +1002,7 @@ func TestNeuralReplaceClass(t *testing.T) {
 			},
 		},
 		Name:        "ReplacedClass",
-		Description: "A replaced class",
+		Description: "A completely replaced class",
 	}
 
 	expectedResponse := neural.ClassResponse{
@@ -1118,12 +1118,12 @@ func TestNeuralCreateClassWithRealWorldSchema(t *testing.T) {
 
 func createActionCallClass() neural.Class {
 	return neural.Class{
-		ID:           "class-action-call",
-		SpaceID:      "space-123",
-		CurrentState: "active",
-		Schema:       createActionCallSchema(),
-		Name:         "ActionCall",
-		Description:  "Schema for action call requests",
+		ID:             "class-action-call",
+		SpaceID:        "space-123",
+		ProvisionState: "active",
+		Schema:         createActionCallSchema(),
+		Name:           "ActionCall",
+		Description:    "Schema for action call requests",
 	}
 }
 

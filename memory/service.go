@@ -48,13 +48,13 @@ func (e *Error) Error() string {
 
 // Prompt represents a memory prompt resource.
 type Prompt struct {
-	ID           string `json:"id,omitempty"`
-	Name         string `json:"name"`
-	Slug         string `json:"slug,omitempty"`
-	Content      string `json:"content"`
-	Role         string `json:"role"`
-	SpaceID      string `json:"space_id"`
-	CurrentState string `json:"current_state"`
+	ID             string `json:"id,omitempty"`
+	Name           string `json:"name"`
+	Slug           string `json:"slug,omitempty"`
+	Content        string `json:"content"`
+	Role           string `json:"role"`
+	SpaceID        string `json:"space_id"`
+	ProvisionState string `json:"provision_state"`
 }
 
 // PromptResponse represents the API response for prompt operations.
