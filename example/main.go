@@ -1054,7 +1054,21 @@ func runPerceptionThoughtOperations(client *tama.Client) {
 func runSensoryIdentityOperations(client *tama.Client) {
 	log.Printf("Starting sensory identity operations...")
 
-	// Create an identity
+	identity := demoCreateIdentity(client)
+	if identity == nil {
+		return
+	}
+
+	demoGetIdentity(client, identity.ID)
+	demoUpdateIdentity(client, identity.ID)
+	demoReplaceIdentity(client, identity.ID)
+	demoIdentityErrorHandling(client)
+
+	log.Printf("Identity operations completed successfully!")
+}
+
+// demoCreateIdentity demonstrates identity creation.
+func demoCreateIdentity(client *tama.Client) *sensory.Identity {
 	createRequest := sensory.CreateIdentityRequest{
 		Identity: sensory.IdentityRequestData{
 			APIKey: "service-api-key-123",
@@ -1066,11 +1080,12 @@ func runSensoryIdentityOperations(client *tama.Client) {
 		},
 	}
 
-	log.Printf("Creating identity for specification %s with identifier %s...", exampleSpecificationID, exampleIdentifier)
+	log.Printf("Creating identity for specification %s with identifier %s...",
+		exampleSpecificationID, exampleIdentifier)
 	identity, err := client.Sensory.CreateIdentity(exampleSpecificationID, exampleIdentifier, createRequest)
 	if err != nil {
 		log.Printf("Error creating identity: %v", err)
-		return
+		return nil
 	}
 
 	log.Printf("Created identity: %s", identity.ID)
@@ -1082,9 +1097,13 @@ func runSensoryIdentityOperations(client *tama.Client) {
 	log.Printf("  Validation Method: %s", identity.Validation.Method)
 	log.Printf("  Validation Codes: %v", identity.Validation.Codes)
 
-	// Get the identity
-	log.Printf("Retrieving identity %s...", identity.ID)
-	retrievedIdentity, err := client.Sensory.GetIdentity(identity.ID)
+	return identity
+}
+
+// demoGetIdentity demonstrates identity retrieval.
+func demoGetIdentity(client *tama.Client, identityID string) {
+	log.Printf("Retrieving identity %s...", identityID)
+	retrievedIdentity, err := client.Sensory.GetIdentity(identityID)
 	if err != nil {
 		log.Printf("Error retrieving identity: %v", err)
 		return
@@ -1092,8 +1111,10 @@ func runSensoryIdentityOperations(client *tama.Client) {
 
 	log.Printf("Retrieved identity: %s", retrievedIdentity.ID)
 	log.Printf("  Current State: %s", retrievedIdentity.CurrentState)
+}
 
-	// Update the identity
+// demoUpdateIdentity demonstrates identity update.
+func demoUpdateIdentity(client *tama.Client, identityID string) {
 	updateRequest := sensory.UpdateIdentityRequest{
 		Identity: sensory.UpdateIdentityData{
 			APIKey: "updated-service-api-key-456",
@@ -1105,8 +1126,8 @@ func runSensoryIdentityOperations(client *tama.Client) {
 		},
 	}
 
-	log.Printf("Updating identity %s...", identity.ID)
-	updatedIdentity, err := client.Sensory.UpdateIdentity(identity.ID, updateRequest)
+	log.Printf("Updating identity %s...", identityID)
+	updatedIdentity, err := client.Sensory.UpdateIdentity(identityID, updateRequest)
 	if err != nil {
 		log.Printf("Error updating identity: %v", err)
 		return
@@ -1116,8 +1137,10 @@ func runSensoryIdentityOperations(client *tama.Client) {
 	log.Printf("  Path: %s", updatedIdentity.Validation.Path)
 	log.Printf("  Method: %s", updatedIdentity.Validation.Method)
 	log.Printf("  Codes: %v", updatedIdentity.Validation.Codes)
+}
 
-	// Replace the identity
+// demoReplaceIdentity demonstrates identity replacement.
+func demoReplaceIdentity(client *tama.Client, identityID string) {
 	replaceRequest := sensory.UpdateIdentityRequest{
 		Identity: sensory.UpdateIdentityData{
 			APIKey: "replaced-service-api-key-789",
@@ -1129,8 +1152,8 @@ func runSensoryIdentityOperations(client *tama.Client) {
 		},
 	}
 
-	log.Printf("Replacing identity %s...", identity.ID)
-	replacedIdentity, err := client.Sensory.ReplaceIdentity(identity.ID, replaceRequest)
+	log.Printf("Replacing identity %s...", identityID)
+	replacedIdentity, err := client.Sensory.ReplaceIdentity(identityID, replaceRequest)
 	if err != nil {
 		log.Printf("Error replacing identity: %v", err)
 		return
@@ -1140,12 +1163,14 @@ func runSensoryIdentityOperations(client *tama.Client) {
 	log.Printf("  Path: %s", replacedIdentity.Validation.Path)
 	log.Printf("  Method: %s", replacedIdentity.Validation.Method)
 	log.Printf("  Codes: %v", replacedIdentity.Validation.Codes)
+}
 
-	// Demonstrate error handling for invalid operations
+// demoIdentityErrorHandling demonstrates error handling for identity operations.
+func demoIdentityErrorHandling(client *tama.Client) {
 	log.Printf("Demonstrating identity error handling...")
 
 	// Try to get a non-existent identity
-	_, err = client.Sensory.GetIdentity("non-existent-identity")
+	_, err := client.Sensory.GetIdentity("non-existent-identity")
 	if err != nil {
 		log.Printf("Expected error for non-existent identity: %v", err)
 	}
@@ -1161,6 +1186,4 @@ func runSensoryIdentityOperations(client *tama.Client) {
 	if err != nil {
 		log.Printf("Expected validation error: %v", err)
 	}
-
-	log.Printf("Identity operations completed successfully!")
 }

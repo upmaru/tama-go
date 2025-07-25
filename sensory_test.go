@@ -1855,15 +1855,18 @@ func TestSensoryGetIdentity(t *testing.T) {
 	}
 
 	if identity.Validation.Method != expectedIdentity.Validation.Method {
-		t.Errorf("Expected validation method %s, got %s", expectedIdentity.Validation.Method, identity.Validation.Method)
+		t.Errorf("Expected validation method %s, got %s",
+			expectedIdentity.Validation.Method, identity.Validation.Method)
 	}
 
 	if len(identity.Validation.Codes) != len(expectedIdentity.Validation.Codes) {
-		t.Errorf("Expected %d validation codes, got %d", len(expectedIdentity.Validation.Codes), len(identity.Validation.Codes))
+		t.Errorf("Expected %d validation codes, got %d",
+			len(expectedIdentity.Validation.Codes), len(identity.Validation.Codes))
 	}
 
 	if identity.Validation.Codes[0] != expectedIdentity.Validation.Codes[0] {
-		t.Errorf("Expected validation code %d, got %d", expectedIdentity.Validation.Codes[0], identity.Validation.Codes[0])
+		t.Errorf("Expected validation code %d, got %d",
+			expectedIdentity.Validation.Codes[0], identity.Validation.Codes[0])
 	}
 }
 
@@ -1916,7 +1919,8 @@ func TestSensoryCreateIdentity(t *testing.T) {
 		}
 
 		if receivedRequest.Identity.Validation.Path != requestData.Identity.Validation.Path {
-			t.Errorf("Expected validation path %s, got %s", requestData.Identity.Validation.Path, receivedRequest.Identity.Validation.Path)
+			t.Errorf("Expected validation path %s, got %s",
+				requestData.Identity.Validation.Path, receivedRequest.Identity.Validation.Path)
 		}
 
 		w.Header().Set("Content-Type", "application/json")
@@ -2100,7 +2104,8 @@ func TestSensoryUpdateIdentity(t *testing.T) {
 	}
 
 	if identity.Validation.Method != expectedIdentity.Validation.Method {
-		t.Errorf("Expected validation method %s, got %s", expectedIdentity.Validation.Method, identity.Validation.Method)
+		t.Errorf("Expected validation method %s, got %s",
+			expectedIdentity.Validation.Method, identity.Validation.Method)
 	}
 }
 
