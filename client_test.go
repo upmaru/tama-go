@@ -10,6 +10,7 @@ import (
 	tama "github.com/upmaru/tama-go"
 	"github.com/upmaru/tama-go/neural"
 	"github.com/upmaru/tama-go/perception"
+	"github.com/upmaru/tama-go/sensory"
 )
 
 // createMockServer creates a test HTTP server with the given handler.
@@ -197,5 +198,21 @@ func TestEmptyIDValidation(t *testing.T) {
 	err = client.Perception.DeleteThought("")
 	if err == nil {
 		t.Error("Expected validation error for empty thought ID in DeleteThought")
+	}
+
+	// Test Identity service validations
+	_, err = client.Sensory.GetIdentity("")
+	if err == nil {
+		t.Error("Expected validation error for empty identity ID in GetIdentity")
+	}
+
+	_, err = client.Sensory.UpdateIdentity("", sensory.UpdateIdentityRequest{})
+	if err == nil {
+		t.Error("Expected validation error for empty identity ID in UpdateIdentity")
+	}
+
+	err = client.Sensory.DeleteIdentity("")
+	if err == nil {
+		t.Error("Expected validation error for empty identity ID in DeleteIdentity")
 	}
 }

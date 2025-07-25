@@ -17,17 +17,20 @@ import (
 )
 
 const (
-	exampleSpaceID    = "space-123"
-	exampleSourceID   = "source-123"
-	exampleModelID    = "model-123"
-	exampleLimitID    = "limit-123"
-	examplePromptID   = "prompt-123"
-	exampleChainID    = "chain-123"
-	exampleThoughtID  = "thought-123"
-	defaultTimeout    = 30
-	defaultLimitCount = 32
-	scaleCountValue   = 5
-	limitCountValue   = 100
+	exampleSpaceID         = "space-123"
+	exampleSourceID        = "source-123"
+	exampleModelID         = "model-123"
+	exampleLimitID         = "limit-123"
+	examplePromptID        = "prompt-123"
+	exampleChainID         = "chain-123"
+	exampleThoughtID       = "thought-123"
+	exampleIdentityID      = "identity-123"
+	exampleSpecificationID = "spec-456"
+	exampleIdentifier      = "test-service"
+	defaultTimeout         = 30
+	defaultLimitCount      = 32
+	scaleCountValue        = 5
+	limitCountValue        = 100
 	// AI model parameters.
 	defaultTemperature = 0.7
 	defaultMaxTokens   = 150
@@ -46,6 +49,7 @@ func main() {
 	runSensoryModelOperations(client)
 	runSensoryLimitOperations(client)
 	runSensorySpecificationOperations(client)
+	runSensoryIdentityOperations(client)
 	runPerceptionChainOperations(client)
 	runPerceptionThoughtOperations(client)
 
@@ -847,6 +851,13 @@ func runDeleteOperations(_ *tama.Client) {
 			log.Printf("Deleted prompt successfully")
 		}
 
+		err = client.Sensory.DeleteIdentity(exampleIdentityID)
+		if err != nil {
+			log.Printf("Error deleting identity: %v", err)
+		} else {
+			log.Printf("Deleted identity successfully")
+		}
+
 		err = client.Sensory.DeleteLimit(limitID)
 		if err != nil {
 			log.Printf("Error deleting limit: %v", err)
@@ -1036,5 +1047,120 @@ func runPerceptionThoughtOperations(client *tama.Client) {
 		}
 	}
 
-	log.Printf("Thought operations completed successfully")
+	log.Printf("Thought operations completed successfully!")
+}
+
+// runSensoryIdentityOperations demonstrates identity CRUD operations.
+func runSensoryIdentityOperations(client *tama.Client) {
+	log.Printf("Starting sensory identity operations...")
+
+	// Create an identity
+	createRequest := sensory.CreateIdentityRequest{
+		Identity: sensory.IdentityRequestData{
+			APIKey: "service-api-key-123",
+			Validation: sensory.Validation{
+				Path:   "/health",
+				Method: "GET",
+				Codes:  []int{200, 204},
+			},
+		},
+	}
+
+	log.Printf("Creating identity for specification %s with identifier %s...", exampleSpecificationID, exampleIdentifier)
+	identity, err := client.Sensory.CreateIdentity(exampleSpecificationID, exampleIdentifier, createRequest)
+	if err != nil {
+		log.Printf("Error creating identity: %v", err)
+		return
+	}
+
+	log.Printf("Created identity: %s", identity.ID)
+	log.Printf("  Specification ID: %s", identity.SpecificationID)
+	log.Printf("  Provision State: %s", identity.ProvisionState)
+	log.Printf("  Current State: %s", identity.CurrentState)
+	log.Printf("  Identifier: %s", identity.Identifier)
+	log.Printf("  Validation Path: %s", identity.Validation.Path)
+	log.Printf("  Validation Method: %s", identity.Validation.Method)
+	log.Printf("  Validation Codes: %v", identity.Validation.Codes)
+
+	// Get the identity
+	log.Printf("Retrieving identity %s...", identity.ID)
+	retrievedIdentity, err := client.Sensory.GetIdentity(identity.ID)
+	if err != nil {
+		log.Printf("Error retrieving identity: %v", err)
+		return
+	}
+
+	log.Printf("Retrieved identity: %s", retrievedIdentity.ID)
+	log.Printf("  Current State: %s", retrievedIdentity.CurrentState)
+
+	// Update the identity
+	updateRequest := sensory.UpdateIdentityRequest{
+		Identity: sensory.UpdateIdentityData{
+			APIKey: "updated-service-api-key-456",
+			Validation: &sensory.Validation{
+				Path:   "/health/check",
+				Method: "POST",
+				Codes:  []int{200, 201, 204},
+			},
+		},
+	}
+
+	log.Printf("Updating identity %s...", identity.ID)
+	updatedIdentity, err := client.Sensory.UpdateIdentity(identity.ID, updateRequest)
+	if err != nil {
+		log.Printf("Error updating identity: %v", err)
+		return
+	}
+
+	log.Printf("Updated identity validation:")
+	log.Printf("  Path: %s", updatedIdentity.Validation.Path)
+	log.Printf("  Method: %s", updatedIdentity.Validation.Method)
+	log.Printf("  Codes: %v", updatedIdentity.Validation.Codes)
+
+	// Replace the identity
+	replaceRequest := sensory.UpdateIdentityRequest{
+		Identity: sensory.UpdateIdentityData{
+			APIKey: "replaced-service-api-key-789",
+			Validation: &sensory.Validation{
+				Path:   "/status",
+				Method: "GET",
+				Codes:  []int{200},
+			},
+		},
+	}
+
+	log.Printf("Replacing identity %s...", identity.ID)
+	replacedIdentity, err := client.Sensory.ReplaceIdentity(identity.ID, replaceRequest)
+	if err != nil {
+		log.Printf("Error replacing identity: %v", err)
+		return
+	}
+
+	log.Printf("Replaced identity validation:")
+	log.Printf("  Path: %s", replacedIdentity.Validation.Path)
+	log.Printf("  Method: %s", replacedIdentity.Validation.Method)
+	log.Printf("  Codes: %v", replacedIdentity.Validation.Codes)
+
+	// Demonstrate error handling for invalid operations
+	log.Printf("Demonstrating identity error handling...")
+
+	// Try to get a non-existent identity
+	_, err = client.Sensory.GetIdentity("non-existent-identity")
+	if err != nil {
+		log.Printf("Expected error for non-existent identity: %v", err)
+	}
+
+	// Try to create an identity with missing required fields
+	invalidRequest := sensory.CreateIdentityRequest{
+		Identity: sensory.IdentityRequestData{
+			// Missing APIKey and Validation
+		},
+	}
+
+	_, err = client.Sensory.CreateIdentity(exampleSpecificationID, exampleIdentifier, invalidRequest)
+	if err != nil {
+		log.Printf("Expected validation error: %v", err)
+	}
+
+	log.Printf("Identity operations completed successfully!")
 }

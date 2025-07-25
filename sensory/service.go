@@ -91,6 +91,23 @@ type Specification struct {
 	ProvisionState string         `json:"provision_state"`
 }
 
+// Validation represents the validation configuration for an identity.
+type Validation struct {
+	Path   string `json:"path"`
+	Method string `json:"method"`
+	Codes  []int  `json:"codes"`
+}
+
+// Identity represents a sensory identity resource.
+type Identity struct {
+	ID              string     `json:"id,omitempty"`
+	SpecificationID string     `json:"specification_id"`
+	ProvisionState  string     `json:"provision_state"`
+	CurrentState    string     `json:"current_state"`
+	Identifier      string     `json:"identifier"`
+	Validation      Validation `json:"validation"`
+}
+
 // SourceResponse represents the API response for source operations.
 type SourceResponse struct {
 	Data Source `json:"data"`
@@ -109,6 +126,11 @@ type LimitResponse struct {
 // SpecificationResponse represents the API response for specification operations.
 type SpecificationResponse struct {
 	Data Specification `json:"data"`
+}
+
+// IdentityResponse represents the API response for identity operations.
+type IdentityResponse struct {
+	Data Identity `json:"data"`
 }
 
 // CreateSourceRequest represents the request payload for creating a source.
@@ -208,6 +230,28 @@ type UpdateSpecificationData struct {
 	Schema   map[string]any `json:"schema,omitempty"`
 	Version  string         `json:"version,omitempty"`
 	Endpoint string         `json:"endpoint,omitempty"`
+}
+
+// CreateIdentityRequest represents the request payload for creating an identity.
+type CreateIdentityRequest struct {
+	Identity IdentityRequestData `json:"identity"`
+}
+
+// IdentityRequestData represents the identity data in the request.
+type IdentityRequestData struct {
+	APIKey     string     `json:"api_key"`
+	Validation Validation `json:"validation"`
+}
+
+// UpdateIdentityRequest represents the request payload for updating an identity.
+type UpdateIdentityRequest struct {
+	Identity UpdateIdentityData `json:"identity"`
+}
+
+// UpdateIdentityData represents the identity update data.
+type UpdateIdentityData struct {
+	APIKey     string      `json:"api_key,omitempty"`
+	Validation *Validation `json:"validation,omitempty"`
 }
 
 // handleAPIError processes API error responses.
