@@ -11,6 +11,7 @@ import (
 // - sensory/model.go: Model operations (AI models with identifiers and paths).
 // - sensory/limit.go: Limit operations (rate limits and restrictions).
 // - sensory/specification.go: Specification operations (configuration schemas with endpoints and versioning).
+// - sensory/identity.go: Identity operations (provisioned instances of specifications with validation endpoints).
 type SensoryService struct {
 	*sensory.Service
 }

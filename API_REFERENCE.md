@@ -843,6 +843,124 @@ Deletes a specification by ID.
 **Returns:**
 - `error`: Error if request fails
 
+### Identity Operations
+
+#### GetIdentity(id string) (*Identity, error)
+
+Retrieves a specific identity by ID.
+
+**Endpoint:** `GET /provision/sensory/identities/:id`
+
+**Parameters:**
+- `id` (string): Identity ID (required)
+
+**Returns:**
+- `*Identity`: Identity data
+- `error`: Error if request fails
+
+**Response:**
+```go
+{
+  "data": {
+    "id": "identity-123",
+    "specification_id": "spec-456",
+    "provision_state": "active",
+    "current_state": "running",
+    "identifier": "test-identifier",
+    "validation": {
+      "path": "/health",
+      "method": "GET",
+      "codes": [200]
+    }
+  }
+}
+```
+
+#### CreateIdentity(specificationID, identifier string, req CreateIdentityRequest) (*Identity, error)
+
+Creates a new identity for a specific specification and identifier.
+
+**Endpoint:** `POST /provision/sensory/specifications/:specification_id/identifiers/:identifier/identities`
+
+**Parameters:**
+- `specificationID` (string): Specification ID (required)
+- `identifier` (string): Identifier (required)
+- `req` (CreateIdentityRequest): Identity data (required)
+
+**Request:**
+```go
+type CreateIdentityRequest struct {
+  Identity IdentityRequestData `json:"identity"`
+}
+
+type IdentityRequestData struct {
+  APIKey     string     `json:"api_key"`
+  Validation Validation `json:"validation"`
+}
+
+type Validation struct {
+  Path   string `json:"path"`
+  Method string `json:"method"`
+  Codes  []int  `json:"codes"`
+}
+```
+
+**Returns:**
+- `*Identity`: Created identity data
+- `error`: Error if request fails
+
+#### UpdateIdentity(id string, req UpdateIdentityRequest) (*Identity, error)
+
+Updates an existing identity using PATCH.
+
+**Endpoint:** `PATCH /provision/sensory/identities/:id`
+
+**Parameters:**
+- `id` (string): Identity ID (required)
+- `req` (UpdateIdentityRequest): Update data
+
+**Request:**
+```go
+type UpdateIdentityRequest struct {
+  Identity UpdateIdentityData `json:"identity"`
+}
+
+type UpdateIdentityData struct {
+  APIKey     string      `json:"api_key,omitempty"`
+  Validation *Validation `json:"validation,omitempty"`
+}
+```
+
+**Returns:**
+- `*Identity`: Updated identity data
+- `error`: Error if request fails
+
+#### ReplaceIdentity(id string, req UpdateIdentityRequest) (*Identity, error)
+
+Replaces an existing identity using PUT.
+
+**Endpoint:** `PUT /provision/sensory/identities/:id`
+
+**Parameters:**
+- `id` (string): Identity ID (required)
+- `req` (UpdateIdentityRequest): Replacement data
+
+**Returns:**
+- `*Identity`: Replaced identity data
+- `error`: Error if request fails
+
+#### DeleteIdentity(id string) error
+
+Deletes an identity by ID.
+
+**Endpoint:** `DELETE /provision/sensory/identities/:id`
+
+**Parameters:**
+- `id` (string): Identity ID (required)
+
+**Returns:**
+- `error`: Error if request fails
+
 ## Perception Service
 
 Access via `client.Perception.*`
@@ -1235,6 +1353,29 @@ type Specification struct {
 }
 ```
 
+#### Identity
+
+```go
+type Identity struct {
+    ID              string     `json:"id,omitempty"`
+    SpecificationID string     `json:"specification_id"`
+    ProvisionState  string     `json:"provision_state"`
+    CurrentState    string     `json:"current_state"`
+    Identifier      string     `json:"identifier"`
+    Validation      Validation `json:"validation"`
+}
+```
+
+#### Validation
+
+```go
+type Validation struct {
+    Path   string `json:"path"`
+    Method string `json:"method"`
+    Codes  []int  `json:"codes"`
+}
+```
+
 #### Chain
 
 ```go
@@ -1366,6 +1507,22 @@ type CreateSpecificationRequest struct {
 ```go
 type UpdateSpecificationRequest struct {
     Specification UpdateSpecificationData `json:"specification"`
+}
+```
+
+#### CreateIdentityRequest
+
+```go
+type CreateIdentityRequest struct {
+    Identity IdentityRequestData `json:"identity"`
+}
+```
+
+#### UpdateIdentityRequest
+
+```go
+type UpdateIdentityRequest struct {
+    Identity UpdateIdentityData `json:"identity"`
 }
 ```
 
@@ -1635,6 +1792,32 @@ type UpdateSpecificationData struct {
 ```go
 type SpecificationResponse struct {
     Data Specification `json:"data"`
+}
+```
+
+#### IdentityRequestData
+
+```go
+type IdentityRequestData struct {
+    APIKey     string     `json:"api_key"`
+    Validation Validation `json:"validation"`
+}
+```
+
+#### UpdateIdentityData
+
+```go
+type UpdateIdentityData struct {
+    APIKey     string      `json:"api_key,omitempty"`
+    Validation *Validation `json:"validation,omitempty"`
+}
+```
+
+#### IdentityResponse
+
+```go
+type IdentityResponse struct {
+    Data Identity `json:"data"`
 }
 ```
 
