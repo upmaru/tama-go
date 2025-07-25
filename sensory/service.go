@@ -57,6 +57,7 @@ type Source struct {
 	Name           string `json:"name"`
 	Endpoint       string `json:"endpoint"`
 	SpaceID        string `json:"space_id"`
+	Type           string `json:"type"`
 	ProvisionState string `json:"provision_state"`
 }
 
