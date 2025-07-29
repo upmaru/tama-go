@@ -394,6 +394,123 @@ Deletes a class by ID.
 **Returns:**
 - `error`: Error if request fails
 
+### Corpus Operations
+
+#### GetCorpus(id string) (*Corpus, error)
+
+Retrieves a specific corpus by ID.
+
+**Endpoint:** `GET /provision/neural/corpora/:id`
+
+**Parameters:**
+- `id` (string): Corpus ID (required)
+
+**Returns:**
+- `*Corpus`: The corpus object
+- `error`: Error if request fails
+
+**Example:**
+```go
+corpus, err := client.Neural.GetCorpus("corpus-123")
+if err != nil {
+    log.Fatal(err)
+}
+fmt.Printf("Corpus: %+v\n", corpus)
+```
+
+#### CreateCorpus(classID string, req CreateCorpusRequest) (*Corpus, error)
+
+Creates a new corpus within a class.
+
+**Endpoint:** `POST /provision/neural/classes/:class_id/corpora`
+
+**Parameters:**
+- `classID` (string): Class ID (required)
+- `req` (CreateCorpusRequest): Request payload
+
+**Request Structure:**
+```go
+type CreateCorpusRequest struct {
+    Corpus CorpusRequestData `json:"corpus"`
+}
+
+type CorpusRequestData struct {
+    Main     bool   `json:"main"`
+    Name     string `json:"name"`
+    Template string `json:"template"`
+}
+```
+
+**Example request:**
+```go
+createReq := neural.CreateCorpusRequest{
+    Corpus: neural.CorpusRequestData{
+        Main:     true,
+        Name:     "Primary Training Corpus",
+        Template: "training-template-v1",
+    },
+}
+
+corpus, err := client.Neural.CreateCorpus("class-123", createReq)
+```
+
+**Returns:**
+- `*Corpus`: Created corpus
+- `error`: Error if request fails
+
+#### UpdateCorpus(id string, req UpdateCorpusRequest) (*Corpus, error)
+
+Updates an existing corpus using PATCH.
+
+**Endpoint:** `PATCH /provision/neural/corpora/:id`
+
+**Parameters:**
+- `id` (string): Corpus ID (required)
+- `req` (UpdateCorpusRequest): Request payload
+
+**Request Structure:**
+```go
+type UpdateCorpusRequest struct {
+    Corpus UpdateCorpusData `json:"corpus"`
+}
+
+type UpdateCorpusData struct {
+    Main     *bool  `json:"main,omitempty"`
+    Name     string `json:"name,omitempty"`
+    Template string `json:"template,omitempty"`
+}
+```
+
+**Returns:**
+- `*Corpus`: Updated corpus
+- `error`: Error if request fails
+
+#### ReplaceCorpus(id string, req UpdateCorpusRequest) (*Corpus, error)
+
+Replaces an existing corpus using PUT.
+
+**Endpoint:** `PUT /provision/neural/corpora/:id`
+
+**Parameters:**
+- `id` (string): Corpus ID (required)
+- `req` (UpdateCorpusRequest): Request payload
+
+**Returns:**
+- `*Corpus`: Replaced corpus
+- `error`: Error if request fails
+
+#### DeleteCorpus(id string) error
+
+Deletes a corpus by ID.
+
+**Endpoint:** `DELETE /provision/neural/corpora/:id`
+
+**Parameters:**
+- `id` (string): Corpus ID (required)
+
+**Returns:**
+- `error`: Error if request fails
+
 ## Memory Service
 
 Access via `client.Memory.*`
@@ -1288,6 +1405,19 @@ type Class struct {
 }
 ```
 
+#### Corpus
+
+```go
+type Corpus struct {
+    ID             string `json:"id,omitempty"`
+    Main           bool   `json:"main"`
+    Name           string `json:"name"`
+    Slug           string `json:"slug,omitempty"`
+    Template       string `json:"template"`
+    ProvisionState string `json:"provision_state,omitempty"`
+}
+```
+
 #### Prompt
 
 ```go
@@ -1555,6 +1685,22 @@ type CreateClassRequest struct {
 ```go
 type UpdateClassRequest struct {
     Class UpdateClassData `json:"class"`
+}
+```
+
+#### CreateCorpusRequest
+
+```go
+type CreateCorpusRequest struct {
+    Corpus CorpusRequestData `json:"corpus"`
+}
+```
+
+#### UpdateCorpusRequest
+
+```go
+type UpdateCorpusRequest struct {
+    Corpus UpdateCorpusData `json:"corpus"`
 }
 ```
 
@@ -1868,6 +2014,34 @@ type UpdateClassData struct {
 ```go
 type ClassResponse struct {
     Data Class `json:"data"`
+}
+```
+
+#### CorpusRequestData
+
+```go
+type CorpusRequestData struct {
+    Main     bool   `json:"main"`
+    Name     string `json:"name"`
+    Template string `json:"template"`
+}
+```
+
+#### UpdateCorpusData
+
+```go
+type UpdateCorpusData struct {
+    Main     *bool  `json:"main,omitempty"`
+    Name     string `json:"name,omitempty"`
+    Template string `json:"template,omitempty"`
+}
+```
+
+#### CorpusResponse
+
+```go
+type CorpusResponse struct {
+    Data Corpus `json:"data"`
 }
 ```
 

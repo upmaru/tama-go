@@ -131,6 +131,8 @@ The client library is organized into the following packages:
 - `service.go` - Service definition and neural-related types
 - `space.go` - Space operations (GET, POST, PATCH, PUT, DELETE)
 - `processor.go` - Processor operations (GET, POST, PATCH, PUT, DELETE)
+- `class.go` - Class operations (GET, POST, PATCH, PUT, DELETE)
+- `corpus.go` - Corpus operations (GET, POST, PATCH, PUT, DELETE)
 
 ### Sensory Package (`sensory/`)
 - `service.go` - Service definition and sensory-related types
@@ -167,6 +169,20 @@ The client provides comprehensive coverage of the Tama API endpoints, organized 
 - `PATCH /provision/neural/spaces/:space_id/models/:model_id/processor` - Update processor
 - `PUT /provision/neural/spaces/:space_id/models/:model_id/processor` - Replace processor
 - `DELETE /provision/neural/spaces/:space_id/models/:model_id/processor` - Delete processor
+
+#### Classes
+- `GET /provision/neural/classes/:id` - Get class by ID
+- `POST /provision/neural/spaces/:space_id/classes` - Create class in space
+- `PATCH /provision/neural/classes/:id` - Update class
+- `PUT /provision/neural/classes/:id` - Replace class
+- `DELETE /provision/neural/classes/:id` - Delete class
+
+#### Corpora
+- `GET /provision/neural/corpora/:id` - Get corpus by ID
+- `POST /provision/neural/classes/:class_id/corpora` - Create corpus in class
+- `PATCH /provision/neural/corpora/:id` - Update corpus
+- `PUT /provision/neural/corpora/:id` - Replace corpus
+- `DELETE /provision/neural/corpora/:id` - Delete corpus
 
 ### Sensory Resources (`/provision/sensory`)
 
@@ -301,6 +317,125 @@ processor, err := client.Neural.ReplaceProcessor("space-123", "model-123", neura
 // Delete a processor
 err := client.Neural.DeleteProcessor("space-123", "model-123")
 ```
+
+### Neural Service - Classes
+
+```go
+import "github.com/upmaru/tama-go/neural"
+
+// Create a class
+class, err := client.Neural.CreateClass("space-123", neural.CreateClassRequest{
+    Class: neural.ClassRequestData{
+        Schema: map[string]any{
+            "title":       "user-profile",
+            "description": "User profile information",
+            "type":        "object",
+            "properties": map[string]any{
+                "name": map[string]any{
+                    "type":        "string",
+                    "description": "User's full name",
+                },
+                "email": map[string]any{
+                    "type":        "string",
+                    "description": "User's email address",
+                },
+                "age": map[string]any{
+                    "type":        "integer",
+                    "description": "User's age",
+                },
+            },
+            "required": []string{"name", "email"},
+        },
+    },
+})
+
+// Get a class
+class, err := client.Neural.GetClass("class-123")
+
+// Update a class (partial update)
+class, err := client.Neural.UpdateClass("class-123", neural.UpdateClassRequest{
+    Class: neural.UpdateClassData{
+        Schema: map[string]any{
+            "title": "updated-user-profile",
+            "properties": map[string]any{
+                "name": map[string]any{
+                    "type": "string",
+                },
+                "phone": map[string]any{
+                    "type": "string",
+                },
+            },
+        },
+    },
+})
+
+// Replace a class (full replacement)
+class, err := client.Neural.ReplaceClass("class-123", neural.UpdateClassRequest{
+    Class: neural.UpdateClassData{
+        Schema: map[string]any{
+            "title": "new-user-profile",
+            "type":  "object",
+            "properties": map[string]any{
+                "username": map[string]any{
+                    "type": "string",
+                },
+            },
+        },
+    },
+})
+
+// Delete a class
+err := client.Neural.DeleteClass("class-123")
+```
+
+### Neural Service - Corpora
+
+```go
+import "github.com/upmaru/tama-go/neural"
+
+// Create a corpus
+corpus, err := client.Neural.CreateCorpus("class-123", neural.CreateCorpusRequest{
+    Corpus: neural.CorpusRequestData{
+        Main:     true,
+        Name:     "Primary Training Corpus",
+        Template: "training-template-v1",
+    },
+})
+
+// Get a corpus
+corpus, err := client.Neural.GetCorpus("corpus-123")
+
+// Update a corpus (partial update)
+main := false
+corpus, err := client.Neural.UpdateCorpus("corpus-123", neural.UpdateCorpusRequest{
+    Corpus: neural.UpdateCorpusData{
+        Main:     &main,
+        Name:     "Updated Training Corpus",
+        Template: "training-template-v2",
+    },
+})
+
+// Replace a corpus (full replacement)
+mainFlag := true
+corpus, err := client.Neural.ReplaceCorpus("corpus-123", neural.UpdateCorpusRequest{
+    Corpus: neural.UpdateCorpusData{
+        Main:     &mainFlag,
+        Name:     "New Training Corpus",
+        Template: "training-template-v3",
+    },
+})
+
+// Delete a corpus
+err := client.Neural.DeleteCorpus("corpus-123")
+```
+
+#### Corpus Fields
+
+- **Main** (boolean): Indicates if this is the primary corpus for the class
+- **Name** (string): Human-readable name for the corpus
+- **Template** (string): Template identifier used for processing the corpus data
+- **Slug** (string): Auto-generated URL-friendly identifier (read-only)
+- **ProvisionState** (string): Current provisioning status (read-only)
 
 #### Processor Types and Configuration
 
@@ -731,16 +866,28 @@ if err != nil {
 
 - **neural.Space**: Neural space resource with configuration, type, and current state
 - **neural.Processor**: Neural processor resource with type-specific configuration
+- **neural.Class**: Neural class resource with schema definition and metadata
+- **neural.Corpus**: Neural corpus resource with main flag, name, template, and state
 - **neural.CreateSpaceRequest**: For creating new spaces
 - **neural.UpdateSpaceRequest**: For updating existing spaces
 - **neural.CreateProcessorRequest**: For creating new processors
 - **neural.UpdateProcessorRequest**: For updating existing processors
+- **neural.CreateClassRequest**: For creating new classes
+- **neural.UpdateClassRequest**: For updating existing classes
+- **neural.CreateCorpusRequest**: For creating new corpora
+- **neural.UpdateCorpusRequest**: For updating existing corpora
 - **neural.SpaceRequestData**: Space data in create requests
 - **neural.UpdateSpaceData**: Space data in update requests
 - **neural.ProcessorRequestData**: Processor data in create requests
 - **neural.UpdateProcessorData**: Processor data in update requests
+- **neural.ClassRequestData**: Class data in create requests
+- **neural.UpdateClassData**: Class data in update requests
+- **neural.CorpusRequestData**: Corpus data in create requests
+- **neural.UpdateCorpusData**: Corpus data in update requests
 - **neural.SpaceResponse**: API response wrapper for space operations
 - **neural.ProcessorResponse**: API response wrapper for processor operations
+- **neural.ClassResponse**: API response wrapper for class operations
+- **neural.CorpusResponse**: API response wrapper for corpus operations
 - **neural.Error**: Neural service specific error type
 
 ### Sensory Package Types
