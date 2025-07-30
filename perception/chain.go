@@ -1,3 +1,4 @@
+//nolint:dupl // CRUD operations follow the same pattern as path.go
 package perception
 
 import (
