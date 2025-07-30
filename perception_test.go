@@ -1150,3 +1150,697 @@ func getKeys(m map[string][]string) []string {
 	}
 	return keys
 }
+
+// Path tests.
+func TestPerceptionGetPath(t *testing.T) {
+	expectedPath := perception.Path{
+		ID:             "path-123",
+		ThoughtID:      "thought-123",
+		ProvisionState: "active",
+		TargetClassID:  "class-123",
+		Parameters: map[string]any{
+			"threshold": 0.8,
+			"enabled":   true,
+		},
+	}
+
+	expectedResponse := perception.PathResponse{
+		Data: expectedPath,
+	}
+
+	server := createMockServer(t, func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet {
+			t.Errorf("Expected GET request, got %s", r.Method)
+		}
+
+		if r.URL.Path != "/provision/perception/paths/path-123" {
+			t.Errorf("Expected path /provision/perception/paths/path-123, got %s", r.URL.Path)
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(expectedResponse)
+	})
+	defer server.Close()
+
+	config := tama.Config{
+		BaseURL: server.URL,
+		APIKey:  "test-key",
+		Timeout: 10 * time.Second,
+	}
+
+	client := tama.NewClient(config)
+	path, err := client.Perception.GetPath("path-123")
+
+	if err != nil {
+		t.Fatalf("Expected no error, got %v", err)
+	}
+
+	validatePathResponse(t, *path, expectedPath)
+}
+
+func TestPerceptionCreatePath(t *testing.T) {
+	request := perception.CreatePathRequest{
+		Path: perception.PathRequestData{
+			TargetClassID: "class-456",
+			Parameters: map[string]any{
+				"threshold": 0.9,
+				"enabled":   false,
+			},
+		},
+	}
+
+	expectedPath := perception.Path{
+		ID:             "path-456",
+		ThoughtID:      "thought-123",
+		ProvisionState: "pending",
+		TargetClassID:  "class-456",
+		Parameters: map[string]any{
+			"threshold": 0.9,
+			"enabled":   false,
+		},
+	}
+
+	expectedResponse := perception.PathResponse{
+		Data: expectedPath,
+	}
+
+	server := createMockServer(t, func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			t.Errorf("Expected POST request, got %s", r.Method)
+		}
+
+		if r.URL.Path != "/provision/perception/thoughts/thought-123/paths" {
+			t.Errorf("Expected path /provision/perception/thoughts/thought-123/paths, got %s", r.URL.Path)
+		}
+
+		var receivedRequest perception.CreatePathRequest
+		if err := json.NewDecoder(r.Body).Decode(&receivedRequest); err != nil {
+			t.Fatalf("Failed to decode request body: %v", err)
+		}
+
+		if receivedRequest.Path.TargetClassID != request.Path.TargetClassID {
+			t.Errorf("Expected target_class_id %s, got %s",
+				request.Path.TargetClassID, receivedRequest.Path.TargetClassID)
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusCreated)
+		json.NewEncoder(w).Encode(expectedResponse)
+	})
+	defer server.Close()
+
+	config := tama.Config{
+		BaseURL: server.URL,
+		APIKey:  "test-key",
+		Timeout: 10 * time.Second,
+	}
+
+	client := tama.NewClient(config)
+	path, err := client.Perception.CreatePath("thought-123", request)
+
+	if err != nil {
+		t.Fatalf("Expected no error, got %v", err)
+	}
+
+	validatePathResponse(t, *path, expectedPath)
+}
+
+func TestPerceptionCreatePathValidation(t *testing.T) {
+	client := tama.NewClient(tama.Config{
+		BaseURL: "https://api.example.com",
+		APIKey:  "test-key",
+	})
+
+	// Test empty thought ID
+	_, err := client.Perception.CreatePath("", perception.CreatePathRequest{
+		Path: perception.PathRequestData{TargetClassID: "class-123"},
+	})
+	if err == nil {
+		t.Error("Expected validation error for empty thought ID")
+	}
+
+	// Test empty target class ID
+	_, err = client.Perception.CreatePath("thought-123", perception.CreatePathRequest{
+		Path: perception.PathRequestData{TargetClassID: ""},
+	})
+	if err == nil {
+		t.Error("Expected validation error for empty target class ID")
+	}
+}
+
+func TestPerceptionUpdatePath(t *testing.T) {
+	request := perception.UpdatePathRequest{
+		Path: perception.UpdatePathData{
+			TargetClassID: "class-789",
+			Parameters: map[string]any{
+				"threshold": 0.7,
+				"enabled":   true,
+			},
+		},
+	}
+
+	expectedPath := perception.Path{
+		ID:             "path-123",
+		ThoughtID:      "thought-123",
+		ProvisionState: "active",
+		TargetClassID:  "class-789",
+		Parameters: map[string]any{
+			"threshold": 0.7,
+			"enabled":   true,
+		},
+	}
+
+	expectedResponse := perception.PathResponse{
+		Data: expectedPath,
+	}
+
+	server := createMockServer(t, func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPatch {
+			t.Errorf("Expected PATCH request, got %s", r.Method)
+		}
+
+		if r.URL.Path != "/provision/perception/paths/path-123" {
+			t.Errorf("Expected path /provision/perception/paths/path-123, got %s", r.URL.Path)
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(expectedResponse)
+	})
+	defer server.Close()
+
+	config := tama.Config{
+		BaseURL: server.URL,
+		APIKey:  "test-key",
+		Timeout: 10 * time.Second,
+	}
+
+	client := tama.NewClient(config)
+	path, err := client.Perception.UpdatePath("path-123", request)
+
+	if err != nil {
+		t.Fatalf("Expected no error, got %v", err)
+	}
+
+	if path.TargetClassID != expectedPath.TargetClassID {
+		t.Errorf("Expected target_class_id %s, got %s", expectedPath.TargetClassID, path.TargetClassID)
+	}
+}
+
+func TestPerceptionReplacePath(t *testing.T) {
+	request := perception.UpdatePathRequest{
+		Path: perception.UpdatePathData{
+			TargetClassID: "class-replaced",
+			Parameters: map[string]any{
+				"threshold": 0.5,
+			},
+		},
+	}
+
+	expectedPath := perception.Path{
+		ID:             "path-123",
+		ThoughtID:      "thought-123",
+		ProvisionState: "active",
+		TargetClassID:  "class-replaced",
+		Parameters: map[string]any{
+			"threshold": 0.5,
+		},
+	}
+
+	expectedResponse := perception.PathResponse{
+		Data: expectedPath,
+	}
+
+	server := createMockServer(t, func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPut {
+			t.Errorf("Expected PUT request, got %s", r.Method)
+		}
+
+		if r.URL.Path != "/provision/perception/paths/path-123" {
+			t.Errorf("Expected path /provision/perception/paths/path-123, got %s", r.URL.Path)
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(expectedResponse)
+	})
+	defer server.Close()
+
+	config := tama.Config{
+		BaseURL: server.URL,
+		APIKey:  "test-key",
+		Timeout: 10 * time.Second,
+	}
+
+	client := tama.NewClient(config)
+	path, err := client.Perception.ReplacePath("path-123", request)
+
+	if err != nil {
+		t.Fatalf("Expected no error, got %v", err)
+	}
+
+	if path.TargetClassID != expectedPath.TargetClassID {
+		t.Errorf("Expected target_class_id %s, got %s", expectedPath.TargetClassID, path.TargetClassID)
+	}
+}
+
+func TestPerceptionDeletePath(t *testing.T) {
+	server := createMockServer(t, func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodDelete {
+			t.Errorf("Expected DELETE request, got %s", r.Method)
+		}
+
+		if r.URL.Path != "/provision/perception/paths/path-123" {
+			t.Errorf("Expected path /provision/perception/paths/path-123, got %s", r.URL.Path)
+		}
+
+		w.WriteHeader(http.StatusNoContent)
+	})
+	defer server.Close()
+
+	config := tama.Config{
+		BaseURL: server.URL,
+		APIKey:  "test-key",
+		Timeout: 10 * time.Second,
+	}
+
+	client := tama.NewClient(config)
+	err := client.Perception.DeletePath("path-123")
+
+	if err != nil {
+		t.Fatalf("Expected no error, got %v", err)
+	}
+}
+
+func TestPerceptionGetPathEmptyID(t *testing.T) {
+	client := tama.NewClient(tama.Config{
+		BaseURL: "https://api.example.com",
+		APIKey:  "test-key",
+	})
+
+	_, err := client.Perception.GetPath("")
+	if err == nil {
+		t.Error("Expected validation error for empty path ID in GetPath")
+	}
+}
+
+func TestPerceptionUpdatePathEmptyID(t *testing.T) {
+	client := tama.NewClient(tama.Config{
+		BaseURL: "https://api.example.com",
+		APIKey:  "test-key",
+	})
+
+	_, err := client.Perception.UpdatePath("", perception.UpdatePathRequest{
+		Path: perception.UpdatePathData{TargetClassID: "test"},
+	})
+	if err == nil {
+		t.Error("Expected validation error for empty path ID in UpdatePath")
+	}
+}
+
+func TestPerceptionReplacePathEmptyID(t *testing.T) {
+	client := tama.NewClient(tama.Config{
+		BaseURL: "https://api.example.com",
+		APIKey:  "test-key",
+	})
+
+	_, err := client.Perception.ReplacePath("", perception.UpdatePathRequest{
+		Path: perception.UpdatePathData{TargetClassID: "test"},
+	})
+	if err == nil {
+		t.Error("Expected validation error for empty path ID in ReplacePath")
+	}
+}
+
+func TestPerceptionDeletePathEmptyID(t *testing.T) {
+	client := tama.NewClient(tama.Config{
+		BaseURL: "https://api.example.com",
+		APIKey:  "test-key",
+	})
+
+	err := client.Perception.DeletePath("")
+	if err == nil {
+		t.Error("Expected validation error for empty path ID in DeletePath")
+	}
+}
+
+func validatePathResponse(t *testing.T, actual, expected perception.Path) {
+	if actual.ID != expected.ID {
+		t.Errorf("Expected path ID %s, got %s", expected.ID, actual.ID)
+	}
+
+	if actual.ThoughtID != expected.ThoughtID {
+		t.Errorf("Expected path thought_id %s, got %s", expected.ThoughtID, actual.ThoughtID)
+	}
+
+	if actual.ProvisionState != expected.ProvisionState {
+		t.Errorf("Expected path provision_state %s, got %s", expected.ProvisionState, actual.ProvisionState)
+	}
+
+	if actual.TargetClassID != expected.TargetClassID {
+		t.Errorf("Expected path target_class_id %s, got %s", expected.TargetClassID, actual.TargetClassID)
+	}
+}
+
+// Context tests.
+func TestPerceptionGetContext(t *testing.T) {
+	expectedContext := perception.Context{
+		ID:             "context-123",
+		ThoughtID:      "thought-123",
+		PromptID:       "prompt-123",
+		Layer:          2,
+		ProvisionState: "active",
+	}
+
+	expectedResponse := perception.ContextResponse{
+		Data: expectedContext,
+	}
+
+	server := createMockServer(t, func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet {
+			t.Errorf("Expected GET request, got %s", r.Method)
+		}
+
+		if r.URL.Path != "/provision/perception/contexts/context-123" {
+			t.Errorf("Expected path /provision/perception/contexts/context-123, got %s", r.URL.Path)
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(expectedResponse)
+	})
+	defer server.Close()
+
+	config := tama.Config{
+		BaseURL: server.URL,
+		APIKey:  "test-key",
+		Timeout: 10 * time.Second,
+	}
+
+	client := tama.NewClient(config)
+	context, err := client.Perception.GetContext("context-123")
+
+	if err != nil {
+		t.Fatalf("Expected no error, got %v", err)
+	}
+
+	validateContextResponse(t, *context, expectedContext)
+}
+
+func TestPerceptionCreateContext(t *testing.T) {
+	request := perception.CreateContextRequest{
+		Context: perception.ContextRequestData{
+			PromptID: "prompt-456",
+			Layer:    3,
+		},
+	}
+
+	expectedContext := perception.Context{
+		ID:             "context-456",
+		ThoughtID:      "thought-123",
+		PromptID:       "prompt-456",
+		Layer:          3,
+		ProvisionState: "pending",
+	}
+
+	expectedResponse := perception.ContextResponse{
+		Data: expectedContext,
+	}
+
+	server := createMockServer(t, func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			t.Errorf("Expected POST request, got %s", r.Method)
+		}
+
+		if r.URL.Path != "/provision/perception/thoughts/thought-123/contexts" {
+			t.Errorf("Expected path /provision/perception/thoughts/thought-123/contexts, got %s", r.URL.Path)
+		}
+
+		var receivedRequest perception.CreateContextRequest
+		if err := json.NewDecoder(r.Body).Decode(&receivedRequest); err != nil {
+			t.Fatalf("Failed to decode request body: %v", err)
+		}
+
+		if receivedRequest.Context.PromptID != request.Context.PromptID {
+			t.Errorf("Expected prompt_id %s, got %s", request.Context.PromptID, receivedRequest.Context.PromptID)
+		}
+
+		if receivedRequest.Context.Layer != request.Context.Layer {
+			t.Errorf("Expected layer %d, got %d", request.Context.Layer, receivedRequest.Context.Layer)
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusCreated)
+		json.NewEncoder(w).Encode(expectedResponse)
+	})
+	defer server.Close()
+
+	config := tama.Config{
+		BaseURL: server.URL,
+		APIKey:  "test-key",
+		Timeout: 10 * time.Second,
+	}
+
+	client := tama.NewClient(config)
+	context, err := client.Perception.CreateContext("thought-123", request)
+
+	if err != nil {
+		t.Fatalf("Expected no error, got %v", err)
+	}
+
+	validateContextResponse(t, *context, expectedContext)
+}
+
+func TestPerceptionCreateContextValidation(t *testing.T) {
+	client := tama.NewClient(tama.Config{
+		BaseURL: "https://api.example.com",
+		APIKey:  "test-key",
+	})
+
+	// Test empty thought ID
+	_, err := client.Perception.CreateContext("", perception.CreateContextRequest{
+		Context: perception.ContextRequestData{PromptID: "prompt-123", Layer: 1},
+	})
+	if err == nil {
+		t.Error("Expected validation error for empty thought ID")
+	}
+
+	// Test empty prompt ID
+	_, err = client.Perception.CreateContext("thought-123", perception.CreateContextRequest{
+		Context: perception.ContextRequestData{PromptID: "", Layer: 1},
+	})
+	if err == nil {
+		t.Error("Expected validation error for empty prompt ID")
+	}
+}
+
+func TestPerceptionUpdateContext(t *testing.T) {
+	request := perception.UpdateContextRequest{
+		Context: perception.UpdateContextData{
+			PromptID: "prompt-789",
+			Layer:    5,
+		},
+	}
+
+	expectedContext := perception.Context{
+		ID:             "context-123",
+		ThoughtID:      "thought-123",
+		PromptID:       "prompt-789",
+		Layer:          5,
+		ProvisionState: "active",
+	}
+
+	expectedResponse := perception.ContextResponse{
+		Data: expectedContext,
+	}
+
+	server := createMockServer(t, func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPatch {
+			t.Errorf("Expected PATCH request, got %s", r.Method)
+		}
+
+		if r.URL.Path != "/provision/perception/contexts/context-123" {
+			t.Errorf("Expected path /provision/perception/contexts/context-123, got %s", r.URL.Path)
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(expectedResponse)
+	})
+	defer server.Close()
+
+	config := tama.Config{
+		BaseURL: server.URL,
+		APIKey:  "test-key",
+		Timeout: 10 * time.Second,
+	}
+
+	client := tama.NewClient(config)
+	context, err := client.Perception.UpdateContext("context-123", request)
+
+	if err != nil {
+		t.Fatalf("Expected no error, got %v", err)
+	}
+
+	if context.PromptID != expectedContext.PromptID {
+		t.Errorf("Expected prompt_id %s, got %s", expectedContext.PromptID, context.PromptID)
+	}
+
+	if context.Layer != expectedContext.Layer {
+		t.Errorf("Expected layer %d, got %d", expectedContext.Layer, context.Layer)
+	}
+}
+
+func TestPerceptionReplaceContext(t *testing.T) {
+	request := perception.UpdateContextRequest{
+		Context: perception.UpdateContextData{
+			PromptID: "prompt-replaced",
+			Layer:    1,
+		},
+	}
+
+	expectedContext := perception.Context{
+		ID:             "context-123",
+		ThoughtID:      "thought-123",
+		PromptID:       "prompt-replaced",
+		Layer:          1,
+		ProvisionState: "active",
+	}
+
+	expectedResponse := perception.ContextResponse{
+		Data: expectedContext,
+	}
+
+	server := createMockServer(t, func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPut {
+			t.Errorf("Expected PUT request, got %s", r.Method)
+		}
+
+		if r.URL.Path != "/provision/perception/contexts/context-123" {
+			t.Errorf("Expected path /provision/perception/contexts/context-123, got %s", r.URL.Path)
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(expectedResponse)
+	})
+	defer server.Close()
+
+	config := tama.Config{
+		BaseURL: server.URL,
+		APIKey:  "test-key",
+		Timeout: 10 * time.Second,
+	}
+
+	client := tama.NewClient(config)
+	context, err := client.Perception.ReplaceContext("context-123", request)
+
+	if err != nil {
+		t.Fatalf("Expected no error, got %v", err)
+	}
+
+	if context.PromptID != expectedContext.PromptID {
+		t.Errorf("Expected prompt_id %s, got %s", expectedContext.PromptID, context.PromptID)
+	}
+
+	if context.Layer != expectedContext.Layer {
+		t.Errorf("Expected layer %d, got %d", expectedContext.Layer, context.Layer)
+	}
+}
+
+func TestPerceptionDeleteContext(t *testing.T) {
+	server := createMockServer(t, func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodDelete {
+			t.Errorf("Expected DELETE request, got %s", r.Method)
+		}
+
+		if r.URL.Path != "/provision/perception/contexts/context-123" {
+			t.Errorf("Expected path /provision/perception/contexts/context-123, got %s", r.URL.Path)
+		}
+
+		w.WriteHeader(http.StatusNoContent)
+	})
+	defer server.Close()
+
+	config := tama.Config{
+		BaseURL: server.URL,
+		APIKey:  "test-key",
+		Timeout: 10 * time.Second,
+	}
+
+	client := tama.NewClient(config)
+	err := client.Perception.DeleteContext("context-123")
+
+	if err != nil {
+		t.Fatalf("Expected no error, got %v", err)
+	}
+}
+
+func TestPerceptionGetContextEmptyID(t *testing.T) {
+	client := tama.NewClient(tama.Config{
+		BaseURL: "https://api.example.com",
+		APIKey:  "test-key",
+	})
+
+	_, err := client.Perception.GetContext("")
+	if err == nil {
+		t.Error("Expected validation error for empty context ID in GetContext")
+	}
+}
+
+func TestPerceptionUpdateContextEmptyID(t *testing.T) {
+	client := tama.NewClient(tama.Config{
+		BaseURL: "https://api.example.com",
+		APIKey:  "test-key",
+	})
+
+	_, err := client.Perception.UpdateContext("", perception.UpdateContextRequest{
+		Context: perception.UpdateContextData{PromptID: "test"},
+	})
+	if err == nil {
+		t.Error("Expected validation error for empty context ID in UpdateContext")
+	}
+}
+
+func TestPerceptionReplaceContextEmptyID(t *testing.T) {
+	client := tama.NewClient(tama.Config{
+		BaseURL: "https://api.example.com",
+		APIKey:  "test-key",
+	})
+
+	_, err := client.Perception.ReplaceContext("", perception.UpdateContextRequest{
+		Context: perception.UpdateContextData{PromptID: "test"},
+	})
+	if err == nil {
+		t.Error("Expected validation error for empty context ID in ReplaceContext")
+	}
+}
+
+func TestPerceptionDeleteContextEmptyID(t *testing.T) {
+	client := tama.NewClient(tama.Config{
+		BaseURL: "https://api.example.com",
+		APIKey:  "test-key",
+	})
+
+	err := client.Perception.DeleteContext("")
+	if err == nil {
+		t.Error("Expected validation error for empty context ID in DeleteContext")
+	}
+}
+
+func validateContextResponse(t *testing.T, actual, expected perception.Context) {
+	if actual.ID != expected.ID {
+		t.Errorf("Expected context ID %s, got %s", expected.ID, actual.ID)
+	}
+
+	if actual.ThoughtID != expected.ThoughtID {
+		t.Errorf("Expected context thought_id %s, got %s", expected.ThoughtID, actual.ThoughtID)
+	}
+
+	if actual.PromptID != expected.PromptID {
+		t.Errorf("Expected context prompt_id %s, got %s", expected.PromptID, actual.PromptID)
+	}
+
+	if actual.Layer != expected.Layer {
+		t.Errorf("Expected context layer %d, got %d", expected.Layer, actual.Layer)
+	}
+
+	if actual.ProvisionState != expected.ProvisionState {
+		t.Errorf("Expected context provision_state %s, got %s", expected.ProvisionState, actual.ProvisionState)
+	}
+}

@@ -145,6 +145,7 @@ The client library is organized into the following packages:
 - `chain.go` - Chain operations (GET, POST, PATCH, PUT, DELETE)
 - `thought.go` - Thought operations (GET, POST, PATCH, DELETE)
 - `path.go` - Path operations (GET, POST, PATCH, PUT, DELETE)
+- `context.go` - Context operations (GET, POST, PATCH, PUT, DELETE)
 
 ### Examples
 - `example/` - Working examples demonstrating all features
@@ -235,6 +236,15 @@ Note: Thoughts are associated with chains and contain module configurations for 
 - `DELETE /provision/perception/paths/:id` - Delete path
 
 Note: Paths are associated with thoughts and define target classes with configurable parameters.
+
+#### Contexts
+- `GET /provision/perception/contexts/:id` - Get context by ID
+- `POST /provision/perception/thoughts/:thought_id/contexts` - Create context in thought
+- `PATCH /provision/perception/contexts/:id` - Update context
+- `PUT /provision/perception/contexts/:id` - Replace context
+- `DELETE /provision/perception/contexts/:id` - Delete context
+
+Note: Contexts are associated with thoughts and contain prompt IDs with layer information for neural processing operations.
 
 ## Usage Examples
 
@@ -782,6 +792,40 @@ path, err := client.Perception.ReplacePath("path-123", perception.UpdatePathRequ
 err := client.Perception.DeletePath("path-123")
 ```
 
+### Perception Service - Contexts
+
+```go
+// Create a context
+context, err := client.Perception.CreateContext("thought-123", perception.CreateContextRequest{
+    Context: perception.ContextRequestData{
+        PromptID: "prompt-456",
+        Layer:    2,
+    },
+})
+
+// Get a context
+context, err := client.Perception.GetContext("context-123")
+
+// Update a context
+context, err := client.Perception.UpdateContext("context-123", perception.UpdateContextRequest{
+    Context: perception.UpdateContextData{
+        PromptID: "prompt-789",
+        Layer:    5,
+    },
+})
+
+// Replace a context
+context, err := client.Perception.ReplaceContext("context-123", perception.UpdateContextRequest{
+    Context: perception.UpdateContextData{
+        PromptID: "prompt-101",
+        Layer:    1,
+    },
+})
+
+// Delete a context
+err := client.Perception.DeleteContext("context-123")
+```
+
 #### Thought Module Configuration
 
 Thoughts contain module configurations that define AI processing operations:
@@ -962,6 +1006,7 @@ if err != nil {
 - **perception.Chain**: Perception chain resource with name, slug, and current state
 - **perception.Thought**: Thought resource with module configuration, relation, and index
 - **perception.Path**: Path resource with target class ID, parameters, and current state
+- **perception.Context**: Context resource with prompt ID, layer, and current state
 - **perception.Module**: Module configuration with reference and parameters
 - **perception.CreateChainRequest**: For creating new chains
 - **perception.UpdateChainRequest**: For updating existing chains
@@ -969,15 +1014,20 @@ if err != nil {
 - **perception.UpdateThoughtRequest**: For updating existing thoughts
 - **perception.CreatePathRequest**: For creating new paths
 - **perception.UpdatePathRequest**: For updating existing paths
+- **perception.CreateContextRequest**: For creating new contexts
+- **perception.UpdateContextRequest**: For updating existing contexts
 - **perception.ChainRequestData**: Chain data in create requests
 - **perception.UpdateChainData**: Chain data in update requests
 - **perception.ThoughtRequestData**: Thought data in create requests (includes optional OutputClassID)
 - **perception.UpdateThoughtData**: Thought data in update requests (includes optional OutputClassID)
 - **perception.PathRequestData**: Path data in create requests
 - **perception.UpdatePathData**: Path data in update requests
+- **perception.ContextRequestData**: Context data in create requests
+- **perception.UpdateContextData**: Context data in update requests
 - **perception.ChainResponse**: API response wrapper for chain operations
 - **perception.ThoughtResponse**: API response wrapper for thought operations
 - **perception.PathResponse**: API response wrapper for path operations
+- **perception.ContextResponse**: API response wrapper for context operations
 - **perception.Error**: Perception service specific error type
 
 ## Examples

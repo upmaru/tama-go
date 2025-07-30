@@ -163,6 +163,42 @@ type UpdatePathData struct {
 	Parameters    map[string]any `json:"parameters,omitempty"`
 }
 
+// Context represents a perception context resource.
+type Context struct {
+	ID             string `json:"id,omitempty"`
+	ThoughtID      string `json:"thought_id,omitempty"`
+	PromptID       string `json:"prompt_id"`
+	Layer          int    `json:"layer"`
+	ProvisionState string `json:"provision_state"`
+}
+
+// ContextResponse represents the API response for context operations.
+type ContextResponse struct {
+	Data Context `json:"data"`
+}
+
+// CreateContextRequest represents the request payload for creating a context.
+type CreateContextRequest struct {
+	Context ContextRequestData `json:"context"`
+}
+
+// ContextRequestData represents the context data in the request.
+type ContextRequestData struct {
+	PromptID string `json:"prompt_id"`
+	Layer    int    `json:"layer"`
+}
+
+// UpdateContextRequest represents the request payload for updating a context.
+type UpdateContextRequest struct {
+	Context UpdateContextData `json:"context"`
+}
+
+// UpdateContextData represents the context update data.
+type UpdateContextData struct {
+	PromptID string `json:"prompt_id,omitempty"`
+	Layer    int    `json:"layer,omitempty"`
+}
+
 // handleAPIError processes API error responses.
 func (s *Service) handleAPIError(resp any) error {
 	errResp, ok := s.extractErrorResponse(resp)
