@@ -511,6 +511,117 @@ Deletes a corpus by ID.
 **Returns:**
 - `error`: Error if request fails
 
+### Bridge Operations
+
+#### GetBridge(id string) (*Bridge, error)
+
+Retrieves a specific bridge by ID.
+
+**Endpoint:** `GET /provision/neural/bridges/:id`
+
+**Parameters:**
+- `id` (string): Bridge ID (required)
+
+**Returns:**
+- `*Bridge`: The bridge object
+- `error`: Error if request fails
+
+**Example:**
+```go
+bridge, err := client.Neural.GetBridge("bridge-123")
+if err != nil {
+    log.Fatal(err)
+}
+fmt.Printf("Bridge: %+v\n", bridge)
+```
+
+#### CreateBridge(spaceID string, req CreateBridgeRequest) (*Bridge, error)
+
+Creates a new bridge within a space.
+
+**Endpoint:** `POST /provision/neural/spaces/:space_id/bridges`
+
+**Parameters:**
+- `spaceID` (string): Space ID (required)
+- `req` (CreateBridgeRequest): Request payload
+
+**Request Structure:**
+```go
+type CreateBridgeRequest struct {
+    Bridge BridgeRequestData `json:"bridge"`
+}
+
+type BridgeRequestData struct {
+    TargetSpaceID string `json:"target_space_id"`
+}
+```
+
+**Example request:**
+```go
+createReq := neural.CreateBridgeRequest{
+    Bridge: neural.BridgeRequestData{
+        TargetSpaceID: "space-456",
+    },
+}
+
+bridge, err := client.Neural.CreateBridge("space-123", createReq)
+```
+
+**Returns:**
+- `*Bridge`: Created bridge
+- `error`: Error if request fails
+
+#### UpdateBridge(id string, req UpdateBridgeRequest) (*Bridge, error)
+
+Updates an existing bridge using PATCH.
+
+**Endpoint:** `PATCH /provision/neural/bridges/:id`
+
+**Parameters:**
+- `id` (string): Bridge ID (required)
+- `req` (UpdateBridgeRequest): Request payload
+
+**Request Structure:**
+```go
+type UpdateBridgeRequest struct {
+    Bridge UpdateBridgeData `json:"bridge"`
+}
+
+type UpdateBridgeData struct {
+    TargetSpaceID string `json:"target_space_id,omitempty"`
+}
+```
+
+**Returns:**
+- `*Bridge`: Updated bridge
+- `error`: Error if request fails
+
+#### ReplaceBridge(id string, req UpdateBridgeRequest) (*Bridge, error)
+
+Replaces an existing bridge using PUT.
+
+**Endpoint:** `PUT /provision/neural/bridges/:id`
+
+**Parameters:**
+- `id` (string): Bridge ID (required)
+- `req` (UpdateBridgeRequest): Request payload
+
+**Returns:**
+- `*Bridge`: Replaced bridge
+- `error`: Error if request fails
+
+#### DeleteBridge(id string) error
+
+Deletes a bridge by ID.
+
+**Endpoint:** `DELETE /provision/neural/bridges/:id`
+
+**Parameters:**
+- `id` (string): Bridge ID (required)
+
+**Returns:**
+- `error`: Error if request fails
+
 ## Memory Service
 
 Access via `client.Memory.*`
@@ -1910,6 +2021,22 @@ type UpdateCorpusRequest struct {
 }
 ```
 
+#### CreateBridgeRequest
+
+```go
+type CreateBridgeRequest struct {
+    Bridge BridgeRequestData `json:"bridge"`
+}
+```
+
+#### UpdateBridgeRequest
+
+```go
+type UpdateBridgeRequest struct {
+    Bridge UpdateBridgeData `json:"bridge"`
+}
+```
+
 #### CreateChainRequest
 
 ```go
@@ -2264,6 +2391,30 @@ type UpdateCorpusData struct {
 ```go
 type CorpusResponse struct {
     Data Corpus `json:"data"`
+}
+```
+
+#### BridgeRequestData
+
+```go
+type BridgeRequestData struct {
+    TargetSpaceID string `json:"target_space_id"`
+}
+```
+
+#### UpdateBridgeData
+
+```go
+type UpdateBridgeData struct {
+    TargetSpaceID string `json:"target_space_id,omitempty"`
+}
+```
+
+#### BridgeResponse
+
+```go
+type BridgeResponse struct {
+    Data Bridge `json:"data"`
 }
 ```
 

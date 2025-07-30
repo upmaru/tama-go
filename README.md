@@ -133,6 +133,7 @@ The client library is organized into the following packages:
 - `processor.go` - Processor operations (GET, POST, PATCH, PUT, DELETE)
 - `class.go` - Class operations (GET, POST, PATCH, PUT, DELETE)
 - `corpus.go` - Corpus operations (GET, POST, PATCH, PUT, DELETE)
+- `bridge.go` - Bridge operations (GET, POST, PATCH, PUT, DELETE)
 
 ### Sensory Package (`sensory/`)
 - `service.go` - Service definition and sensory-related types
@@ -185,6 +186,13 @@ The client provides comprehensive coverage of the Tama API endpoints, organized 
 - `PATCH /provision/neural/corpora/:id` - Update corpus
 - `PUT /provision/neural/corpora/:id` - Replace corpus
 - `DELETE /provision/neural/corpora/:id` - Delete corpus
+
+#### Bridges
+- `GET /provision/neural/bridges/:id` - Get bridge by ID
+- `POST /provision/neural/spaces/:space_id/bridges` - Create bridge in space
+- `PATCH /provision/neural/bridges/:id` - Update bridge
+- `PUT /provision/neural/bridges/:id` - Replace bridge
+- `DELETE /provision/neural/bridges/:id` - Delete bridge
 
 ### Sensory Resources (`/provision/sensory`)
 
@@ -448,6 +456,46 @@ corpus, err := client.Neural.ReplaceCorpus("corpus-123", neural.UpdateCorpusRequ
 // Delete a corpus
 err := client.Neural.DeleteCorpus("corpus-123")
 ```
+
+### Neural Service - Bridges
+
+```go
+import "github.com/upmaru/tama-go/neural"
+
+// Create a bridge
+bridge, err := client.Neural.CreateBridge("space-123", neural.CreateBridgeRequest{
+    Bridge: neural.BridgeRequestData{
+        TargetSpaceID: "space-456",
+    },
+})
+
+// Get a bridge
+bridge, err := client.Neural.GetBridge("bridge-123")
+
+// Update a bridge (partial update)
+bridge, err := client.Neural.UpdateBridge("bridge-123", neural.UpdateBridgeRequest{
+    Bridge: neural.UpdateBridgeData{
+        TargetSpaceID: "space-789",
+    },
+})
+
+// Replace a bridge (full replacement)
+bridge, err := client.Neural.ReplaceBridge("bridge-123", neural.UpdateBridgeRequest{
+    Bridge: neural.UpdateBridgeData{
+        TargetSpaceID: "space-999",
+    },
+})
+
+// Delete a bridge
+err := client.Neural.DeleteBridge("bridge-123")
+```
+
+#### Bridge Fields
+
+- **ID** (string): Unique identifier for the bridge (read-only)
+- **SpaceID** (string): ID of the source space (read-only, set from creation endpoint)
+- **TargetSpaceID** (string): ID of the target space that this bridge connects to (required)
+- **ProvisionState** (string): Current provisioning status (read-only)
 
 #### Corpus Fields
 
@@ -966,6 +1014,7 @@ if err != nil {
 - **neural.Processor**: Neural processor resource with type-specific configuration
 - **neural.Class**: Neural class resource with schema definition and metadata
 - **neural.Corpus**: Neural corpus resource with main flag, name, template, and state
+- **neural.Bridge**: Neural bridge resource connecting two spaces with target space ID and state
 - **neural.CreateSpaceRequest**: For creating new spaces
 - **neural.UpdateSpaceRequest**: For updating existing spaces
 - **neural.CreateProcessorRequest**: For creating new processors
@@ -974,6 +1023,8 @@ if err != nil {
 - **neural.UpdateClassRequest**: For updating existing classes
 - **neural.CreateCorpusRequest**: For creating new corpora
 - **neural.UpdateCorpusRequest**: For updating existing corpora
+- **neural.CreateBridgeRequest**: For creating new bridges
+- **neural.UpdateBridgeRequest**: For updating existing bridges
 - **neural.SpaceRequestData**: Space data in create requests
 - **neural.UpdateSpaceData**: Space data in update requests
 - **neural.ProcessorRequestData**: Processor data in create requests
@@ -982,10 +1033,13 @@ if err != nil {
 - **neural.UpdateClassData**: Class data in update requests
 - **neural.CorpusRequestData**: Corpus data in create requests
 - **neural.UpdateCorpusData**: Corpus data in update requests
+- **neural.BridgeRequestData**: Bridge data in create requests
+- **neural.UpdateBridgeData**: Bridge data in update requests
 - **neural.SpaceResponse**: API response wrapper for space operations
 - **neural.ProcessorResponse**: API response wrapper for processor operations
 - **neural.ClassResponse**: API response wrapper for class operations
 - **neural.CorpusResponse**: API response wrapper for corpus operations
+- **neural.BridgeResponse**: API response wrapper for bridge operations
 - **neural.Error**: Neural service specific error type
 
 ### Sensory Package Types
