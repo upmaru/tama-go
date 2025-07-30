@@ -193,6 +193,39 @@ type UpdateCorpusData struct {
 	Template string `json:"template,omitempty"`
 }
 
+// Bridge represents a neural bridge resource.
+type Bridge struct {
+	ID             string `json:"id,omitempty"`
+	SpaceID        string `json:"space_id"`
+	TargetSpaceID  string `json:"target_space_id"`
+	ProvisionState string `json:"provision_state"`
+}
+
+// BridgeResponse represents the API response for bridge operations.
+type BridgeResponse struct {
+	Data Bridge `json:"data"`
+}
+
+// CreateBridgeRequest represents the request payload for creating a bridge.
+type CreateBridgeRequest struct {
+	Bridge BridgeRequestData `json:"bridge"`
+}
+
+// BridgeRequestData represents the bridge data in the request.
+type BridgeRequestData struct {
+	TargetSpaceID string `json:"target_space_id"`
+}
+
+// UpdateBridgeRequest represents the request payload for updating a bridge.
+type UpdateBridgeRequest struct {
+	Bridge UpdateBridgeData `json:"bridge"`
+}
+
+// UpdateBridgeData represents the bridge update data.
+type UpdateBridgeData struct {
+	TargetSpaceID string `json:"target_space_id,omitempty"`
+}
+
 // handleAPIError processes API error responses.
 func (s *Service) handleAPIError(resp any) error {
 	errResp, ok := s.extractErrorResponse(resp)
