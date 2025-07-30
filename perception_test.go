@@ -747,6 +747,95 @@ func TestPerceptionCreateThoughtWithOutputClassID(t *testing.T) {
 	validateThoughtResponse(t, *thought, expectedThought)
 }
 
+func TestPerceptionCreateThoughtWithIndex(t *testing.T) {
+	request := perception.CreateThoughtRequest{
+		Thought: perception.ThoughtRequestData{
+			Relation: "description",
+			Index:    5,
+			Module: perception.Module{
+				Reference: "tama/agentic/generate",
+				Parameters: map[string]any{
+					"temperature": 0.8,
+					"max_tokens":  150,
+				},
+			},
+		},
+	}
+
+	expectedThought := perception.Thought{
+		ID:            "thought-456",
+		ChainID:       "chain-123",
+		OutputClassID: "class-123",
+		Module: perception.Module{
+			ID:        "module-456",
+			Reference: "tama/agentic/generate",
+			Parameters: map[string]any{
+				"temperature": 0.8,
+				"max_tokens":  150,
+			},
+		},
+		ProvisionState: "pending",
+		Relation:       "description",
+		Index:          5,
+	}
+
+	expectedResponse := perception.ThoughtResponse{
+		Data: expectedThought,
+	}
+
+	server := createMockServer(t, func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			t.Errorf("Expected POST request, got %s", r.Method)
+		}
+
+		if r.URL.Path != "/provision/perception/chains/chain-123/thoughts" {
+			t.Errorf("Expected path /provision/perception/chains/chain-123/thoughts, got %s", r.URL.Path)
+		}
+
+		var receivedRequest perception.CreateThoughtRequest
+		if err := json.NewDecoder(r.Body).Decode(&receivedRequest); err != nil {
+			t.Fatalf("Failed to decode request body: %v", err)
+		}
+
+		// Validate that the index is properly included in the request body
+		if receivedRequest.Thought.Index != request.Thought.Index {
+			t.Errorf("Expected thought index %d, got %d", request.Thought.Index, receivedRequest.Thought.Index)
+		}
+
+		if receivedRequest.Thought.Relation != request.Thought.Relation {
+			t.Errorf("Expected thought relation %s, got %s", request.Thought.Relation, receivedRequest.Thought.Relation)
+		}
+
+		if receivedRequest.Thought.Module.Reference != request.Thought.Module.Reference {
+			t.Errorf(
+				"Expected module reference %s, got %s",
+				request.Thought.Module.Reference,
+				receivedRequest.Thought.Module.Reference,
+			)
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusCreated)
+		json.NewEncoder(w).Encode(expectedResponse)
+	})
+	defer server.Close()
+
+	config := tama.Config{
+		BaseURL: server.URL,
+		APIKey:  "test-key",
+		Timeout: 10 * time.Second,
+	}
+
+	client := tama.NewClient(config)
+	thought, err := client.Perception.CreateThought("chain-123", request)
+
+	if err != nil {
+		t.Fatalf("Expected no error, got %v", err)
+	}
+
+	validateThoughtResponse(t, *thought, expectedThought)
+}
+
 func TestPerceptionCreateThoughtValidation(t *testing.T) {
 	client := tama.NewClient(tama.Config{
 		BaseURL: "https://api.example.com",
@@ -866,6 +955,188 @@ func TestPerceptionUpdateThought(t *testing.T) {
 	}
 }
 
+func TestPerceptionUpdateThoughtWithIndex(t *testing.T) {
+	request := perception.UpdateThoughtRequest{
+		Thought: perception.UpdateThoughtData{
+			Relation:      "updated-description",
+			OutputClassID: "class-789",
+			Index:         3,
+			Module: perception.Module{
+				Reference: "tama/agentic/analyze",
+				Parameters: map[string]any{
+					"depth": 3,
+				},
+			},
+		},
+	}
+
+	expectedThought := perception.Thought{
+		ID:            "thought-123",
+		ChainID:       "chain-123",
+		OutputClassID: "class-789",
+		Module: perception.Module{
+			ID:        "module-123",
+			Reference: "tama/agentic/analyze",
+			Parameters: map[string]any{
+				"depth": 3,
+			},
+		},
+		ProvisionState: "active",
+		Relation:       "updated-description",
+		Index:          3,
+	}
+
+	expectedResponse := perception.ThoughtResponse{
+		Data: expectedThought,
+	}
+
+	server := createMockServer(t, func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPatch {
+			t.Errorf("Expected PATCH request, got %s", r.Method)
+		}
+
+		if r.URL.Path != "/provision/perception/thoughts/thought-123" {
+			t.Errorf("Expected path /provision/perception/thoughts/thought-123, got %s", r.URL.Path)
+		}
+
+		var receivedRequest perception.UpdateThoughtRequest
+		if err := json.NewDecoder(r.Body).Decode(&receivedRequest); err != nil {
+			t.Fatalf("Failed to decode request body: %v", err)
+		}
+
+		// Validate that the index is properly included in the request body
+		if receivedRequest.Thought.Index != request.Thought.Index {
+			t.Errorf("Expected thought index %d, got %d", request.Thought.Index, receivedRequest.Thought.Index)
+		}
+
+		if receivedRequest.Thought.Relation != request.Thought.Relation {
+			t.Errorf("Expected thought relation %s, got %s", request.Thought.Relation, receivedRequest.Thought.Relation)
+		}
+
+		if receivedRequest.Thought.Module.Reference != request.Thought.Module.Reference {
+			t.Errorf(
+				"Expected module reference %s, got %s",
+				request.Thought.Module.Reference,
+				receivedRequest.Thought.Module.Reference,
+			)
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(expectedResponse)
+	})
+	defer server.Close()
+
+	config := tama.Config{
+		BaseURL: server.URL,
+		APIKey:  "test-key",
+		Timeout: 10 * time.Second,
+	}
+
+	client := tama.NewClient(config)
+	thought, err := client.Perception.UpdateThought("thought-123", request)
+
+	if err != nil {
+		t.Fatalf("Expected no error, got %v", err)
+	}
+
+	if thought.Relation != expectedThought.Relation {
+		t.Errorf("Expected thought relation %s, got %s", expectedThought.Relation, thought.Relation)
+	}
+
+	if thought.Module.Reference != expectedThought.Module.Reference {
+		t.Errorf("Expected module reference %s, got %s", expectedThought.Module.Reference, thought.Module.Reference)
+	}
+
+	if thought.Index != expectedThought.Index {
+		t.Errorf("Expected thought index %d, got %d", expectedThought.Index, thought.Index)
+	}
+}
+
+func TestPerceptionCreateThoughtWithZeroIndex(t *testing.T) {
+	request := perception.CreateThoughtRequest{
+		Thought: perception.ThoughtRequestData{
+			Relation: "description",
+			Index:    0, // Explicitly set zero index
+			Module: perception.Module{
+				Reference: "tama/agentic/generate",
+				Parameters: map[string]any{
+					"temperature": 0.8,
+					"max_tokens":  150,
+				},
+			},
+		},
+	}
+
+	expectedThought := perception.Thought{
+		ID:            "thought-456",
+		ChainID:       "chain-123",
+		OutputClassID: "class-123",
+		Module: perception.Module{
+			ID:        "module-456",
+			Reference: "tama/agentic/generate",
+			Parameters: map[string]any{
+				"temperature": 0.8,
+				"max_tokens":  150,
+			},
+		},
+		ProvisionState: "pending",
+		Relation:       "description",
+		Index:          0,
+	}
+
+	expectedResponse := perception.ThoughtResponse{
+		Data: expectedThought,
+	}
+
+	server := createMockServer(t, func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			t.Errorf("Expected POST request, got %s", r.Method)
+		}
+
+		if r.URL.Path != "/provision/perception/chains/chain-123/thoughts" {
+			t.Errorf("Expected path /provision/perception/chains/chain-123/thoughts, got %s", r.URL.Path)
+		}
+
+		var receivedRequest perception.CreateThoughtRequest
+		if err := json.NewDecoder(r.Body).Decode(&receivedRequest); err != nil {
+			t.Fatalf("Failed to decode request body: %v", err)
+		}
+
+		// Validate that zero index is properly included in the request body
+		if receivedRequest.Thought.Index != 0 {
+			t.Errorf("Expected thought index 0, got %d", receivedRequest.Thought.Index)
+		}
+
+		if receivedRequest.Thought.Relation != request.Thought.Relation {
+			t.Errorf("Expected thought relation %s, got %s", request.Thought.Relation, receivedRequest.Thought.Relation)
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusCreated)
+		json.NewEncoder(w).Encode(expectedResponse)
+	})
+	defer server.Close()
+
+	config := tama.Config{
+		BaseURL: server.URL,
+		APIKey:  "test-key",
+		Timeout: 10 * time.Second,
+	}
+
+	client := tama.NewClient(config)
+	thought, err := client.Perception.CreateThought("chain-123", request)
+
+	if err != nil {
+		t.Fatalf("Expected no error, got %v", err)
+	}
+
+	if thought.Index != 0 {
+		t.Errorf("Expected thought index 0, got %d", thought.Index)
+	}
+
+	validateThoughtResponse(t, *thought, expectedThought)
+}
+
 func TestPerceptionDeleteThought(t *testing.T) {
 	server := createMockServer(t, func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodDelete {
@@ -929,6 +1200,91 @@ func TestPerceptionDeleteThoughtEmptyID(t *testing.T) {
 	err := client.Perception.DeleteThought("")
 	if err == nil {
 		t.Error("Expected validation error for empty thought ID in DeleteThought")
+	}
+}
+
+func TestPerceptionUpdateThoughtWithZeroIndex(t *testing.T) {
+	request := perception.UpdateThoughtRequest{
+		Thought: perception.UpdateThoughtData{
+			Relation:      "updated-description",
+			OutputClassID: "class-789",
+			Index:         0, // Explicitly set zero index
+			Module: perception.Module{
+				Reference: "tama/agentic/analyze",
+				Parameters: map[string]any{
+					"depth": 3,
+				},
+			},
+		},
+	}
+
+	expectedThought := perception.Thought{
+		ID:            "thought-123",
+		ChainID:       "chain-123",
+		OutputClassID: "class-789",
+		Module: perception.Module{
+			ID:        "module-123",
+			Reference: "tama/agentic/analyze",
+			Parameters: map[string]any{
+				"depth": 3,
+			},
+		},
+		ProvisionState: "active",
+		Relation:       "updated-description",
+		Index:          0,
+	}
+
+	expectedResponse := perception.ThoughtResponse{
+		Data: expectedThought,
+	}
+
+	server := createMockServer(t, func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPatch {
+			t.Errorf("Expected PATCH request, got %s", r.Method)
+		}
+
+		if r.URL.Path != "/provision/perception/thoughts/thought-123" {
+			t.Errorf("Expected path /provision/perception/thoughts/thought-123, got %s", r.URL.Path)
+		}
+
+		var receivedRequest perception.UpdateThoughtRequest
+		if err := json.NewDecoder(r.Body).Decode(&receivedRequest); err != nil {
+			t.Fatalf("Failed to decode request body: %v", err)
+		}
+
+		// Validate that zero index is properly included in the request body
+		if receivedRequest.Thought.Index != 0 {
+			t.Errorf("Expected thought index 0, got %d", receivedRequest.Thought.Index)
+		}
+
+		if receivedRequest.Thought.Relation != request.Thought.Relation {
+			t.Errorf("Expected thought relation %s, got %s", request.Thought.Relation, receivedRequest.Thought.Relation)
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(expectedResponse)
+	})
+	defer server.Close()
+
+	config := tama.Config{
+		BaseURL: server.URL,
+		APIKey:  "test-key",
+		Timeout: 10 * time.Second,
+	}
+
+	client := tama.NewClient(config)
+	thought, err := client.Perception.UpdateThought("thought-123", request)
+
+	if err != nil {
+		t.Fatalf("Expected no error, got %v", err)
+	}
+
+	if thought.Index != 0 {
+		t.Errorf("Expected thought index 0, got %d", thought.Index)
+	}
+
+	if thought.Relation != expectedThought.Relation {
+		t.Errorf("Expected thought relation %s, got %s", expectedThought.Relation, thought.Relation)
 	}
 }
 
