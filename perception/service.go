@@ -277,7 +277,7 @@ func (s *Service) parseNestedError(body []byte, statusCode int) error {
 // flattenErrors recursively flattens nested error structures into dot-notation keys.
 func (s *Service) flattenErrors(data interface{}, prefix string, result map[string][]string) {
 	switch v := data.(type) {
-	case map[string]interface{}:
+	case map[string]any:
 		// Handle nested objects
 		for key, value := range v {
 			newPrefix := key
@@ -287,7 +287,7 @@ func (s *Service) flattenErrors(data interface{}, prefix string, result map[stri
 			s.flattenErrors(value, newPrefix, result)
 		}
 
-	case []interface{}:
+	case []any:
 		// Handle arrays - convert to []string if possible
 		var stringSlice []string
 		for _, item := range v {
