@@ -144,6 +144,7 @@ The client library is organized into the following packages:
 - `service.go` - Service definition and perception-related types
 - `chain.go` - Chain operations (GET, POST, PATCH, PUT, DELETE)
 - `thought.go` - Thought operations (GET, POST, PATCH, DELETE)
+- `path.go` - Path operations (GET, POST, PATCH, PUT, DELETE)
 
 ### Examples
 - `example/` - Working examples demonstrating all features
@@ -225,6 +226,15 @@ Note: Limits are associated with sources via the `source_id` field and track res
 - `DELETE /provision/perception/thoughts/:id` - Delete thought
 
 Note: Thoughts are associated with chains and contain module configurations for AI processing operations.
+
+#### Paths
+- `GET /provision/perception/paths/:id` - Get path by ID
+- `POST /provision/perception/thoughts/:thought_id/paths` - Create path in thought
+- `PATCH /provision/perception/paths/:id` - Update path
+- `PUT /provision/perception/paths/:id` - Replace path
+- `DELETE /provision/perception/paths/:id` - Delete path
+
+Note: Paths are associated with thoughts and define target classes with configurable parameters.
 
 ## Usage Examples
 
@@ -728,6 +738,50 @@ thought, err := client.Perception.UpdateThought("thought-123", perception.Update
 err := client.Perception.DeleteThought("thought-123")
 ```
 
+### Perception Service - Paths
+
+```go
+// Create a path
+path, err := client.Perception.CreatePath("thought-123", perception.CreatePathRequest{
+    Path: perception.PathRequestData{
+        TargetClassID: "class-456",
+        Parameters: map[string]any{
+            "threshold":    0.8,
+            "max_results":  10,
+            "output_format": "json",
+        },
+    },
+})
+
+// Get a path
+path, err := client.Perception.GetPath("path-123")
+
+// Update a path
+path, err := client.Perception.UpdatePath("path-123", perception.UpdatePathRequest{
+    Path: perception.UpdatePathData{
+        TargetClassID: "class-789",
+        Parameters: map[string]any{
+            "threshold":   0.9,
+            "max_results": 5,
+        },
+    },
+})
+
+// Replace a path
+path, err := client.Perception.ReplacePath("path-123", perception.UpdatePathRequest{
+    Path: perception.UpdatePathData{
+        TargetClassID: "class-101",
+        Parameters: map[string]any{
+            "mode": "strict",
+            "validation": true,
+        },
+    },
+})
+
+// Delete a path
+err := client.Perception.DeletePath("path-123")
+```
+
 #### Thought Module Configuration
 
 Thoughts contain module configurations that define AI processing operations:
@@ -907,17 +961,23 @@ if err != nil {
 
 - **perception.Chain**: Perception chain resource with name, slug, and current state
 - **perception.Thought**: Thought resource with module configuration, relation, and index
+- **perception.Path**: Path resource with target class ID, parameters, and current state
 - **perception.Module**: Module configuration with reference and parameters
 - **perception.CreateChainRequest**: For creating new chains
 - **perception.UpdateChainRequest**: For updating existing chains
 - **perception.CreateThoughtRequest**: For creating new thoughts
 - **perception.UpdateThoughtRequest**: For updating existing thoughts
+- **perception.CreatePathRequest**: For creating new paths
+- **perception.UpdatePathRequest**: For updating existing paths
 - **perception.ChainRequestData**: Chain data in create requests
 - **perception.UpdateChainData**: Chain data in update requests
 - **perception.ThoughtRequestData**: Thought data in create requests (includes optional OutputClassID)
 - **perception.UpdateThoughtData**: Thought data in update requests (includes optional OutputClassID)
+- **perception.PathRequestData**: Path data in create requests
+- **perception.UpdatePathData**: Path data in update requests
 - **perception.ChainResponse**: API response wrapper for chain operations
 - **perception.ThoughtResponse**: API response wrapper for thought operations
+- **perception.PathResponse**: API response wrapper for path operations
 - **perception.Error**: Perception service specific error type
 
 ## Examples

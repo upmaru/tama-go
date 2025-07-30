@@ -1265,6 +1265,99 @@ Deletes a thought by ID.
 
 **Endpoint:** `DELETE /provision/perception/thoughts/:id`
 
+### Path Operations
+
+#### GetPath(id string) (*Path, error)
+
+Retrieves a specific path by ID.
+
+**Endpoint:** `GET /provision/perception/paths/:id`
+
+**Parameters:**
+- `id` (string): Path ID (required)
+
+**Returns:**
+- `*Path`: Path object with ID, ThoughtID, TargetClassID, Parameters, and ProvisionState
+- `error`: Error if request fails
+
+**Example:**
+```go
+path, err := client.Perception.GetPath("path-123")
+if err != nil {
+    log.Printf("Error: %v", err)
+    return
+}
+log.Printf("Path: %s (%s)", path.TargetClassID, path.ProvisionState)
+```
+
+#### CreatePath(thoughtID string, req CreatePathRequest) (*Path, error)
+
+Creates a new path within a thought.
+
+**Endpoint:** `POST /provision/perception/thoughts/:thought_id/paths`
+
+**Parameters:**
+- `thoughtID` (string): Thought ID (required)
+- `req` (CreatePathRequest): Path creation request (required)
+
+```go
+type CreatePathRequest struct {
+    Path PathRequestData `json:"path"`
+}
+
+type PathRequestData struct {
+    TargetClassID string         `json:"target_class_id"`
+    Parameters    map[string]any `json:"parameters,omitempty"`
+}
+```
+
+**Returns:**
+- `*Path`: Created path object
+- `error`: Error if request fails
+
+**Example:**
+```go
+path, err := client.Perception.CreatePath("thought-123", perception.CreatePathRequest{
+    Path: perception.PathRequestData{
+        TargetClassID: "class-456",
+        Parameters: map[string]any{
+            "threshold":    0.8,
+            "max_results":  10,
+            "output_format": "json",
+        },
+    },
+})
+```
+
+#### UpdatePath(id string, req UpdatePathRequest) (*Path, error)
+
+Updates an existing path using PATCH.
+
+**Endpoint:** `PATCH /provision/perception/paths/:id`
+
+```go
+type UpdatePathRequest struct {
+    Path UpdatePathData `json:"path"`
+}
+
+type UpdatePathData struct {
+    TargetClassID string         `json:"target_class_id,omitempty"`
+    Parameters    map[string]any `json:"parameters,omitempty"`
+}
+```
+
+#### ReplacePath(id string, req UpdatePathRequest) (*Path, error)
+
+Replaces an existing path using PUT.
+
+**Endpoint:** `PUT /provision/perception/paths/:id`
+
+#### DeletePath(id string) error
+
+Deletes a path by ID.
+
+**Endpoint:** `DELETE /provision/perception/paths/:id`
+
 ## Error Handling
 
 ### Error Type
@@ -1532,6 +1625,18 @@ type Thought struct {
 }
 ```
 
+#### Path
+
+```go
+type Path struct {
+    ID             string         `json:"id,omitempty"`
+    ThoughtID      string         `json:"thought_id,omitempty"`
+    ProvisionState string         `json:"provision_state"`
+    TargetClassID  string         `json:"target_class_id"`
+    Parameters     map[string]any `json:"parameters,omitempty"`
+}
+```
+
 #### Module
 
 ```go
@@ -1733,6 +1838,22 @@ type CreateThoughtRequest struct {
 ```go
 type UpdateThoughtRequest struct {
     Thought UpdateThoughtData `json:"thought"`
+}
+```
+
+#### CreatePathRequest
+
+```go
+type CreatePathRequest struct {
+    Path PathRequestData `json:"path"`
+}
+```
+
+#### UpdatePathRequest
+
+```go
+type UpdatePathRequest struct {
+    Path UpdatePathData `json:"path"`
 }
 ```
 
@@ -2081,6 +2202,24 @@ type UpdateThoughtData struct {
 }
 ```
 
+#### PathRequestData
+
+```go
+type PathRequestData struct {
+    TargetClassID string         `json:"target_class_id"`
+    Parameters    map[string]any `json:"parameters,omitempty"`
+}
+```
+
+#### UpdatePathData
+
+```go
+type UpdatePathData struct {
+    TargetClassID string         `json:"target_class_id,omitempty"`
+    Parameters    map[string]any `json:"parameters,omitempty"`
+}
+```
+
 #### ChainResponse
 
 ```go
@@ -2094,6 +2233,14 @@ type ChainResponse struct {
 ```go
 type ThoughtResponse struct {
     Data Thought `json:"data"`
+}
+```
+
+#### PathResponse
+
+```go
+type PathResponse struct {
+    Data Path `json:"data"`
 }
 ```
 
