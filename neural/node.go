@@ -28,8 +28,8 @@ type CreateNodeRequest struct {
 
 // NodeRequestData represents the node data in the request.
 type NodeRequestData struct {
-	On     string `json:"on,omitempty"`
-	Type   string `json:"type"`
+	On      string `json:"on,omitempty"`
+	Type    string `json:"type"`
 	ClassID string `json:"class_id"`
 	ChainID string `json:"chain_id"`
 }
@@ -41,8 +41,8 @@ type UpdateNodeRequest struct {
 
 // UpdateNodeData represents the node update data.
 type UpdateNodeData struct {
-	On     string `json:"on,omitempty"`
-	Type   string `json:"type,omitempty"`
+	On   string `json:"on,omitempty"`
+	Type string `json:"type,omitempty"`
 }
 
 // GetNode retrieves a specific node by ID.

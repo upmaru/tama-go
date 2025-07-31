@@ -46,7 +46,6 @@ func (e *Error) Error() string {
 	return "API error"
 }
 
-
 // handleAPIError processes API error responses.
 func (s *Service) handleAPIError(resp any) error {
 	errResp, ok := s.extractErrorResponse(resp)

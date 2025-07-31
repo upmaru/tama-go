@@ -1,4 +1,3 @@
-//nolint:dupl // CRUD operations follow the same pattern as chain.go
 package perception
 
 import (
