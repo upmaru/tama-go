@@ -8,6 +8,44 @@ import (
 // This file contains all Model-related operations for the SensoryService.
 // Models represent machine learning models with identifiers and paths.
 
+// Model represents a sensory model resource.
+type Model struct {
+	ID             string         `json:"id,omitempty"`
+	Identifier     string         `json:"identifier"`
+	Path           string         `json:"path"`
+	Parameters     map[string]any `json:"parameters,omitempty"`
+	ProvisionState string         `json:"provision_state"`
+}
+
+// ModelResponse represents the API response for model operations.
+type ModelResponse struct {
+	Data Model `json:"data"`
+}
+
+// CreateModelRequest represents the request payload for creating a model.
+type CreateModelRequest struct {
+	Model ModelRequestData `json:"model"`
+}
+
+// ModelRequestData represents the model data in the request.
+type ModelRequestData struct {
+	Identifier string         `json:"identifier"`
+	Path       string         `json:"path"`
+	Parameters map[string]any `json:"parameters,omitempty"`
+}
+
+// UpdateModelRequest represents the request payload for updating a model.
+type UpdateModelRequest struct {
+	Model UpdateModelData `json:"model"`
+}
+
+// UpdateModelData represents the model update data.
+type UpdateModelData struct {
+	Identifier string         `json:"identifier,omitempty"`
+	Path       string         `json:"path,omitempty"`
+	Parameters map[string]any `json:"parameters,omitempty"`
+}
+
 // Model operations
 
 // GetModel retrieves a specific model by ID.

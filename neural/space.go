@@ -5,6 +5,42 @@ import (
 	"fmt"
 )
 
+// Space represents a neural space resource.
+type Space struct {
+	ID             string `json:"id,omitempty"`
+	Name           string `json:"name"`
+	Slug           string `json:"slug,omitempty"`
+	Type           string `json:"type"`
+	ProvisionState string `json:"provision_state"`
+}
+
+// SpaceResponse represents the API response for space operations.
+type SpaceResponse struct {
+	Data Space `json:"data"`
+}
+
+// CreateSpaceRequest represents the request payload for creating a space.
+type CreateSpaceRequest struct {
+	Space SpaceRequestData `json:"space"`
+}
+
+// SpaceRequestData represents the space data in the request.
+type SpaceRequestData struct {
+	Name string `json:"name"`
+	Type string `json:"type"`
+}
+
+// UpdateSpaceRequest represents the request payload for updating a space.
+type UpdateSpaceRequest struct {
+	Space UpdateSpaceData `json:"space"`
+}
+
+// UpdateSpaceData represents the space update data.
+type UpdateSpaceData struct {
+	Name string `json:"name,omitempty"`
+	Type string `json:"type,omitempty"`
+}
+
 // GetSpace retrieves a specific space by ID.
 // GET /provision/neural/spaces/:id.
 func (s *Service) GetSpace(id string) (*Space, error) {

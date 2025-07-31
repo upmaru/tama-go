@@ -1,10 +1,45 @@
-//nolint:dupl // CRUD operations follow the same pattern as chain.go
 package perception
 
 import (
 	"errors"
 	"fmt"
 )
+
+// Path represents a perception path resource.
+type Path struct {
+	ID             string         `json:"id,omitempty"`
+	ThoughtID      string         `json:"thought_id,omitempty"`
+	ProvisionState string         `json:"provision_state"`
+	TargetClassID  string         `json:"target_class_id"`
+	Parameters     map[string]any `json:"parameters,omitempty"`
+}
+
+// PathResponse represents the API response for path operations.
+type PathResponse struct {
+	Data Path `json:"data"`
+}
+
+// CreatePathRequest represents the request payload for creating a path.
+type CreatePathRequest struct {
+	Path PathRequestData `json:"path"`
+}
+
+// PathRequestData represents the path data in the request.
+type PathRequestData struct {
+	TargetClassID string         `json:"target_class_id"`
+	Parameters    map[string]any `json:"parameters,omitempty"`
+}
+
+// UpdatePathRequest represents the request payload for updating a path.
+type UpdatePathRequest struct {
+	Path UpdatePathData `json:"path"`
+}
+
+// UpdatePathData represents the path update data.
+type UpdatePathData struct {
+	TargetClassID string         `json:"target_class_id,omitempty"`
+	Parameters    map[string]any `json:"parameters,omitempty"`
+}
 
 // GetPath retrieves a specific path by ID.
 // GET /provision/perception/paths/:id.

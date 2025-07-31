@@ -1,10 +1,45 @@
-//nolint:dupl // CRUD operations follow the same pattern as path.go
 package perception
 
 import (
 	"errors"
 	"fmt"
 )
+
+// Context represents a perception context resource.
+type Context struct {
+	ID             string `json:"id,omitempty"`
+	ThoughtID      string `json:"thought_id,omitempty"`
+	PromptID       string `json:"prompt_id"`
+	Layer          int    `json:"layer"`
+	ProvisionState string `json:"provision_state"`
+}
+
+// ContextResponse represents the API response for context operations.
+type ContextResponse struct {
+	Data Context `json:"data"`
+}
+
+// CreateContextRequest represents the request payload for creating a context.
+type CreateContextRequest struct {
+	Context ContextRequestData `json:"context"`
+}
+
+// ContextRequestData represents the context data in the request.
+type ContextRequestData struct {
+	PromptID string `json:"prompt_id"`
+	Layer    int    `json:"layer"`
+}
+
+// UpdateContextRequest represents the request payload for updating a context.
+type UpdateContextRequest struct {
+	Context UpdateContextData `json:"context"`
+}
+
+// UpdateContextData represents the context update data.
+type UpdateContextData struct {
+	PromptID string `json:"prompt_id,omitempty"`
+	Layer    int    `json:"layer,omitempty"`
+}
 
 // GetContext retrieves a specific context by ID.
 // GET /provision/perception/contexts/:id.

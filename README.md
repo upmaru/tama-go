@@ -153,6 +153,18 @@ The client library is organized into the following packages:
 
 This modular structure separates concerns into different packages, making the codebase easier to navigate, maintain, and extend. Each service package encapsulates its related functionality with its own types and operations.
 
+## Documentation
+
+Detailed API documentation is available in the [`docs/`](docs/) directory:
+
+- **[Client Configuration](docs/client_configuration.md)** - How to configure and initialize the Tama client
+- **[Neural Service](docs/neural.md)** - Space, Processor, Class, Corpus, and Bridge operations
+- **[Memory Service](docs/memory.md)** - Prompt operations and memory management
+- **[Sensory Service](docs/sensory.md)** - Source, Model, Limit, Specification, and Identity operations
+- **[Perception Service](docs/perception.md)** - Chain, Thought, Path, and Context operations
+
+For a complete overview, see the [documentation index](docs/README.md).
+
 ## API Coverage
 
 The client provides comprehensive coverage of the Tama API endpoints, organized by resource type:

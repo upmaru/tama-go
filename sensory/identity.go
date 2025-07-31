@@ -8,6 +8,50 @@ import (
 // This file contains all Identity-related operations for the SensoryService.
 // Identities represent provisioned instances of specifications with validation endpoints.
 
+// Validation represents the validation configuration for an identity.
+type Validation struct {
+	Path   string `json:"path"`
+	Method string `json:"method"`
+	Codes  []int  `json:"codes"`
+}
+
+// Identity represents a sensory identity resource.
+type Identity struct {
+	ID              string     `json:"id,omitempty"`
+	SpecificationID string     `json:"specification_id"`
+	ProvisionState  string     `json:"provision_state"`
+	CurrentState    string     `json:"current_state"`
+	Identifier      string     `json:"identifier"`
+	Validation      Validation `json:"validation"`
+}
+
+// IdentityResponse represents the API response for identity operations.
+type IdentityResponse struct {
+	Data Identity `json:"data"`
+}
+
+// CreateIdentityRequest represents the request payload for creating an identity.
+type CreateIdentityRequest struct {
+	Identity IdentityRequestData `json:"identity"`
+}
+
+// IdentityRequestData represents the identity data in the request.
+type IdentityRequestData struct {
+	APIKey     string     `json:"api_key"`
+	Validation Validation `json:"validation"`
+}
+
+// UpdateIdentityRequest represents the request payload for updating an identity.
+type UpdateIdentityRequest struct {
+	Identity UpdateIdentityData `json:"identity"`
+}
+
+// UpdateIdentityData represents the identity update data.
+type UpdateIdentityData struct {
+	APIKey     string      `json:"api_key,omitempty"`
+	Validation *Validation `json:"validation,omitempty"`
+}
+
 // Identity operations
 
 // GetIdentity retrieves a specific identity by ID.

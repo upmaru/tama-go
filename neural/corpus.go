@@ -5,6 +5,45 @@ import (
 	"fmt"
 )
 
+// Corpus represents a neural corpus resource.
+type Corpus struct {
+	ID             string `json:"id,omitempty"`
+	Main           bool   `json:"main"`
+	Name           string `json:"name"`
+	Slug           string `json:"slug,omitempty"`
+	Template       string `json:"template"`
+	ProvisionState string `json:"provision_state,omitempty"`
+}
+
+// CorpusResponse represents the API response for corpus operations.
+type CorpusResponse struct {
+	Data Corpus `json:"data"`
+}
+
+// CreateCorpusRequest represents the request payload for creating a corpus.
+type CreateCorpusRequest struct {
+	Corpus CorpusRequestData `json:"corpus"`
+}
+
+// CorpusRequestData represents the corpus data in the request.
+type CorpusRequestData struct {
+	Main     bool   `json:"main"`
+	Name     string `json:"name"`
+	Template string `json:"template"`
+}
+
+// UpdateCorpusRequest represents the request payload for updating a corpus.
+type UpdateCorpusRequest struct {
+	Corpus UpdateCorpusData `json:"corpus"`
+}
+
+// UpdateCorpusData represents the corpus update data.
+type UpdateCorpusData struct {
+	Main     *bool  `json:"main,omitempty"`
+	Name     string `json:"name,omitempty"`
+	Template string `json:"template,omitempty"`
+}
+
 // GetCorpus retrieves a specific corpus by ID.
 // GET /provision/neural/corpora/:id.
 func (s *Service) GetCorpus(id string) (*Corpus, error) {
