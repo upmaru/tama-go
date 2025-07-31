@@ -143,3 +143,82 @@ type ProcessorRequestData struct {
 ```
 
 **Returns:**
+- `*Processor`: Created processor object
+- `error`: Error if request fails
+
+### Node Operations
+
+#### GetNode(id string) (*Node, error)
+
+Retrieves a specific neural node by ID.
+
+**Endpoint:** `GET /provision/neural/nodes/:id`
+
+**Parameters:**
+- `id` (string): Node ID (required)
+
+**Returns:**
+- `*Node`: Node object with relevant node details
+- `error`: Error if request fails
+
+**Example:**
+```go
+node, err := client.Neural.GetNode("node-123")
+if err != nil {
+    log.Fatal(err)
+}
+fmt.Printf("Node: %+v\n", node)
+```
+
+#### CreateNode(req CreateNodeRequest) (*Node, error)
+
+Creates a new neural node.
+
+**Endpoint:** `POST /provision/neural/nodes`
+
+**Parameters:**
+- `req` (CreateNodeRequest): Node creation request
+
+**Returns:**
+- `*Node`: Created node object with all fields
+- `error`: Error if request fails
+
+#### UpdateNode(id string, req UpdateNodeRequest) (*Node, error)
+
+Updates an existing node using PATCH (partial update).
+
+**Endpoint:** `PATCH /provision/neural/nodes/:id`
+
+**Parameters:**
+- `id` (string): Node ID (required)
+- `req` (UpdateNodeRequest): Update request
+
+**Returns:**
+- `*Node`: Updated node object with all fields
+- `error`: Error if request fails
+
+#### ReplaceNode(id string, req UpdateNodeRequest) (*Node, error)
+
+Replaces an existing node using PUT (full replacement).
+
+**Endpoint:** `PUT /provision/neural/nodes/:id`
+
+**Parameters:**
+- `id` (string): Node ID (required)
+- `req` (UpdateNodeRequest): Replacement request
+
+**Returns:**
+- `*Node`: Updated node object with all fields
+- `error`: Error if request fails
+
+#### DeleteNode(id string) error
+
+Deletes a node by ID.
+
+**Endpoint:** `DELETE /provision/neural/nodes/:id`
+
+**Parameters:**
+- `id` (string): Node ID (required)
+
+**Returns:**
+- `error`: Error if request fails
