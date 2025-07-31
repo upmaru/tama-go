@@ -46,213 +46,6 @@ func (e *Error) Error() string {
 	return "API error"
 }
 
-// SourceCredential represents the credential structure for sources.
-type SourceCredential struct {
-	APIKey string `json:"api_key"`
-}
-
-// Source represents a sensory source resource.
-type Source struct {
-	ID             string `json:"id,omitempty"`
-	Name           string `json:"name"`
-	Endpoint       string `json:"endpoint"`
-	SpaceID        string `json:"space_id"`
-	Type           string `json:"type"`
-	ProvisionState string `json:"provision_state"`
-}
-
-// Model represents a sensory model resource.
-type Model struct {
-	ID             string         `json:"id,omitempty"`
-	Identifier     string         `json:"identifier"`
-	Path           string         `json:"path"`
-	Parameters     map[string]any `json:"parameters,omitempty"`
-	ProvisionState string         `json:"provision_state"`
-}
-
-// Limit represents a sensory limit resource.
-type Limit struct {
-	ID             string `json:"id,omitempty"`
-	SourceID       string `json:"source_id"`
-	Count          int    `json:"count"`
-	ScaleUnit      string `json:"scale_unit"`
-	ScaleCount     int    `json:"scale_count"`
-	ProvisionState string `json:"provision_state"`
-}
-
-// Specification represents a sensory specification resource.
-type Specification struct {
-	ID             string         `json:"id,omitempty"`
-	SpaceID        string         `json:"space_id"`
-	Schema         map[string]any `json:"schema"`
-	Version        string         `json:"version"`
-	Endpoint       string         `json:"endpoint"`
-	CurrentState   string         `json:"current_state"`
-	ProvisionState string         `json:"provision_state"`
-}
-
-// Validation represents the validation configuration for an identity.
-type Validation struct {
-	Path   string `json:"path"`
-	Method string `json:"method"`
-	Codes  []int  `json:"codes"`
-}
-
-// Identity represents a sensory identity resource.
-type Identity struct {
-	ID              string     `json:"id,omitempty"`
-	SpecificationID string     `json:"specification_id"`
-	ProvisionState  string     `json:"provision_state"`
-	CurrentState    string     `json:"current_state"`
-	Identifier      string     `json:"identifier"`
-	Validation      Validation `json:"validation"`
-}
-
-// SourceResponse represents the API response for source operations.
-type SourceResponse struct {
-	Data Source `json:"data"`
-}
-
-// ModelResponse represents the API response for model operations.
-type ModelResponse struct {
-	Data Model `json:"data"`
-}
-
-// LimitResponse represents the API response for limit operations.
-type LimitResponse struct {
-	Data Limit `json:"data"`
-}
-
-// SpecificationResponse represents the API response for specification operations.
-type SpecificationResponse struct {
-	Data Specification `json:"data"`
-}
-
-// IdentityResponse represents the API response for identity operations.
-type IdentityResponse struct {
-	Data Identity `json:"data"`
-}
-
-// CreateSourceRequest represents the request payload for creating a source.
-type CreateSourceRequest struct {
-	Source SourceRequestData `json:"source"`
-}
-
-// SourceRequestData represents the source data in the request.
-type SourceRequestData struct {
-	Name       string           `json:"name"`
-	Type       string           `json:"type"`
-	Endpoint   string           `json:"endpoint"`
-	Credential SourceCredential `json:"credential"`
-}
-
-// UpdateSourceRequest represents the request payload for updating a source.
-type UpdateSourceRequest struct {
-	Source UpdateSourceData `json:"source"`
-}
-
-// UpdateSourceData represents the source update data.
-type UpdateSourceData struct {
-	Name       string            `json:"name,omitempty"`
-	Type       string            `json:"type,omitempty"`
-	Endpoint   string            `json:"endpoint,omitempty"`
-	Credential *SourceCredential `json:"credential,omitempty"`
-}
-
-// CreateModelRequest represents the request payload for creating a model.
-type CreateModelRequest struct {
-	Model ModelRequestData `json:"model"`
-}
-
-// ModelRequestData represents the model data in the request.
-type ModelRequestData struct {
-	Identifier string         `json:"identifier"`
-	Path       string         `json:"path"`
-	Parameters map[string]any `json:"parameters,omitempty"`
-}
-
-// UpdateModelRequest represents the request payload for updating a model.
-type UpdateModelRequest struct {
-	Model UpdateModelData `json:"model"`
-}
-
-// UpdateModelData represents the model update data.
-type UpdateModelData struct {
-	Identifier string         `json:"identifier,omitempty"`
-	Path       string         `json:"path,omitempty"`
-	Parameters map[string]any `json:"parameters,omitempty"`
-}
-
-// CreateLimitRequest represents the request payload for creating a limit.
-type CreateLimitRequest struct {
-	Limit LimitRequestData `json:"limit"`
-}
-
-// LimitRequestData represents the limit data in the request.
-type LimitRequestData struct {
-	ScaleUnit  string `json:"scale_unit"`
-	ScaleCount int    `json:"scale_count"`
-	Count      int    `json:"count"`
-}
-
-// UpdateLimitRequest represents the request payload for updating a limit.
-type UpdateLimitRequest struct {
-	Limit UpdateLimitData `json:"limit"`
-}
-
-// UpdateLimitData represents the limit update data.
-type UpdateLimitData struct {
-	ScaleUnit      string `json:"scale_unit,omitempty"`
-	ScaleCount     int    `json:"scale_count,omitempty"`
-	Count          int    `json:"count,omitempty"`
-	ProvisionState string `json:"provision_state,omitempty"`
-}
-
-// CreateSpecificationRequest represents the request payload for creating a specification.
-type CreateSpecificationRequest struct {
-	Specification SpecificationRequestData `json:"specification"`
-}
-
-// SpecificationRequestData represents the specification data in the request.
-type SpecificationRequestData struct {
-	Schema   map[string]any `json:"schema"`
-	Version  string         `json:"version"`
-	Endpoint string         `json:"endpoint"`
-}
-
-// UpdateSpecificationRequest represents the request payload for updating a specification.
-type UpdateSpecificationRequest struct {
-	Specification UpdateSpecificationData `json:"specification"`
-}
-
-// UpdateSpecificationData represents the specification update data.
-type UpdateSpecificationData struct {
-	Schema   map[string]any `json:"schema,omitempty"`
-	Version  string         `json:"version,omitempty"`
-	Endpoint string         `json:"endpoint,omitempty"`
-}
-
-// CreateIdentityRequest represents the request payload for creating an identity.
-type CreateIdentityRequest struct {
-	Identity IdentityRequestData `json:"identity"`
-}
-
-// IdentityRequestData represents the identity data in the request.
-type IdentityRequestData struct {
-	APIKey     string     `json:"api_key"`
-	Validation Validation `json:"validation"`
-}
-
-// UpdateIdentityRequest represents the request payload for updating an identity.
-type UpdateIdentityRequest struct {
-	Identity UpdateIdentityData `json:"identity"`
-}
-
-// UpdateIdentityData represents the identity update data.
-type UpdateIdentityData struct {
-	APIKey     string      `json:"api_key,omitempty"`
-	Validation *Validation `json:"validation,omitempty"`
-}
 
 // handleAPIError processes API error responses.
 func (s *Service) handleAPIError(resp any) error {
@@ -305,7 +98,7 @@ func (s *Service) parseErrorFromBody(body []byte, statusCode int) error {
 // parseNestedError parses errors with arbitrary nesting depth (e.g., module.config.database.connection).
 func (s *Service) parseNestedError(body []byte, statusCode int) error {
 	var rawNestedError struct {
-		Errors interface{} `json:"errors"`
+		Errors any `json:"errors"`
 	}
 
 	if err := json.Unmarshal(body, &rawNestedError); err == nil && rawNestedError.Errors != nil {
@@ -323,9 +116,9 @@ func (s *Service) parseNestedError(body []byte, statusCode int) error {
 }
 
 // flattenErrors recursively flattens nested error structures into dot-notation keys.
-func (s *Service) flattenErrors(data interface{}, prefix string, result map[string][]string) {
+func (s *Service) flattenErrors(data any, prefix string, result map[string][]string) {
 	switch v := data.(type) {
-	case map[string]interface{}:
+	case map[string]any:
 		// Handle nested objects
 		for key, value := range v {
 			newPrefix := key
@@ -335,7 +128,7 @@ func (s *Service) flattenErrors(data interface{}, prefix string, result map[stri
 			s.flattenErrors(value, newPrefix, result)
 		}
 
-	case []interface{}:
+	case []any:
 		// Handle arrays - convert to []string if possible
 		var stringSlice []string
 		for _, item := range v {

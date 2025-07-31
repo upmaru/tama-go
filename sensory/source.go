@@ -9,6 +9,52 @@ import (
 // This file contains all Source-related operations for the SensoryService.
 // Sources represent data sources with endpoints and credentials.
 
+// SourceCredential represents the credential structure for sources.
+type SourceCredential struct {
+	APIKey string `json:"api_key"`
+}
+
+// Source represents a sensory source resource.
+type Source struct {
+	ID             string `json:"id,omitempty"`
+	Name           string `json:"name"`
+	Endpoint       string `json:"endpoint"`
+	SpaceID        string `json:"space_id"`
+	Type           string `json:"type"`
+	ProvisionState string `json:"provision_state"`
+}
+
+// SourceResponse represents the API response for source operations.
+type SourceResponse struct {
+	Data Source `json:"data"`
+}
+
+// CreateSourceRequest represents the request payload for creating a source.
+type CreateSourceRequest struct {
+	Source SourceRequestData `json:"source"`
+}
+
+// SourceRequestData represents the source data in the request.
+type SourceRequestData struct {
+	Name       string           `json:"name"`
+	Type       string           `json:"type"`
+	Endpoint   string           `json:"endpoint"`
+	Credential SourceCredential `json:"credential"`
+}
+
+// UpdateSourceRequest represents the request payload for updating a source.
+type UpdateSourceRequest struct {
+	Source UpdateSourceData `json:"source"`
+}
+
+// UpdateSourceData represents the source update data.
+type UpdateSourceData struct {
+	Name       string            `json:"name,omitempty"`
+	Type       string            `json:"type,omitempty"`
+	Endpoint   string            `json:"endpoint,omitempty"`
+	Credential *SourceCredential `json:"credential,omitempty"`
+}
+
 // Source operations
 
 // GetSource retrieves a specific source by ID.

@@ -9,6 +9,46 @@ import (
 // This file contains all Limit-related operations for the SensoryService.
 // Limits represent rate limits and restrictions with scale units and counts.
 
+// Limit represents a sensory limit resource.
+type Limit struct {
+	ID             string `json:"id,omitempty"`
+	SourceID       string `json:"source_id"`
+	Count          int    `json:"count"`
+	ScaleUnit      string `json:"scale_unit"`
+	ScaleCount     int    `json:"scale_count"`
+	ProvisionState string `json:"provision_state"`
+}
+
+// LimitResponse represents the API response for limit operations.
+type LimitResponse struct {
+	Data Limit `json:"data"`
+}
+
+// CreateLimitRequest represents the request payload for creating a limit.
+type CreateLimitRequest struct {
+	Limit LimitRequestData `json:"limit"`
+}
+
+// LimitRequestData represents the limit data in the request.
+type LimitRequestData struct {
+	ScaleUnit  string `json:"scale_unit"`
+	ScaleCount int    `json:"scale_count"`
+	Count      int    `json:"count"`
+}
+
+// UpdateLimitRequest represents the request payload for updating a limit.
+type UpdateLimitRequest struct {
+	Limit UpdateLimitData `json:"limit"`
+}
+
+// UpdateLimitData represents the limit update data.
+type UpdateLimitData struct {
+	ScaleUnit      string `json:"scale_unit,omitempty"`
+	ScaleCount     int    `json:"scale_count,omitempty"`
+	Count          int    `json:"count,omitempty"`
+	ProvisionState string `json:"provision_state,omitempty"`
+}
+
 // Limit operations
 
 // GetLimit retrieves a specific limit by ID.

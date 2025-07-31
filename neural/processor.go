@@ -5,6 +5,43 @@ import (
 	"fmt"
 )
 
+// Processor represents a neural processor resource.
+type Processor struct {
+	ID             string         `json:"id,omitempty"`
+	SpaceID        string         `json:"space_id,omitempty"`
+	ModelID        string         `json:"model_id,omitempty"`
+	Configuration  map[string]any `json:"configuration"`
+	ProvisionState string         `json:"provision_state"`
+	Type           string         `json:"type"`
+}
+
+// ProcessorResponse represents the API response for processor operations.
+type ProcessorResponse struct {
+	Data Processor `json:"data"`
+}
+
+// CreateProcessorRequest represents the request payload for creating a processor.
+type CreateProcessorRequest struct {
+	Processor ProcessorRequestData `json:"processor"`
+}
+
+// ProcessorRequestData represents the processor data in the request.
+type ProcessorRequestData struct {
+	ModelID       string         `json:"model_id"`
+	Configuration map[string]any `json:"configuration"`
+}
+
+// UpdateProcessorRequest represents the request payload for updating a processor.
+type UpdateProcessorRequest struct {
+	Processor UpdateProcessorData `json:"processor"`
+}
+
+// UpdateProcessorData represents the processor update data.
+type UpdateProcessorData struct {
+	ModelID       string         `json:"model_id,omitempty"`
+	Configuration map[string]any `json:"configuration,omitempty"`
+}
+
 // GetProcessor retrieves a specific processor by space ID and type.
 // GET /provision/neural/spaces/:space_id/types/:type/processor.
 func (s *Service) GetProcessor(spaceID, processorType string) (*Processor, error) {

@@ -46,45 +46,6 @@ func (e *Error) Error() string {
 	return "API error"
 }
 
-// Prompt represents a memory prompt resource.
-type Prompt struct {
-	ID             string `json:"id,omitempty"`
-	Name           string `json:"name"`
-	Slug           string `json:"slug,omitempty"`
-	Content        string `json:"content"`
-	Role           string `json:"role"`
-	SpaceID        string `json:"space_id"`
-	ProvisionState string `json:"provision_state"`
-}
-
-// PromptResponse represents the API response for prompt operations.
-type PromptResponse struct {
-	Data Prompt `json:"data"`
-}
-
-// CreatePromptRequest represents the request payload for creating a prompt.
-type CreatePromptRequest struct {
-	Prompt PromptRequestData `json:"prompt"`
-}
-
-// PromptRequestData represents the prompt data in the request.
-type PromptRequestData struct {
-	Name    string `json:"name"`
-	Content string `json:"content"`
-	Role    string `json:"role"`
-}
-
-// UpdatePromptRequest represents the request payload for updating a prompt.
-type UpdatePromptRequest struct {
-	Prompt UpdatePromptData `json:"prompt"`
-}
-
-// UpdatePromptData represents the prompt update data.
-type UpdatePromptData struct {
-	Name    string `json:"name,omitempty"`
-	Content string `json:"content,omitempty"`
-	Role    string `json:"role,omitempty"`
-}
 
 // handleAPIError processes API error responses.
 func (s *Service) handleAPIError(resp any) error {
@@ -137,7 +98,7 @@ func (s *Service) parseErrorFromBody(body []byte, statusCode int) error {
 // parseNestedError parses errors with arbitrary nesting depth (e.g., module.config.database.connection).
 func (s *Service) parseNestedError(body []byte, statusCode int) error {
 	var rawNestedError struct {
-		Errors interface{} `json:"errors"`
+		Errors any `json:"errors"`
 	}
 
 	if err := json.Unmarshal(body, &rawNestedError); err == nil && rawNestedError.Errors != nil {
@@ -155,9 +116,9 @@ func (s *Service) parseNestedError(body []byte, statusCode int) error {
 }
 
 // flattenErrors recursively flattens nested error structures into dot-notation keys.
-func (s *Service) flattenErrors(data interface{}, prefix string, result map[string][]string) {
+func (s *Service) flattenErrors(data any, prefix string, result map[string][]string) {
 	switch v := data.(type) {
-	case map[string]interface{}:
+	case map[string]any:
 		// Handle nested objects
 		for key, value := range v {
 			newPrefix := key
@@ -167,7 +128,7 @@ func (s *Service) flattenErrors(data interface{}, prefix string, result map[stri
 			s.flattenErrors(value, newPrefix, result)
 		}
 
-	case []interface{}:
+	case []any:
 		// Handle arrays - convert to []string if possible
 		var stringSlice []string
 		for _, item := range v {

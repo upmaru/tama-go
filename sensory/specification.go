@@ -8,6 +8,46 @@ import (
 // This file contains all Specification-related operations for the SensoryService.
 // Specifications represent configuration schemas with endpoints and versioning.
 
+// Specification represents a sensory specification resource.
+type Specification struct {
+	ID             string         `json:"id,omitempty"`
+	SpaceID        string         `json:"space_id"`
+	Schema         map[string]any `json:"schema"`
+	Version        string         `json:"version"`
+	Endpoint       string         `json:"endpoint"`
+	CurrentState   string         `json:"current_state"`
+	ProvisionState string         `json:"provision_state"`
+}
+
+// SpecificationResponse represents the API response for specification operations.
+type SpecificationResponse struct {
+	Data Specification `json:"data"`
+}
+
+// CreateSpecificationRequest represents the request payload for creating a specification.
+type CreateSpecificationRequest struct {
+	Specification SpecificationRequestData `json:"specification"`
+}
+
+// SpecificationRequestData represents the specification data in the request.
+type SpecificationRequestData struct {
+	Schema   map[string]any `json:"schema"`
+	Version  string         `json:"version"`
+	Endpoint string         `json:"endpoint"`
+}
+
+// UpdateSpecificationRequest represents the request payload for updating a specification.
+type UpdateSpecificationRequest struct {
+	Specification UpdateSpecificationData `json:"specification"`
+}
+
+// UpdateSpecificationData represents the specification update data.
+type UpdateSpecificationData struct {
+	Schema   map[string]any `json:"schema,omitempty"`
+	Version  string         `json:"version,omitempty"`
+	Endpoint string         `json:"endpoint,omitempty"`
+}
+
 // Specification operations
 
 // GetSpecification retrieves a specific specification by ID.

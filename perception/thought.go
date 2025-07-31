@@ -5,6 +5,55 @@ import (
 	"fmt"
 )
 
+// Module represents a thought module configuration.
+type Module struct {
+	ID         string         `json:"id,omitempty"`
+	Reference  string         `json:"reference"`
+	Parameters map[string]any `json:"parameters,omitempty"`
+}
+
+// Thought represents a perception thought resource.
+type Thought struct {
+	ID             string `json:"id,omitempty"`
+	ChainID        string `json:"chain_id,omitempty"`
+	OutputClassID  string `json:"output_class_id,omitempty"`
+	Module         Module `json:"module"`
+	ProvisionState string `json:"provision_state"`
+	Relation       string `json:"relation"`
+	Index          int    `json:"index"`
+}
+
+// ThoughtResponse represents the API response for thought operations.
+type ThoughtResponse struct {
+	Data Thought `json:"data"`
+}
+
+// CreateThoughtRequest represents the request payload for creating a thought.
+type CreateThoughtRequest struct {
+	Thought ThoughtRequestData `json:"thought"`
+}
+
+// ThoughtRequestData represents the thought data in the request.
+type ThoughtRequestData struct {
+	Relation      string `json:"relation"`
+	OutputClassID string `json:"output_class_id,omitempty"`
+	Index         int    `json:"index,omitempty"`
+	Module        Module `json:"module"`
+}
+
+// UpdateThoughtRequest represents the request payload for updating a thought.
+type UpdateThoughtRequest struct {
+	Thought UpdateThoughtData `json:"thought"`
+}
+
+// UpdateThoughtData represents the thought update data.
+type UpdateThoughtData struct {
+	Relation      string `json:"relation,omitempty"`
+	OutputClassID string `json:"output_class_id,omitempty"`
+	Index         int    `json:"index,omitempty"`
+	Module        Module `json:"module,omitempty"`
+}
+
 // GetThought retrieves a specific thought by ID.
 // GET /provision/perception/thoughts/:id.
 func (s *Service) GetThought(id string) (*Thought, error) {

@@ -46,160 +46,6 @@ func (e *Error) Error() string {
 	return "API error"
 }
 
-// Chain represents a perception chain resource.
-type Chain struct {
-	ID             string `json:"id,omitempty"`
-	SpaceID        string `json:"space_id,omitempty"`
-	Name           string `json:"name"`
-	Slug           string `json:"slug,omitempty"`
-	ProvisionState string `json:"provision_state"`
-}
-
-// ChainResponse represents the API response for chain operations.
-type ChainResponse struct {
-	Data Chain `json:"data"`
-}
-
-// CreateChainRequest represents the request payload for creating a chain.
-type CreateChainRequest struct {
-	Chain ChainRequestData `json:"chain"`
-}
-
-// ChainRequestData represents the chain data in the request.
-type ChainRequestData struct {
-	Name string `json:"name"`
-}
-
-// UpdateChainRequest represents the request payload for updating a chain.
-type UpdateChainRequest struct {
-	Chain UpdateChainData `json:"chain"`
-}
-
-// UpdateChainData represents the chain update data.
-type UpdateChainData struct {
-	Name string `json:"name,omitempty"`
-}
-
-// Module represents a thought module configuration.
-type Module struct {
-	ID         string         `json:"id,omitempty"`
-	Reference  string         `json:"reference"`
-	Parameters map[string]any `json:"parameters,omitempty"`
-}
-
-// Thought represents a perception thought resource.
-type Thought struct {
-	ID             string `json:"id,omitempty"`
-	ChainID        string `json:"chain_id,omitempty"`
-	OutputClassID  string `json:"output_class_id,omitempty"`
-	Module         Module `json:"module"`
-	ProvisionState string `json:"provision_state"`
-	Relation       string `json:"relation"`
-	Index          int    `json:"index"`
-}
-
-// ThoughtResponse represents the API response for thought operations.
-type ThoughtResponse struct {
-	Data Thought `json:"data"`
-}
-
-// CreateThoughtRequest represents the request payload for creating a thought.
-type CreateThoughtRequest struct {
-	Thought ThoughtRequestData `json:"thought"`
-}
-
-// ThoughtRequestData represents the thought data in the request.
-type ThoughtRequestData struct {
-	Relation      string `json:"relation"`
-	OutputClassID string `json:"output_class_id,omitempty"`
-	Index         int    `json:"index,omitempty"`
-	Module        Module `json:"module"`
-}
-
-// UpdateThoughtRequest represents the request payload for updating a thought.
-type UpdateThoughtRequest struct {
-	Thought UpdateThoughtData `json:"thought"`
-}
-
-// UpdateThoughtData represents the thought update data.
-type UpdateThoughtData struct {
-	Relation      string `json:"relation,omitempty"`
-	OutputClassID string `json:"output_class_id,omitempty"`
-	Index         int    `json:"index,omitempty"`
-	Module        Module `json:"module,omitempty"`
-}
-
-// Path represents a perception path resource.
-type Path struct {
-	ID             string         `json:"id,omitempty"`
-	ThoughtID      string         `json:"thought_id,omitempty"`
-	ProvisionState string         `json:"provision_state"`
-	TargetClassID  string         `json:"target_class_id"`
-	Parameters     map[string]any `json:"parameters,omitempty"`
-}
-
-// PathResponse represents the API response for path operations.
-type PathResponse struct {
-	Data Path `json:"data"`
-}
-
-// CreatePathRequest represents the request payload for creating a path.
-type CreatePathRequest struct {
-	Path PathRequestData `json:"path"`
-}
-
-// PathRequestData represents the path data in the request.
-type PathRequestData struct {
-	TargetClassID string         `json:"target_class_id"`
-	Parameters    map[string]any `json:"parameters,omitempty"`
-}
-
-// UpdatePathRequest represents the request payload for updating a path.
-type UpdatePathRequest struct {
-	Path UpdatePathData `json:"path"`
-}
-
-// UpdatePathData represents the path update data.
-type UpdatePathData struct {
-	TargetClassID string         `json:"target_class_id,omitempty"`
-	Parameters    map[string]any `json:"parameters,omitempty"`
-}
-
-// Context represents a perception context resource.
-type Context struct {
-	ID             string `json:"id,omitempty"`
-	ThoughtID      string `json:"thought_id,omitempty"`
-	PromptID       string `json:"prompt_id"`
-	Layer          int    `json:"layer"`
-	ProvisionState string `json:"provision_state"`
-}
-
-// ContextResponse represents the API response for context operations.
-type ContextResponse struct {
-	Data Context `json:"data"`
-}
-
-// CreateContextRequest represents the request payload for creating a context.
-type CreateContextRequest struct {
-	Context ContextRequestData `json:"context"`
-}
-
-// ContextRequestData represents the context data in the request.
-type ContextRequestData struct {
-	PromptID string `json:"prompt_id"`
-	Layer    int    `json:"layer"`
-}
-
-// UpdateContextRequest represents the request payload for updating a context.
-type UpdateContextRequest struct {
-	Context UpdateContextData `json:"context"`
-}
-
-// UpdateContextData represents the context update data.
-type UpdateContextData struct {
-	PromptID string `json:"prompt_id,omitempty"`
-	Layer    int    `json:"layer,omitempty"`
-}
 
 // handleAPIError processes API error responses.
 func (s *Service) handleAPIError(resp any) error {
@@ -257,7 +103,7 @@ func (s *Service) parseErrorFromBody(body []byte, statusCode int) error {
 // parseNestedError parses errors with arbitrary nesting depth (e.g., module.config.database.connection).
 func (s *Service) parseNestedError(body []byte, statusCode int) error {
 	var rawNestedError struct {
-		Errors interface{} `json:"errors"`
+		Errors any `json:"errors"`
 	}
 
 	if err := json.Unmarshal(body, &rawNestedError); err == nil && rawNestedError.Errors != nil {
@@ -275,7 +121,7 @@ func (s *Service) parseNestedError(body []byte, statusCode int) error {
 }
 
 // flattenErrors recursively flattens nested error structures into dot-notation keys.
-func (s *Service) flattenErrors(data interface{}, prefix string, result map[string][]string) {
+func (s *Service) flattenErrors(data any, prefix string, result map[string][]string) {
 	switch v := data.(type) {
 	case map[string]any:
 		// Handle nested objects

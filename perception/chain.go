@@ -6,6 +6,40 @@ import (
 	"fmt"
 )
 
+// Chain represents a perception chain resource.
+type Chain struct {
+	ID             string `json:"id,omitempty"`
+	SpaceID        string `json:"space_id,omitempty"`
+	Name           string `json:"name"`
+	Slug           string `json:"slug,omitempty"`
+	ProvisionState string `json:"provision_state"`
+}
+
+// ChainResponse represents the API response for chain operations.
+type ChainResponse struct {
+	Data Chain `json:"data"`
+}
+
+// CreateChainRequest represents the request payload for creating a chain.
+type CreateChainRequest struct {
+	Chain ChainRequestData `json:"chain"`
+}
+
+// ChainRequestData represents the chain data in the request.
+type ChainRequestData struct {
+	Name string `json:"name"`
+}
+
+// UpdateChainRequest represents the request payload for updating a chain.
+type UpdateChainRequest struct {
+	Chain UpdateChainData `json:"chain"`
+}
+
+// UpdateChainData represents the chain update data.
+type UpdateChainData struct {
+	Name string `json:"name,omitempty"`
+}
+
 // GetChain retrieves a specific chain by ID.
 // GET /provision/perception/chains/:id.
 func (s *Service) GetChain(id string) (*Chain, error) {

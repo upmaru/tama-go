@@ -46,185 +46,6 @@ func (e *Error) Error() string {
 	return "API error"
 }
 
-// Space represents a neural space resource.
-type Space struct {
-	ID             string `json:"id,omitempty"`
-	Name           string `json:"name"`
-	Slug           string `json:"slug,omitempty"`
-	Type           string `json:"type"`
-	ProvisionState string `json:"provision_state"`
-}
-
-// SpaceResponse represents the API response for space operations.
-type SpaceResponse struct {
-	Data Space `json:"data"`
-}
-
-// CreateSpaceRequest represents the request payload for creating a space.
-type CreateSpaceRequest struct {
-	Space SpaceRequestData `json:"space"`
-}
-
-// SpaceRequestData represents the space data in the request.
-type SpaceRequestData struct {
-	Name string `json:"name"`
-	Type string `json:"type"`
-}
-
-// UpdateSpaceRequest represents the request payload for updating a space.
-type UpdateSpaceRequest struct {
-	Space UpdateSpaceData `json:"space"`
-}
-
-// UpdateSpaceData represents the space update data.
-type UpdateSpaceData struct {
-	Name string `json:"name,omitempty"`
-	Type string `json:"type,omitempty"`
-}
-
-// Processor represents a neural processor resource.
-type Processor struct {
-	ID             string         `json:"id,omitempty"`
-	SpaceID        string         `json:"space_id,omitempty"`
-	ModelID        string         `json:"model_id,omitempty"`
-	Configuration  map[string]any `json:"configuration"`
-	ProvisionState string         `json:"provision_state"`
-	Type           string         `json:"type"`
-}
-
-// ProcessorResponse represents the API response for processor operations.
-type ProcessorResponse struct {
-	Data Processor `json:"data"`
-}
-
-// CreateProcessorRequest represents the request payload for creating a processor.
-type CreateProcessorRequest struct {
-	Processor ProcessorRequestData `json:"processor"`
-}
-
-// ProcessorRequestData represents the processor data in the request.
-type ProcessorRequestData struct {
-	ModelID       string         `json:"model_id"`
-	Configuration map[string]any `json:"configuration"`
-}
-
-// UpdateProcessorRequest represents the request payload for updating a processor.
-type UpdateProcessorRequest struct {
-	Processor UpdateProcessorData `json:"processor"`
-}
-
-// UpdateProcessorData represents the processor update data.
-type UpdateProcessorData struct {
-	ModelID       string         `json:"model_id,omitempty"`
-	Configuration map[string]any `json:"configuration,omitempty"`
-}
-
-// Class represents a neural class resource.
-type Class struct {
-	ID             string         `json:"id,omitempty"`
-	SpaceID        string         `json:"space_id,omitempty"`
-	ProvisionState string         `json:"provision_state"`
-	Schema         map[string]any `json:"schema"`
-	Name           string         `json:"name"`
-	Description    string         `json:"description"`
-}
-
-// ClassResponse represents the API response for class operations.
-type ClassResponse struct {
-	Data Class `json:"data"`
-}
-
-// CreateClassRequest represents the request payload for creating a class.
-type CreateClassRequest struct {
-	Class ClassRequestData `json:"class"`
-}
-
-// ClassRequestData represents the class data in the request.
-type ClassRequestData struct {
-	Schema map[string]any `json:"schema"`
-}
-
-// UpdateClassRequest represents the request payload for updating a class.
-type UpdateClassRequest struct {
-	Class UpdateClassData `json:"class"`
-}
-
-// UpdateClassData represents the class update data.
-type UpdateClassData struct {
-	Schema map[string]any `json:"schema,omitempty"`
-}
-
-// Corpus represents a neural corpus resource.
-type Corpus struct {
-	ID             string `json:"id,omitempty"`
-	Main           bool   `json:"main"`
-	Name           string `json:"name"`
-	Slug           string `json:"slug,omitempty"`
-	Template       string `json:"template"`
-	ProvisionState string `json:"provision_state,omitempty"`
-}
-
-// CorpusResponse represents the API response for corpus operations.
-type CorpusResponse struct {
-	Data Corpus `json:"data"`
-}
-
-// CreateCorpusRequest represents the request payload for creating a corpus.
-type CreateCorpusRequest struct {
-	Corpus CorpusRequestData `json:"corpus"`
-}
-
-// CorpusRequestData represents the corpus data in the request.
-type CorpusRequestData struct {
-	Main     bool   `json:"main"`
-	Name     string `json:"name"`
-	Template string `json:"template"`
-}
-
-// UpdateCorpusRequest represents the request payload for updating a corpus.
-type UpdateCorpusRequest struct {
-	Corpus UpdateCorpusData `json:"corpus"`
-}
-
-// UpdateCorpusData represents the corpus update data.
-type UpdateCorpusData struct {
-	Main     *bool  `json:"main,omitempty"`
-	Name     string `json:"name,omitempty"`
-	Template string `json:"template,omitempty"`
-}
-
-// Bridge represents a neural bridge resource.
-type Bridge struct {
-	ID             string `json:"id,omitempty"`
-	SpaceID        string `json:"space_id"`
-	TargetSpaceID  string `json:"target_space_id"`
-	ProvisionState string `json:"provision_state"`
-}
-
-// BridgeResponse represents the API response for bridge operations.
-type BridgeResponse struct {
-	Data Bridge `json:"data"`
-}
-
-// CreateBridgeRequest represents the request payload for creating a bridge.
-type CreateBridgeRequest struct {
-	Bridge BridgeRequestData `json:"bridge"`
-}
-
-// BridgeRequestData represents the bridge data in the request.
-type BridgeRequestData struct {
-	TargetSpaceID string `json:"target_space_id"`
-}
-
-// UpdateBridgeRequest represents the request payload for updating a bridge.
-type UpdateBridgeRequest struct {
-	Bridge UpdateBridgeData `json:"bridge"`
-}
-
-// UpdateBridgeData represents the bridge update data.
-type UpdateBridgeData struct {
-	TargetSpaceID string `json:"target_space_id,omitempty"`
-}
 
 // handleAPIError processes API error responses.
 func (s *Service) handleAPIError(resp any) error {
@@ -282,7 +103,7 @@ func (s *Service) parseErrorFromBody(body []byte, statusCode int) error {
 // parseNestedError parses errors with arbitrary nesting depth (e.g., module.config.database.connection).
 func (s *Service) parseNestedError(body []byte, statusCode int) error {
 	var rawNestedError struct {
-		Errors interface{} `json:"errors"`
+		Errors any `json:"errors"`
 	}
 
 	if err := json.Unmarshal(body, &rawNestedError); err == nil && rawNestedError.Errors != nil {
@@ -300,9 +121,9 @@ func (s *Service) parseNestedError(body []byte, statusCode int) error {
 }
 
 // flattenErrors recursively flattens nested error structures into dot-notation keys.
-func (s *Service) flattenErrors(data interface{}, prefix string, result map[string][]string) {
+func (s *Service) flattenErrors(data any, prefix string, result map[string][]string) {
 	switch v := data.(type) {
-	case map[string]interface{}:
+	case map[string]any:
 		// Handle nested objects
 		for key, value := range v {
 			newPrefix := key
@@ -312,7 +133,7 @@ func (s *Service) flattenErrors(data interface{}, prefix string, result map[stri
 			s.flattenErrors(value, newPrefix, result)
 		}
 
-	case []interface{}:
+	case []any:
 		// Handle arrays - convert to []string if possible
 		var stringSlice []string
 		for _, item := range v {
