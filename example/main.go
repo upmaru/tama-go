@@ -951,7 +951,7 @@ func runPerceptionThoughtOperations(client *tama.Client) {
 		Thought: perception.ThoughtRequestData{
 			Relation:      "description",
 			OutputClassID: "class-123",
-			Module: perception.Module{
+			Module: &perception.Module{
 				Reference: "tama/agentic/generate",
 				Parameters: map[string]any{
 					"temperature": defaultTemperature,
@@ -989,7 +989,7 @@ func runPerceptionThoughtOperations(client *tama.Client) {
 		Thought: perception.UpdateThoughtData{
 			Relation:      "analysis",
 			OutputClassID: "class-456",
-			Module: perception.Module{
+			Module: &perception.Module{
 				Reference: "tama/agentic/analyze",
 				Parameters: map[string]any{
 					"depth":       defaultDepth,
@@ -1014,7 +1014,7 @@ func runPerceptionThoughtOperations(client *tama.Client) {
 		{
 			Thought: perception.ThoughtRequestData{
 				Relation: "preprocessing",
-				Module: perception.Module{
+				Module: &perception.Module{
 					Reference: "tama/agentic/preprocess",
 					Parameters: map[string]any{
 						"clean_text": true,
@@ -1026,7 +1026,7 @@ func runPerceptionThoughtOperations(client *tama.Client) {
 		{
 			Thought: perception.ThoughtRequestData{
 				Relation: "validation",
-				Module: perception.Module{
+				Module: &perception.Module{
 					Reference: "tama/agentic/validate",
 					Parameters: map[string]any{
 						"strict_mode":    false,

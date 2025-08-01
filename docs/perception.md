@@ -274,7 +274,7 @@ Deletes a chain by ID.
 
 **Endpoint:** `DELETE /provision/perception/chains/:id`
 
-### Thought Operations
+#### Thought Operations
 
 #### GetThought(id string) (*Thought, error)
 
@@ -286,7 +286,7 @@ Retrieves a specific thought by ID.
 - `id` (string): Thought ID (required)
 
 **Returns:**
-- `*Thought`: Thought object with ID, ChainID, Module, Relation, and Index
+- `*Thought`: Thought object with ID, ChainID, Module, Delegation, Relation, and Index
 - `error`: Error if request fails
 
 **Example:**
@@ -315,14 +315,19 @@ type CreateThoughtRequest struct {
 }
 
 type ThoughtRequestData struct {
-    Relation      string `json:"relation"`
-    OutputClassID string `json:"output_class_id,omitempty"`
-    Module        Module `json:"module"`
+    Relation      string      `json:"relation"`
+    OutputClassID string      `json:"output_class_id,omitempty"`
+    Module        *Module     `json:"module,omitempty"`
+    Delegation    *Delegation `json:"delegation,omitempty"`
 }
 
 type Module struct {
     Reference  string         `json:"reference"`
     Parameters map[string]any `json:"parameters"`
+}
+
+type Delegation struct {
+    TargetThoughtID string `json:"target_thought_id"`
 }
 ```
 
@@ -336,7 +341,7 @@ thought, err := client.Perception.CreateThought("chain-123", perception.CreateTh
     Thought: perception.ThoughtRequestData{
         Relation:      "description",
         OutputClassID: "class-123",
-        Module: perception.Module{
+        Module: &perception.Module{
             Reference: "tama/agentic/generate",
             Parameters: map[string]any{
                 "temperature": 0.7,
@@ -359,9 +364,10 @@ type UpdateThoughtRequest struct {
 }
 
 type UpdateThoughtData struct {
-    Relation      string `json:"relation,omitempty"`
-    OutputClassID string `json:"output_class_id,omitempty"`
-    Module        Module `json:"module,omitempty"`
+    Relation      string      `json:"relation,omitempty"`
+    OutputClassID string      `json:"output_class_id,omitempty"`
+    Module        *Module     `json:"module,omitempty"`
+    Delegation    *Delegation `json:"delegation,omitempty"`
 }
 ```
 
