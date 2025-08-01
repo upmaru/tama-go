@@ -91,9 +91,6 @@ func (s *Service) CreateThought(chainID string, req CreateThoughtRequest) (*Thou
 	if chainID == "" {
 		return nil, errors.New("chain ID is required")
 	}
-	if req.Thought.Relation == "" {
-		return nil, errors.New("thought relation is required")
-	}
 	if req.Thought.Module != nil && req.Thought.Module.Reference == "" {
 		return nil, errors.New("thought module reference is required")
 	}
