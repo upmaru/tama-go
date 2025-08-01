@@ -1,3 +1,91 @@
+### Delegation Operations
+
+#### GetDelegation(thoughtID string) (*Delegation, error)
+
+Retrieves a specific delegation by thought ID.
+
+**Endpoint:** `GET /provision/perception/thoughts/:thought_id/delegation`
+
+**Parameters:**
+- `thoughtID` (string): Thought ID (required)
+
+**Returns:**
+- `*Delegation`: Delegation object with ID, ThoughtID, TargetThoughtID, and ProvisionState
+- `error`: Error if request fails
+
+**Example:**
+```go
+delegation, err := client.Perception.GetDelegation("thought-123")
+if err != nil {
+    log.Printf("Error: %v", err)
+    return
+}
+log.Printf("Delegation: %s -> %s (%s)", delegation.ID, delegation.TargetThoughtID, delegation.ProvisionState)
+```
+
+#### CreateDelegation(thoughtID string, req CreateDelegationRequest) (*Delegation, error)
+
+Creates a new delegation within a thought.
+
+**Endpoint:** `POST /provision/perception/thoughts/:thought_id/delegation`
+
+**Parameters:**
+- `thoughtID` (string): Thought ID (required)
+- `req` (CreateDelegationRequest): Delegation creation request (required)
+
+```go
+type CreateDelegationRequest struct {
+    Delegation DelegationRequestData `json:"delegation"`
+}
+
+type DelegationRequestData struct {
+    TargetThoughtID string `json:"target_thought_id"`
+}
+```
+
+**Returns:**
+- `*Delegation`: Created delegation object
+- `error`: Error if request fails
+
+**Example:**
+```go
+delegation, err := client.Perception.CreateDelegation("thought-123", perception.CreateDelegationRequest{
+    Delegation: perception.DelegationRequestData{
+        TargetThoughtID: "target-thought-123",
+    },
+})
+```
+
+#### UpdateDelegation(thoughtID string, req UpdateDelegationRequest) (*Delegation, error)
+
+Updates an existing delegation using PATCH.
+
+**Endpoint:** `PATCH /provision/perception/thoughts/:thought_id/delegation`
+
+```go
+type UpdateDelegationRequest struct {
+    Delegation UpdateDelegationData `json:"delegation"`
+}
+
+type UpdateDelegationData struct {
+    TargetThoughtID string `json:"target_thought_id,omitempty"`
+}
+```
+
+#### ReplaceDelegation(thoughtID string, req UpdateDelegationRequest) (*Delegation, error)
+
+Replaces an existing delegation using PUT.
+
+**Endpoint:** `PUT /provision/perception/thoughts/:thought_id/delegation`
+
+#### DeleteDelegation(thoughtID string) error
+
+Deletes a delegation by thought ID.
+
+**Endpoint:** `DELETE /provision/perception/thoughts/:thought_id/delegation`
+
+---
+
 ### Processor Operations
 
 #### GetProcessor(thoughtID, processorType string) (*Processor, error)
