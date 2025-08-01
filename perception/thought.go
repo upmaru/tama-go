@@ -41,7 +41,7 @@ type CreateThoughtRequest struct {
 
 // ThoughtRequestData represents the thought data in the request.
 type ThoughtRequestData struct {
-	Relation      string      `json:"relation"`
+	Relation      string      `json:"relation,omitempty"`
 	OutputClassID string      `json:"output_class_id,omitempty"`
 	Index         int         `json:"index,omitempty"`
 	Module        *Module     `json:"module,omitempty"`
