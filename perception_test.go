@@ -2730,11 +2730,15 @@ func TestPerceptionGetDelegation(t *testing.T) {
 	}
 
 	if delegation.TargetThoughtID != expectedDelegation.TargetThoughtID {
-		t.Errorf("Expected target_thought_id %s, got %s", expectedDelegation.TargetThoughtID, delegation.TargetThoughtID)
+		t.Errorf(
+			"Expected target_thought_id %s, got %s",
+			expectedDelegation.TargetThoughtID, delegation.TargetThoughtID)
 	}
 
 	if delegation.ProvisionState != expectedDelegation.ProvisionState {
-		t.Errorf("Expected provision_state %s, got %s", expectedDelegation.ProvisionState, delegation.ProvisionState)
+		t.Errorf(
+			"Expected provision_state %s, got %s",
+			expectedDelegation.ProvisionState, delegation.ProvisionState)
 	}
 }
 
@@ -2833,7 +2837,9 @@ func TestPerceptionUpdateDelegation(t *testing.T) {
 	}
 
 	if delegation.TargetThoughtID != expectedDelegation.TargetThoughtID {
-		t.Errorf("Expected target_thought_id %s, got %s", expectedDelegation.TargetThoughtID, delegation.TargetThoughtID)
+		t.Errorf(
+			"Expected target_thought_id %s, got %s",
+			expectedDelegation.TargetThoughtID, delegation.TargetThoughtID)
 	}
 }
 
@@ -2882,7 +2888,9 @@ func TestPerceptionReplaceDelegation(t *testing.T) {
 	}
 
 	if delegation.TargetThoughtID != expectedDelegation.TargetThoughtID {
-		t.Errorf("Expected target_thought_id %s, got %s", expectedDelegation.TargetThoughtID, delegation.TargetThoughtID)
+		t.Errorf(
+			"Expected target_thought_id %s, got %s",
+			expectedDelegation.TargetThoughtID, delegation.TargetThoughtID)
 	}
 }
 
