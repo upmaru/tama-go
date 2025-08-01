@@ -96,15 +96,15 @@ Deletes a space by ID.
 
 ### Processor Operations
 
-#### GetProcessor(spaceID, modelID string) (*Processor, error)
+#### GetProcessor(spaceID, processorType string) (*Processor, error)
 
-Retrieves a specific processor by space ID and model ID.
+Retrieves a specific processor by space ID and processor type.
 
-**Endpoint:** `GET /provision/neural/spaces/:space_id/models/:model_id/processor`
+**Endpoint:** `GET /provision/neural/spaces/:space_id/types/:type/processor`
 
 **Parameters:**
 - `spaceID` (string): Space ID (required)
-- `modelID` (string): Model ID (required)
+- `processorType` (string): Processor type (required)
 
 **Returns:**
 - `*Processor`: Processor data
@@ -112,22 +112,22 @@ Retrieves a specific processor by space ID and model ID.
 
 **Example:**
 ```go
-processor, err := client.Neural.GetProcessor("space-123", "model-456")
+processor, err := client.Neural.GetProcessor("space-123", "chat")
 if err != nil {
     log.Fatal(err)
 }
 fmt.Printf("Processor: %+v\n", processor)
 ```
 
-#### CreateProcessor(spaceID, modelID string, req CreateProcessorRequest) (*Processor, error)
+#### CreateProcessor(spaceID, processorType string, req CreateProcessorRequest) (*Processor, error)
 
-Creates a new processor for a specific space and model.
+Creates a new processor for a specific space and type.
 
-**Endpoint:** `POST /provision/neural/spaces/:space_id/models/:model_id/processor`
+**Endpoint:** `POST /provision/neural/spaces/:space_id/types/:type/processor`
 
 **Parameters:**
 - `spaceID` (string): Space ID (required)
-- `modelID` (string): Model ID (required)
+- `processorType` (string): Processor type (required)
 - `req` (CreateProcessorRequest): Processor creation data (required)
 
 **Request Structure:**
@@ -143,3 +143,156 @@ type ProcessorRequestData struct {
 ```
 
 **Returns:**
+- `*Processor`: Created processor object
+- `error`: Error if request fails
+
+**Example:**
+```go
+req := neural.CreateProcessorRequest{
+    Processor: neural.ProcessorRequestData{
+        ModelID: "model-456",
+        Configuration: map[string]any{
+            "temperature":  0.8,
+            "tool_choice": "required",
+            "role_mappings": []map[string]any{
+                {"from": "user", "to": "human"},
+                {"from": "assistant", "to": "ai"},
+            },
+        },
+    },
+}
+
+processor, err := client.Neural.CreateProcessor("space-123", "chat", req)
+```
+
+#### UpdateProcessor(spaceID, processorType string, req UpdateProcessorRequest) (*Processor, error)
+
+Updates an existing processor using PATCH (partial update).
+
+**Endpoint:** `PATCH /provision/neural/spaces/:space_id/types/:type/processor`
+
+**Parameters:**
+- `spaceID` (string): Space ID (required)
+- `processorType` (string): Processor type (required)
+- `req` (UpdateProcessorRequest): Processor update data (required)
+
+**Request Structure:**
+```go
+type UpdateProcessorRequest struct {
+    Processor UpdateProcessorData `json:"processor"`
+}
+
+type UpdateProcessorData struct {
+    ModelID       string         `json:"model_id,omitempty"`
+    Configuration map[string]any `json:"configuration,omitempty"`
+}
+```
+
+**Returns:**
+- `*Processor`: Updated processor
+- `error`: Error if request fails
+
+#### ReplaceProcessor(spaceID, processorType string, req UpdateProcessorRequest) (*Processor, error)
+
+Replaces an existing processor using PUT (full replacement).
+
+**Endpoint:** `PUT /provision/neural/spaces/:space_id/types/:type/processor`
+
+**Parameters:**
+- `spaceID` (string): Space ID (required)
+- `processorType` (string): Processor type (required)
+- `req` (UpdateProcessorRequest): Processor replacement data (required)
+
+**Returns:**
+- `*Processor`: Replaced processor
+- `error`: Error if request fails
+
+#### DeleteProcessor(spaceID, processorType string) error
+
+Deletes a processor by space ID and processor type.
+
+**Endpoint:** `DELETE /provision/neural/spaces/:space_id/types/:type/processor`
+
+**Parameters:**
+- `spaceID` (string): Space ID (required)
+- `processorType` (string): Processor type (required)
+
+**Returns:**
+- `error`: Error if request fails
+
+### Node Operations
+
+#### GetNode(id string) (*Node, error)
+
+Retrieves a specific neural node by ID.
+
+**Endpoint:** `GET /provision/neural/nodes/:id`
+
+**Parameters:**
+- `id` (string): Node ID (required)
+
+**Returns:**
+- `*Node`: Node object with relevant node details
+- `error`: Error if request fails
+
+**Example:**
+```go
+node, err := client.Neural.GetNode("node-123")
+if err != nil {
+    log.Fatal(err)
+}
+fmt.Printf("Node: %+v\n", node)
+```
+
+#### CreateNode(req CreateNodeRequest) (*Node, error)
+
+Creates a new neural node.
+
+**Endpoint:** `POST /provision/neural/nodes`
+
+**Parameters:**
+- `req` (CreateNodeRequest): Node creation request
+
+**Returns:**
+- `*Node`: Created node object with all fields
+- `error`: Error if request fails
+
+#### UpdateNode(id string, req UpdateNodeRequest) (*Node, error)
+
+Updates an existing node using PATCH (partial update).
+
+**Endpoint:** `PATCH /provision/neural/nodes/:id`
+
+**Parameters:**
+- `id` (string): Node ID (required)
+- `req` (UpdateNodeRequest): Update request
+
+**Returns:**
+- `*Node`: Updated node object with all fields
+- `error`: Error if request fails
+
+#### ReplaceNode(id string, req UpdateNodeRequest) (*Node, error)
+
+Replaces an existing node using PUT (full replacement).
+
+**Endpoint:** `PUT /provision/neural/nodes/:id`
+
+**Parameters:**
+- `id` (string): Node ID (required)
+- `req` (UpdateNodeRequest): Replacement request
+
+**Returns:**
+- `*Node`: Updated node object with all fields
+- `error`: Error if request fails
+
+#### DeleteNode(id string) error
+
+Deletes a node by ID.
+
+**Endpoint:** `DELETE /provision/neural/nodes/:id`
+
+**Parameters:**
+- `id` (string): Node ID (required)
+
+**Returns:**
+- `error`: Error if request fails

@@ -1,3 +1,101 @@
+### Processor Operations
+
+#### GetProcessor(thoughtID, processorType string) (*Processor, error)
+
+Retrieves a specific processor by thought ID and type.
+
+**Endpoint:** `GET /provision/perception/thoughts/:thought_id/types/:type/processor`
+
+**Parameters:**
+- `thoughtID` (string): Thought ID (required)
+- `processorType` (string): Processor type (required)
+
+**Returns:**
+- `*Processor`: Processor object with ID, ThoughtID, ModelID, Configuration, ProvisionState, and Type
+- `error`: Error if request fails
+
+**Example:**
+```go
+processor, err := client.Perception.GetProcessor("thought-123", "text-generation")
+if err != nil {
+    log.Printf("Error: %v", err)
+    return
+}
+log.Printf("Processor: %s (%s)", processor.ModelID, processor.ProvisionState)
+```
+
+#### CreateProcessor(thoughtID, processorType string, req CreateProcessorRequest) (*Processor, error)
+
+Creates a new processor within a thought.
+
+**Endpoint:** `POST /provision/perception/thoughts/:thought_id/types/:type/processor`
+
+**Parameters:**
+- `thoughtID` (string): Thought ID (required)
+- `processorType` (string): Processor type (required)
+- `req` (CreateProcessorRequest): Processor creation request (required)
+
+```go
+type CreateProcessorRequest struct {
+    Processor ProcessorRequestData `json:"processor"`
+}
+
+type ProcessorRequestData struct {
+    ModelID       string         `json:"model_id"`
+    Configuration map[string]any `json:"configuration"`
+}
+```
+
+**Returns:**
+- `*Processor`: Created processor object
+- `error`: Error if request fails
+
+**Example:**
+```go
+processor, err := client.Perception.CreateProcessor("thought-123", "text-generation", perception.CreateProcessorRequest{
+    Processor: perception.ProcessorRequestData{
+        ModelID: "gpt-4",
+        Configuration: map[string]any{
+            "temperature":   0.7,
+            "max_tokens":    150,
+            "top_p":         0.9,
+            "frequency_penalty": 0.0,
+        },
+    },
+})
+```
+
+#### UpdateProcessor(thoughtID, processorType string, req UpdateProcessorRequest) (*Processor, error)
+
+Updates an existing processor using PATCH.
+
+**Endpoint:** `PATCH /provision/perception/thoughts/:thought_id/types/:type/processor`
+
+```go
+type UpdateProcessorRequest struct {
+    Processor UpdateProcessorData `json:"processor"`
+}
+
+type UpdateProcessorData struct {
+    ModelID       string         `json:"model_id,omitempty"`
+    Configuration map[string]any `json:"configuration,omitempty"`
+}
+```
+
+#### ReplaceProcessor(thoughtID, processorType string, req UpdateProcessorRequest) (*Processor, error)
+
+Replaces an existing processor using PUT.
+
+**Endpoint:** `PUT /provision/perception/thoughts/:thought_id/types/:type/processor`
+
+#### DeleteProcessor(thoughtID, processorType string) error
+
+Deletes a processor by thought ID and type.
+
+**Endpoint:** `DELETE /provision/perception/thoughts/:thought_id/types/:type/processor`
+
+---
+
 ## Perception Service
 
 Access via `client.Perception.*`
