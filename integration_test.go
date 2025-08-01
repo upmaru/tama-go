@@ -476,7 +476,7 @@ func TestIntegrationThoughtInvalidModuleError(t *testing.T) {
 	invalidThought := perception.CreateThoughtRequest{
 		Thought: perception.ThoughtRequestData{
 			Relation: "description",
-			Module: perception.Module{
+			Module: &perception.Module{
 				Reference: "tama/some/invalid", // This should trigger a 422 error
 				Parameters: map[string]any{
 					"temperature": 0.7,
@@ -579,7 +579,7 @@ func TestIntegrationThoughtModuleParametersError(t *testing.T) {
 	thoughtWithParams := perception.CreateThoughtRequest{
 		Thought: perception.ThoughtRequestData{
 			Relation: "description",
-			Module: perception.Module{
+			Module: &perception.Module{
 				Reference: "tama/agentic/generate", // Use a valid module reference
 				Parameters: map[string]any{
 					"required_fields": []string{"input", "output"},
@@ -617,7 +617,7 @@ func TestIntegrationThoughtModuleParametersError(t *testing.T) {
 	invalidThought := perception.CreateThoughtRequest{
 		Thought: perception.ThoughtRequestData{
 			Relation: "description",
-			Module: perception.Module{
+			Module: &perception.Module{
 				Reference: "tama/agentic/generate",
 				Parameters: map[string]any{
 					"temperature":   "invalid_string", // Should be float

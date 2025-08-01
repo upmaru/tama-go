@@ -12,15 +12,21 @@ type Module struct {
 	Parameters map[string]any `json:"parameters,omitempty"`
 }
 
+// Delegation represents a thought delegation configuration.
+type Delegation struct {
+	TargetThoughtID string `json:"target_thought_id"`
+}
+
 // Thought represents a perception thought resource.
 type Thought struct {
-	ID             string `json:"id,omitempty"`
-	ChainID        string `json:"chain_id,omitempty"`
-	OutputClassID  string `json:"output_class_id,omitempty"`
-	Module         Module `json:"module"`
-	ProvisionState string `json:"provision_state"`
-	Relation       string `json:"relation"`
-	Index          int    `json:"index"`
+	ID             string      `json:"id,omitempty"`
+	ChainID        string      `json:"chain_id,omitempty"`
+	OutputClassID  string      `json:"output_class_id,omitempty"`
+	Module         *Module     `json:"module,omitempty"`
+	Delegation     *Delegation `json:"delegation,omitempty"`
+	ProvisionState string      `json:"provision_state"`
+	Relation       string      `json:"relation"`
+	Index          int         `json:"index"`
 }
 
 // ThoughtResponse represents the API response for thought operations.
@@ -35,10 +41,11 @@ type CreateThoughtRequest struct {
 
 // ThoughtRequestData represents the thought data in the request.
 type ThoughtRequestData struct {
-	Relation      string `json:"relation"`
-	OutputClassID string `json:"output_class_id,omitempty"`
-	Index         int    `json:"index,omitempty"`
-	Module        Module `json:"module"`
+	Relation      string      `json:"relation"`
+	OutputClassID string      `json:"output_class_id,omitempty"`
+	Index         int         `json:"index,omitempty"`
+	Module        *Module     `json:"module,omitempty"`
+	Delegation    *Delegation `json:"delegation,omitempty"`
 }
 
 // UpdateThoughtRequest represents the request payload for updating a thought.
@@ -48,10 +55,11 @@ type UpdateThoughtRequest struct {
 
 // UpdateThoughtData represents the thought update data.
 type UpdateThoughtData struct {
-	Relation      string `json:"relation,omitempty"`
-	OutputClassID string `json:"output_class_id,omitempty"`
-	Index         int    `json:"index,omitempty"`
-	Module        Module `json:"module,omitempty"`
+	Relation      string      `json:"relation,omitempty"`
+	OutputClassID string      `json:"output_class_id,omitempty"`
+	Index         int         `json:"index,omitempty"`
+	Module        *Module     `json:"module,omitempty"`
+	Delegation    *Delegation `json:"delegation,omitempty"`
 }
 
 // GetThought retrieves a specific thought by ID.
@@ -86,8 +94,11 @@ func (s *Service) CreateThought(chainID string, req CreateThoughtRequest) (*Thou
 	if req.Thought.Relation == "" {
 		return nil, errors.New("thought relation is required")
 	}
-	if req.Thought.Module.Reference == "" {
+	if req.Thought.Module != nil && req.Thought.Module.Reference == "" {
 		return nil, errors.New("thought module reference is required")
+	}
+	if req.Thought.Module == nil && req.Thought.Delegation == nil {
+		return nil, errors.New("either module or delegation is required")
 	}
 
 	var thoughtResp ThoughtResponse

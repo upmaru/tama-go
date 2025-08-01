@@ -69,7 +69,11 @@ func TestPerceptionGetChain(t *testing.T) {
 	}
 
 	if chain.ProvisionState != expectedChain.ProvisionState {
-		t.Errorf("Expected chain provision_state %s, got %s", expectedChain.ProvisionState, chain.ProvisionState)
+		t.Errorf(
+			"Expected chain provision_state %s, got %s",
+			expectedChain.ProvisionState,
+			chain.ProvisionState,
+		)
 	}
 }
 
@@ -139,7 +143,10 @@ func TestPerceptionCreateChain(t *testing.T) {
 		}
 
 		if r.URL.Path != "/provision/perception/spaces/space-123/chains" {
-			t.Errorf("Expected path /provision/perception/spaces/space-123/chains, got %s", r.URL.Path)
+			t.Errorf(
+				"Expected path /provision/perception/spaces/space-123/chains, got %s",
+				r.URL.Path,
+			)
 		}
 
 		var receivedRequest perception.CreateChainRequest
@@ -148,7 +155,11 @@ func TestPerceptionCreateChain(t *testing.T) {
 		}
 
 		if receivedRequest.Chain.Name != request.Chain.Name {
-			t.Errorf("Expected chain name %s, got %s", request.Chain.Name, receivedRequest.Chain.Name)
+			t.Errorf(
+				"Expected chain name %s, got %s",
+				request.Chain.Name,
+				receivedRequest.Chain.Name,
+			)
 		}
 
 		w.Header().Set("Content-Type", "application/json")
@@ -443,7 +454,10 @@ func TestPerceptionCreateChainWithFieldErrors(t *testing.T) {
 		}
 
 		if r.URL.Path != "/provision/perception/spaces/space-123/chains" {
-			t.Errorf("Expected path /provision/perception/spaces/space-123/chains, got %s", r.URL.Path)
+			t.Errorf(
+				"Expected path /provision/perception/spaces/space-123/chains, got %s",
+				r.URL.Path,
+			)
 		}
 
 		w.Header().Set("Content-Type", "application/json")
@@ -496,7 +510,7 @@ func TestPerceptionGetThought(t *testing.T) {
 		ID:            "thought-123",
 		ChainID:       "chain-123",
 		OutputClassID: "class-123",
-		Module: perception.Module{
+		Module: &perception.Module{
 			ID:        "module-123",
 			Reference: "tama/agentic/generate",
 			Parameters: map[string]any{
@@ -588,7 +602,7 @@ func TestPerceptionCreateThought(t *testing.T) {
 	request := perception.CreateThoughtRequest{
 		Thought: perception.ThoughtRequestData{
 			Relation: "description",
-			Module: perception.Module{
+			Module: &perception.Module{
 				Reference: "tama/agentic/generate",
 				Parameters: map[string]any{
 					"temperature": 0.8,
@@ -602,7 +616,7 @@ func TestPerceptionCreateThought(t *testing.T) {
 		ID:            "thought-456",
 		ChainID:       "chain-123",
 		OutputClassID: "class-123",
-		Module: perception.Module{
+		Module: &perception.Module{
 			ID:        "module-456",
 			Reference: "tama/agentic/generate",
 			Parameters: map[string]any{
@@ -625,7 +639,10 @@ func TestPerceptionCreateThought(t *testing.T) {
 		}
 
 		if r.URL.Path != "/provision/perception/chains/chain-123/thoughts" {
-			t.Errorf("Expected path /provision/perception/chains/chain-123/thoughts, got %s", r.URL.Path)
+			t.Errorf(
+				"Expected path /provision/perception/chains/chain-123/thoughts, got %s",
+				r.URL.Path,
+			)
 		}
 
 		var receivedRequest perception.CreateThoughtRequest
@@ -634,7 +651,11 @@ func TestPerceptionCreateThought(t *testing.T) {
 		}
 
 		if receivedRequest.Thought.Relation != request.Thought.Relation {
-			t.Errorf("Expected thought relation %s, got %s", request.Thought.Relation, receivedRequest.Thought.Relation)
+			t.Errorf(
+				"Expected thought relation %s, got %s",
+				request.Thought.Relation,
+				receivedRequest.Thought.Relation,
+			)
 		}
 
 		if receivedRequest.Thought.Module.Reference != request.Thought.Module.Reference {
@@ -672,11 +693,11 @@ func TestPerceptionCreateThoughtWithOutputClassID(t *testing.T) {
 		Thought: perception.ThoughtRequestData{
 			Relation:      "description",
 			OutputClassID: "class-456",
-			Module: perception.Module{
+			Module: &perception.Module{
 				Reference: "tama/agentic/generate",
 				Parameters: map[string]any{
-					"temperature": 0.8,
-					"max_tokens":  150,
+					"temperature": 0.9,
+					"max_tokens":  200,
 				},
 			},
 		},
@@ -686,12 +707,12 @@ func TestPerceptionCreateThoughtWithOutputClassID(t *testing.T) {
 		ID:            "thought-789",
 		ChainID:       "chain-123",
 		OutputClassID: "class-456",
-		Module: perception.Module{
+		Module: &perception.Module{
 			ID:        "module-789",
 			Reference: "tama/agentic/generate",
 			Parameters: map[string]any{
-				"temperature": 0.8,
-				"max_tokens":  150,
+				"temperature": 0.9,
+				"max_tokens":  200,
 			},
 		},
 		ProvisionState: "pending",
@@ -709,7 +730,10 @@ func TestPerceptionCreateThoughtWithOutputClassID(t *testing.T) {
 		}
 
 		if r.URL.Path != "/provision/perception/chains/chain-123/thoughts" {
-			t.Errorf("Expected path /provision/perception/chains/chain-123/thoughts, got %s", r.URL.Path)
+			t.Errorf(
+				"Expected path /provision/perception/chains/chain-123/thoughts, got %s",
+				r.URL.Path,
+			)
 		}
 
 		var receivedRequest perception.CreateThoughtRequest
@@ -752,26 +776,26 @@ func TestPerceptionCreateThoughtWithIndex(t *testing.T) {
 		Thought: perception.ThoughtRequestData{
 			Relation: "description",
 			Index:    5,
-			Module: perception.Module{
+			Module: &perception.Module{
 				Reference: "tama/agentic/generate",
 				Parameters: map[string]any{
-					"temperature": 0.8,
-					"max_tokens":  150,
+					"temperature": 0.6,
+					"max_tokens":  120,
 				},
 			},
 		},
 	}
 
 	expectedThought := perception.Thought{
-		ID:            "thought-456",
+		ID:            "thought-101",
 		ChainID:       "chain-123",
 		OutputClassID: "class-123",
-		Module: perception.Module{
-			ID:        "module-456",
+		Module: &perception.Module{
+			ID:        "module-101",
 			Reference: "tama/agentic/generate",
 			Parameters: map[string]any{
-				"temperature": 0.8,
-				"max_tokens":  150,
+				"temperature": 0.6,
+				"max_tokens":  120,
 			},
 		},
 		ProvisionState: "pending",
@@ -789,7 +813,10 @@ func TestPerceptionCreateThoughtWithIndex(t *testing.T) {
 		}
 
 		if r.URL.Path != "/provision/perception/chains/chain-123/thoughts" {
-			t.Errorf("Expected path /provision/perception/chains/chain-123/thoughts, got %s", r.URL.Path)
+			t.Errorf(
+				"Expected path /provision/perception/chains/chain-123/thoughts, got %s",
+				r.URL.Path,
+			)
 		}
 
 		var receivedRequest perception.CreateThoughtRequest
@@ -799,11 +826,19 @@ func TestPerceptionCreateThoughtWithIndex(t *testing.T) {
 
 		// Validate that the index is properly included in the request body
 		if receivedRequest.Thought.Index != request.Thought.Index {
-			t.Errorf("Expected thought index %d, got %d", request.Thought.Index, receivedRequest.Thought.Index)
+			t.Errorf(
+				"Expected thought index %d, got %d",
+				request.Thought.Index,
+				receivedRequest.Thought.Index,
+			)
 		}
 
 		if receivedRequest.Thought.Relation != request.Thought.Relation {
-			t.Errorf("Expected thought relation %s, got %s", request.Thought.Relation, receivedRequest.Thought.Relation)
+			t.Errorf(
+				"Expected thought relation %s, got %s",
+				request.Thought.Relation,
+				receivedRequest.Thought.Relation,
+			)
 		}
 
 		if receivedRequest.Thought.Module.Reference != request.Thought.Module.Reference {
@@ -846,7 +881,7 @@ func TestPerceptionCreateThoughtValidation(t *testing.T) {
 	_, err := client.Perception.CreateThought("", perception.CreateThoughtRequest{
 		Thought: perception.ThoughtRequestData{
 			Relation: "description",
-			Module: perception.Module{
+			Module: &perception.Module{
 				Reference:  "tama/agentic/generate",
 				Parameters: map[string]any{},
 			},
@@ -860,9 +895,8 @@ func TestPerceptionCreateThoughtValidation(t *testing.T) {
 	_, err = client.Perception.CreateThought("chain-123", perception.CreateThoughtRequest{
 		Thought: perception.ThoughtRequestData{
 			Relation: "",
-			Module: perception.Module{
-				Reference:  "tama/agentic/generate",
-				Parameters: map[string]any{},
+			Module: &perception.Module{
+				Reference: "tama/agentic/generate",
 			},
 		},
 	})
@@ -874,9 +908,8 @@ func TestPerceptionCreateThoughtValidation(t *testing.T) {
 	_, err = client.Perception.CreateThought("chain-123", perception.CreateThoughtRequest{
 		Thought: perception.ThoughtRequestData{
 			Relation: "description",
-			Module: perception.Module{
-				Reference:  "",
-				Parameters: map[string]any{},
+			Module: &perception.Module{
+				Reference: "",
 			},
 		},
 	})
@@ -888,9 +921,9 @@ func TestPerceptionCreateThoughtValidation(t *testing.T) {
 func TestPerceptionUpdateThought(t *testing.T) {
 	request := perception.UpdateThoughtRequest{
 		Thought: perception.UpdateThoughtData{
-			Relation:      "updated-description",
-			OutputClassID: "class-789",
-			Module: perception.Module{
+			Relation: "updated-description",
+			Index:    3,
+			Module: &perception.Module{
 				Reference: "tama/agentic/analyze",
 				Parameters: map[string]any{
 					"depth": 3,
@@ -900,19 +933,20 @@ func TestPerceptionUpdateThought(t *testing.T) {
 	}
 
 	expectedThought := perception.Thought{
-		ID:            "thought-123",
+		ID:            "thought-111",
 		ChainID:       "chain-123",
 		OutputClassID: "class-789",
-		Module: perception.Module{
-			ID:        "module-123",
+		Module: &perception.Module{
+			ID:        "module-111",
 			Reference: "tama/agentic/analyze",
 			Parameters: map[string]any{
 				"depth": 3,
+				"scope": "global",
 			},
 		},
 		ProvisionState: "active",
-		Relation:       "updated-description",
-		Index:          1,
+		Relation:       "analysis",
+		Index:          7,
 	}
 
 	expectedResponse := perception.ThoughtResponse{
@@ -951,7 +985,11 @@ func TestPerceptionUpdateThought(t *testing.T) {
 	}
 
 	if thought.Module.Reference != expectedThought.Module.Reference {
-		t.Errorf("Expected module reference %s, got %s", expectedThought.Module.Reference, thought.Module.Reference)
+		t.Errorf(
+			"Expected module reference %s, got %s",
+			expectedThought.Module.Reference,
+			thought.Module.Reference,
+		)
 	}
 }
 
@@ -961,7 +999,7 @@ func TestPerceptionUpdateThoughtWithIndex(t *testing.T) {
 			Relation:      "updated-description",
 			OutputClassID: "class-789",
 			Index:         3,
-			Module: perception.Module{
+			Module: &perception.Module{
 				Reference: "tama/agentic/analyze",
 				Parameters: map[string]any{
 					"depth": 3,
@@ -971,19 +1009,20 @@ func TestPerceptionUpdateThoughtWithIndex(t *testing.T) {
 	}
 
 	expectedThought := perception.Thought{
-		ID:            "thought-123",
+		ID:            "thought-222",
 		ChainID:       "chain-123",
-		OutputClassID: "class-789",
-		Module: perception.Module{
-			ID:        "module-123",
-			Reference: "tama/agentic/analyze",
+		OutputClassID: "class-456",
+		Module: &perception.Module{
+			ID:        "module-222",
+			Reference: "tama/agentic/transform",
 			Parameters: map[string]any{
-				"depth": 3,
+				"format": "json",
+				"schema": "v2",
 			},
 		},
 		ProvisionState: "active",
-		Relation:       "updated-description",
-		Index:          3,
+		Relation:       "transformation",
+		Index:          10,
 	}
 
 	expectedResponse := perception.ThoughtResponse{
@@ -1006,11 +1045,19 @@ func TestPerceptionUpdateThoughtWithIndex(t *testing.T) {
 
 		// Validate that the index is properly included in the request body
 		if receivedRequest.Thought.Index != request.Thought.Index {
-			t.Errorf("Expected thought index %d, got %d", request.Thought.Index, receivedRequest.Thought.Index)
+			t.Errorf(
+				"Expected thought index %d, got %d",
+				request.Thought.Index,
+				receivedRequest.Thought.Index,
+			)
 		}
 
 		if receivedRequest.Thought.Relation != request.Thought.Relation {
-			t.Errorf("Expected thought relation %s, got %s", request.Thought.Relation, receivedRequest.Thought.Relation)
+			t.Errorf(
+				"Expected thought relation %s, got %s",
+				request.Thought.Relation,
+				receivedRequest.Thought.Relation,
+			)
 		}
 
 		if receivedRequest.Thought.Module.Reference != request.Thought.Module.Reference {
@@ -1044,7 +1091,11 @@ func TestPerceptionUpdateThoughtWithIndex(t *testing.T) {
 	}
 
 	if thought.Module.Reference != expectedThought.Module.Reference {
-		t.Errorf("Expected module reference %s, got %s", expectedThought.Module.Reference, thought.Module.Reference)
+		t.Errorf(
+			"Expected module reference %s, got %s",
+			expectedThought.Module.Reference,
+			thought.Module.Reference,
+		)
 	}
 
 	if thought.Index != expectedThought.Index {
@@ -1057,7 +1108,7 @@ func TestPerceptionCreateThoughtWithZeroIndex(t *testing.T) {
 		Thought: perception.ThoughtRequestData{
 			Relation: "description",
 			Index:    0, // Explicitly set zero index
-			Module: perception.Module{
+			Module: &perception.Module{
 				Reference: "tama/agentic/generate",
 				Parameters: map[string]any{
 					"temperature": 0.8,
@@ -1071,7 +1122,7 @@ func TestPerceptionCreateThoughtWithZeroIndex(t *testing.T) {
 		ID:            "thought-456",
 		ChainID:       "chain-123",
 		OutputClassID: "class-123",
-		Module: perception.Module{
+		Module: &perception.Module{
 			ID:        "module-456",
 			Reference: "tama/agentic/generate",
 			Parameters: map[string]any{
@@ -1094,7 +1145,10 @@ func TestPerceptionCreateThoughtWithZeroIndex(t *testing.T) {
 		}
 
 		if r.URL.Path != "/provision/perception/chains/chain-123/thoughts" {
-			t.Errorf("Expected path /provision/perception/chains/chain-123/thoughts, got %s", r.URL.Path)
+			t.Errorf(
+				"Expected path /provision/perception/chains/chain-123/thoughts, got %s",
+				r.URL.Path,
+			)
 		}
 
 		var receivedRequest perception.CreateThoughtRequest
@@ -1108,7 +1162,11 @@ func TestPerceptionCreateThoughtWithZeroIndex(t *testing.T) {
 		}
 
 		if receivedRequest.Thought.Relation != request.Thought.Relation {
-			t.Errorf("Expected thought relation %s, got %s", request.Thought.Relation, receivedRequest.Thought.Relation)
+			t.Errorf(
+				"Expected thought relation %s, got %s",
+				request.Thought.Relation,
+				receivedRequest.Thought.Relation,
+			)
 		}
 
 		w.Header().Set("Content-Type", "application/json")
@@ -1206,10 +1264,8 @@ func TestPerceptionDeleteThoughtEmptyID(t *testing.T) {
 func TestPerceptionUpdateThoughtWithZeroIndex(t *testing.T) {
 	request := perception.UpdateThoughtRequest{
 		Thought: perception.UpdateThoughtData{
-			Relation:      "updated-description",
-			OutputClassID: "class-789",
-			Index:         0, // Explicitly set zero index
-			Module: perception.Module{
+			Relation: "updated-description",
+			Module: &perception.Module{
 				Reference: "tama/agentic/analyze",
 				Parameters: map[string]any{
 					"depth": 3,
@@ -1222,7 +1278,7 @@ func TestPerceptionUpdateThoughtWithZeroIndex(t *testing.T) {
 		ID:            "thought-123",
 		ChainID:       "chain-123",
 		OutputClassID: "class-789",
-		Module: perception.Module{
+		Module: &perception.Module{
 			ID:        "module-123",
 			Reference: "tama/agentic/analyze",
 			Parameters: map[string]any{
@@ -1258,7 +1314,11 @@ func TestPerceptionUpdateThoughtWithZeroIndex(t *testing.T) {
 		}
 
 		if receivedRequest.Thought.Relation != request.Thought.Relation {
-			t.Errorf("Expected thought relation %s, got %s", request.Thought.Relation, receivedRequest.Thought.Relation)
+			t.Errorf(
+				"Expected thought relation %s, got %s",
+				request.Thought.Relation,
+				receivedRequest.Thought.Relation,
+			)
 		}
 
 		w.Header().Set("Content-Type", "application/json")
@@ -1296,7 +1356,10 @@ func TestPerceptionCreateThoughtWithFieldErrors(t *testing.T) {
 		}
 
 		if r.URL.Path != "/provision/perception/chains/chain-123/thoughts" {
-			t.Errorf("Expected path /provision/perception/chains/chain-123/thoughts, got %s", r.URL.Path)
+			t.Errorf(
+				"Expected path /provision/perception/chains/chain-123/thoughts, got %s",
+				r.URL.Path,
+			)
 		}
 
 		w.Header().Set("Content-Type", "application/json")
@@ -1322,7 +1385,7 @@ func TestPerceptionCreateThoughtWithFieldErrors(t *testing.T) {
 	request := perception.CreateThoughtRequest{
 		Thought: perception.ThoughtRequestData{
 			Relation: "invalid-relation", // Valid relation to bypass client validation
-			Module: perception.Module{
+			Module: &perception.Module{
 				Reference:  "invalid/reference", // Valid reference to bypass client validation
 				Parameters: map[string]any{},
 			},
@@ -1341,11 +1404,174 @@ func TestPerceptionCreateThoughtWithFieldErrors(t *testing.T) {
 		t.Errorf("Expected error to contain 'relation can't be blank', got %s", errorMsg)
 	}
 	if !strings.Contains(errorMsg, "relation is not included in the list") {
-		t.Errorf("Expected error to contain 'relation is not included in the list', got %s", errorMsg)
+		t.Errorf(
+			"Expected error to contain 'relation is not included in the list', got %s",
+			errorMsg,
+		)
 	}
 	if !strings.Contains(errorMsg, "module reference is invalid") {
 		t.Errorf("Expected error to contain 'module reference is invalid', got %s", errorMsg)
 	}
+}
+
+func TestPerceptionCreateThoughtWithDelegation(t *testing.T) {
+	request := perception.CreateThoughtRequest{
+		Thought: perception.ThoughtRequestData{
+			Relation: "delegation",
+			Delegation: &perception.Delegation{
+				TargetThoughtID: "target-thought-123",
+			},
+		},
+	}
+
+	expectedThought := perception.Thought{
+		ID:      "thought-delegation-456",
+		ChainID: "chain-123",
+		Delegation: &perception.Delegation{
+			TargetThoughtID: "target-thought-123",
+		},
+		ProvisionState: "pending",
+		Relation:       "delegation",
+		Index:          1,
+	}
+
+	expectedResponse := perception.ThoughtResponse{
+		Data: expectedThought,
+	}
+
+	server := createMockServer(t, func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			t.Errorf("Expected POST request, got %s", r.Method)
+		}
+
+		if r.URL.Path != "/provision/perception/chains/chain-123/thoughts" {
+			t.Errorf(
+				"Expected path /provision/perception/chains/chain-123/thoughts, got %s",
+				r.URL.Path,
+			)
+		}
+
+		var receivedRequest perception.CreateThoughtRequest
+		if err := json.NewDecoder(r.Body).Decode(&receivedRequest); err != nil {
+			t.Fatalf("Failed to decode request body: %v", err)
+		}
+
+		if receivedRequest.Thought.Relation != request.Thought.Relation {
+			t.Errorf(
+				"Expected thought relation %s, got %s",
+				request.Thought.Relation,
+				receivedRequest.Thought.Relation,
+			)
+		}
+
+		if receivedRequest.Thought.Delegation == nil {
+			t.Error("Expected delegation to be present")
+		} else if receivedRequest.Thought.Delegation.TargetThoughtID != request.Thought.Delegation.TargetThoughtID {
+			t.Errorf(
+				"Expected delegation target_thought_id %s, got %s",
+				request.Thought.Delegation.TargetThoughtID,
+				receivedRequest.Thought.Delegation.TargetThoughtID,
+			)
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusCreated)
+		json.NewEncoder(w).Encode(expectedResponse)
+	})
+	defer server.Close()
+
+	config := tama.Config{
+		BaseURL: server.URL,
+		APIKey:  "test-key",
+		Timeout: 10 * time.Second,
+	}
+
+	client := tama.NewClient(config)
+	thought, err := client.Perception.CreateThought("chain-123", request)
+
+	if err != nil {
+		t.Fatalf("Expected no error, got %v", err)
+	}
+
+	validateThoughtResponse(t, *thought, expectedThought)
+}
+
+func TestPerceptionUpdateThoughtWithDelegation(t *testing.T) {
+	request := perception.UpdateThoughtRequest{
+		Thought: perception.UpdateThoughtData{
+			Relation: "updated-delegation",
+			Delegation: &perception.Delegation{
+				TargetThoughtID: "new-target-thought-789",
+			},
+		},
+	}
+
+	expectedThought := perception.Thought{
+		ID:      "thought-123",
+		ChainID: "chain-123",
+		Delegation: &perception.Delegation{
+			TargetThoughtID: "new-target-thought-789",
+		},
+		ProvisionState: "active",
+		Relation:       "updated-delegation",
+		Index:          1,
+	}
+
+	expectedResponse := perception.ThoughtResponse{
+		Data: expectedThought,
+	}
+
+	server := createMockServer(t, func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPatch {
+			t.Errorf("Expected PATCH request, got %s", r.Method)
+		}
+
+		if r.URL.Path != "/provision/perception/thoughts/thought-123" {
+			t.Errorf("Expected path /provision/perception/thoughts/thought-123, got %s", r.URL.Path)
+		}
+
+		var receivedRequest perception.UpdateThoughtRequest
+		if err := json.NewDecoder(r.Body).Decode(&receivedRequest); err != nil {
+			t.Fatalf("Failed to decode request body: %v", err)
+		}
+
+		if receivedRequest.Thought.Relation != request.Thought.Relation {
+			t.Errorf(
+				"Expected thought relation %s, got %s",
+				request.Thought.Relation,
+				receivedRequest.Thought.Relation,
+			)
+		}
+
+		if receivedRequest.Thought.Delegation == nil {
+			t.Error("Expected delegation to be present")
+		} else if receivedRequest.Thought.Delegation.TargetThoughtID != request.Thought.Delegation.TargetThoughtID {
+			t.Errorf(
+				"Expected delegation target_thought_id %s, got %s",
+				request.Thought.Delegation.TargetThoughtID,
+				receivedRequest.Thought.Delegation.TargetThoughtID,
+			)
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(expectedResponse)
+	})
+	defer server.Close()
+
+	config := tama.Config{
+		BaseURL: server.URL,
+		APIKey:  "test-key",
+		Timeout: 10 * time.Second,
+	}
+
+	client := tama.NewClient(config)
+	thought, err := client.Perception.UpdateThought("thought-123", request)
+
+	if err != nil {
+		t.Fatalf("Expected no error, got %v", err)
+	}
+
+	validateThoughtResponse(t, *thought, expectedThought)
 }
 
 func validateThoughtResponse(t *testing.T, actual, expected perception.Thought) {
@@ -1358,19 +1584,58 @@ func validateThoughtResponse(t *testing.T, actual, expected perception.Thought) 
 	}
 
 	if actual.OutputClassID != expected.OutputClassID {
-		t.Errorf("Expected thought output_class_id %s, got %s", expected.OutputClassID, actual.OutputClassID)
+		t.Errorf(
+			"Expected thought output_class_id %s, got %s",
+			expected.OutputClassID,
+			actual.OutputClassID,
+		)
 	}
 
-	if actual.Module.ID != expected.Module.ID {
-		t.Errorf("Expected module ID %s, got %s", expected.Module.ID, actual.Module.ID)
+	// Handle Module pointer comparison
+	if (actual.Module == nil) != (expected.Module == nil) {
+		t.Errorf(
+			"Expected module nil status %v, got %v",
+			expected.Module == nil,
+			actual.Module == nil,
+		)
+	}
+	if actual.Module != nil && expected.Module != nil {
+		if actual.Module.ID != expected.Module.ID {
+			t.Errorf("Expected module ID %s, got %s", expected.Module.ID, actual.Module.ID)
+		}
+		if actual.Module.Reference != expected.Module.Reference {
+			t.Errorf(
+				"Expected module reference %s, got %s",
+				expected.Module.Reference,
+				actual.Module.Reference,
+			)
+		}
 	}
 
-	if actual.Module.Reference != expected.Module.Reference {
-		t.Errorf("Expected module reference %s, got %s", expected.Module.Reference, actual.Module.Reference)
+	// Handle Delegation pointer comparison
+	if (actual.Delegation == nil) != (expected.Delegation == nil) {
+		t.Errorf(
+			"Expected delegation nil status %v, got %v",
+			expected.Delegation == nil,
+			actual.Delegation == nil,
+		)
+	}
+	if actual.Delegation != nil && expected.Delegation != nil {
+		if actual.Delegation.TargetThoughtID != expected.Delegation.TargetThoughtID {
+			t.Errorf(
+				"Expected delegation target_thought_id %s, got %s",
+				expected.Delegation.TargetThoughtID,
+				actual.Delegation.TargetThoughtID,
+			)
+		}
 	}
 
 	if actual.ProvisionState != expected.ProvisionState {
-		t.Errorf("Expected thought provision_state %s, got %s", expected.ProvisionState, actual.ProvisionState)
+		t.Errorf(
+			"Expected thought provision_state %s, got %s",
+			expected.ProvisionState,
+			actual.ProvisionState,
+		)
 	}
 
 	if actual.Relation != expected.Relation {
@@ -1390,7 +1655,10 @@ func TestPerceptionNestedErrorParsing(t *testing.T) {
 		}
 
 		if r.URL.Path != "/provision/perception/chains/chain-123/thoughts" {
-			t.Errorf("Expected path /provision/perception/chains/chain-123/thoughts, got %s", r.URL.Path)
+			t.Errorf(
+				"Expected path /provision/perception/chains/chain-123/thoughts, got %s",
+				r.URL.Path,
+			)
 		}
 
 		w.Header().Set("Content-Type", "application/json")
@@ -1427,7 +1695,7 @@ func TestPerceptionNestedErrorParsing(t *testing.T) {
 	request := perception.CreateThoughtRequest{
 		Thought: perception.ThoughtRequestData{
 			Relation: "description", // Valid to bypass client validation
-			Module: perception.Module{
+			Module: &perception.Module{
 				Reference:  "tama/some/invalid", // Valid format to bypass client validation
 				Parameters: map[string]any{},
 			},
@@ -1448,7 +1716,11 @@ func TestPerceptionNestedErrorParsing(t *testing.T) {
 
 	// Verify status code
 	if perceptionErr.StatusCode != http.StatusUnprocessableEntity {
-		t.Errorf("Expected status code %d, got %d", http.StatusUnprocessableEntity, perceptionErr.StatusCode)
+		t.Errorf(
+			"Expected status code %d, got %d",
+			http.StatusUnprocessableEntity,
+			perceptionErr.StatusCode,
+		)
 	}
 
 	// Check that nested fields are flattened with dot notation
@@ -1586,7 +1858,10 @@ func TestPerceptionCreatePath(t *testing.T) {
 		}
 
 		if r.URL.Path != "/provision/perception/thoughts/thought-123/paths" {
-			t.Errorf("Expected path /provision/perception/thoughts/thought-123/paths, got %s", r.URL.Path)
+			t.Errorf(
+				"Expected path /provision/perception/thoughts/thought-123/paths, got %s",
+				r.URL.Path,
+			)
 		}
 
 		var receivedRequest perception.CreatePathRequest
@@ -1698,7 +1973,11 @@ func TestPerceptionUpdatePath(t *testing.T) {
 	}
 
 	if path.TargetClassID != expectedPath.TargetClassID {
-		t.Errorf("Expected target_class_id %s, got %s", expectedPath.TargetClassID, path.TargetClassID)
+		t.Errorf(
+			"Expected target_class_id %s, got %s",
+			expectedPath.TargetClassID,
+			path.TargetClassID,
+		)
 	}
 }
 
@@ -1754,7 +2033,11 @@ func TestPerceptionReplacePath(t *testing.T) {
 	}
 
 	if path.TargetClassID != expectedPath.TargetClassID {
-		t.Errorf("Expected target_class_id %s, got %s", expectedPath.TargetClassID, path.TargetClassID)
+		t.Errorf(
+			"Expected target_class_id %s, got %s",
+			expectedPath.TargetClassID,
+			path.TargetClassID,
+		)
 	}
 }
 
@@ -1848,11 +2131,19 @@ func validatePathResponse(t *testing.T, actual, expected perception.Path) {
 	}
 
 	if actual.ProvisionState != expected.ProvisionState {
-		t.Errorf("Expected path provision_state %s, got %s", expected.ProvisionState, actual.ProvisionState)
+		t.Errorf(
+			"Expected path provision_state %s, got %s",
+			expected.ProvisionState,
+			actual.ProvisionState,
+		)
 	}
 
 	if actual.TargetClassID != expected.TargetClassID {
-		t.Errorf("Expected path target_class_id %s, got %s", expected.TargetClassID, actual.TargetClassID)
+		t.Errorf(
+			"Expected path target_class_id %s, got %s",
+			expected.TargetClassID,
+			actual.TargetClassID,
+		)
 	}
 }
 
@@ -1926,7 +2217,10 @@ func TestPerceptionCreateContext(t *testing.T) {
 		}
 
 		if r.URL.Path != "/provision/perception/thoughts/thought-123/contexts" {
-			t.Errorf("Expected path /provision/perception/thoughts/thought-123/contexts, got %s", r.URL.Path)
+			t.Errorf(
+				"Expected path /provision/perception/thoughts/thought-123/contexts, got %s",
+				r.URL.Path,
+			)
 		}
 
 		var receivedRequest perception.CreateContextRequest
@@ -1935,11 +2229,19 @@ func TestPerceptionCreateContext(t *testing.T) {
 		}
 
 		if receivedRequest.Context.PromptID != request.Context.PromptID {
-			t.Errorf("Expected prompt_id %s, got %s", request.Context.PromptID, receivedRequest.Context.PromptID)
+			t.Errorf(
+				"Expected prompt_id %s, got %s",
+				request.Context.PromptID,
+				receivedRequest.Context.PromptID,
+			)
 		}
 
 		if receivedRequest.Context.Layer != request.Context.Layer {
-			t.Errorf("Expected layer %d, got %d", request.Context.Layer, receivedRequest.Context.Layer)
+			t.Errorf(
+				"Expected layer %d, got %d",
+				request.Context.Layer,
+				receivedRequest.Context.Layer,
+			)
 		}
 
 		w.Header().Set("Content-Type", "application/json")
@@ -2197,7 +2499,11 @@ func validateContextResponse(t *testing.T, actual, expected perception.Context) 
 	}
 
 	if actual.ProvisionState != expected.ProvisionState {
-		t.Errorf("Expected context provision_state %s, got %s", expected.ProvisionState, actual.ProvisionState)
+		t.Errorf(
+			"Expected context provision_state %s, got %s",
+			expected.ProvisionState,
+			actual.ProvisionState,
+		)
 	}
 }
 
@@ -2257,7 +2563,9 @@ func TestPerceptionGetProcessor(t *testing.T) {
 		t.Errorf("Expected processor type %s, got %s", expectedProcessor.Type, processor.Type)
 	}
 
-	if int(processor.Configuration["batch_size"].(float64)) != expectedProcessor.Configuration["batch_size"].(int) {
+	if int(
+		processor.Configuration["batch_size"].(float64),
+	) != expectedProcessor.Configuration["batch_size"].(int) {
 		t.Errorf(
 			"Expected batch_size %v, got %v",
 			expectedProcessor.Configuration["batch_size"],
@@ -2420,23 +2728,31 @@ func TestPerceptionCreateProcessorValidation(t *testing.T) {
 	}
 
 	// Test empty model ID validation
-	_, err = client.Perception.CreateProcessor("thought-123", "completion", perception.CreateProcessorRequest{
-		Processor: perception.ProcessorRequestData{
-			Configuration: map[string]any{"test": "value"},
+	_, err = client.Perception.CreateProcessor(
+		"thought-123",
+		"completion",
+		perception.CreateProcessorRequest{
+			Processor: perception.ProcessorRequestData{
+				Configuration: map[string]any{"test": "value"},
+			},
 		},
-	})
+	)
 
 	if err == nil {
 		t.Error("Expected validation error for empty model ID")
 	}
 
 	// Test valid model ID
-	_, err = client.Perception.CreateProcessor("thought-123", "completion", perception.CreateProcessorRequest{
-		Processor: perception.ProcessorRequestData{
-			ModelID:       "valid-model-123",
-			Configuration: map[string]any{"test": "value"},
+	_, err = client.Perception.CreateProcessor(
+		"thought-123",
+		"completion",
+		perception.CreateProcessorRequest{
+			Processor: perception.ProcessorRequestData{
+				ModelID:       "valid-model-123",
+				Configuration: map[string]any{"test": "value"},
+			},
 		},
-	})
+	)
 	// We expect a network error since we're not mocking this, but not a validation error
 	if err != nil && err.Error() == "model ID is required" {
 		t.Error("Valid model ID should not cause validation error")
