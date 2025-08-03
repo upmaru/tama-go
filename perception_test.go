@@ -3,6 +3,7 @@ package tama_test
 import (
 	"encoding/json"
 	"errors"
+	"io"
 	"net/http"
 	"strings"
 	"testing"
@@ -772,10 +773,11 @@ func TestPerceptionCreateThoughtWithOutputClassID(t *testing.T) {
 }
 
 func TestPerceptionCreateThoughtWithIndex(t *testing.T) {
+	indexValue := 5
 	request := perception.CreateThoughtRequest{
 		Thought: perception.ThoughtRequestData{
 			Relation: "description",
-			Index:    5,
+			Index:    &indexValue,
 			Module: &perception.Module{
 				Reference: "tama/agentic/generate",
 				Parameters: map[string]any{
@@ -825,11 +827,15 @@ func TestPerceptionCreateThoughtWithIndex(t *testing.T) {
 		}
 
 		// Validate that the index is properly included in the request body
-		if receivedRequest.Thought.Index != request.Thought.Index {
+		if receivedRequest.Thought.Index == nil || *receivedRequest.Thought.Index != *request.Thought.Index {
+			var receivedIndex int
+			if receivedRequest.Thought.Index != nil {
+				receivedIndex = *receivedRequest.Thought.Index
+			}
 			t.Errorf(
 				"Expected thought index %d, got %d",
-				request.Thought.Index,
-				receivedRequest.Thought.Index,
+				*request.Thought.Index,
+				receivedIndex,
 			)
 		}
 
@@ -919,10 +925,11 @@ func TestPerceptionCreateThoughtValidation(t *testing.T) {
 }
 
 func TestPerceptionUpdateThought(t *testing.T) {
+	indexValue := 3
 	request := perception.UpdateThoughtRequest{
 		Thought: perception.UpdateThoughtData{
 			Relation: "updated-description",
-			Index:    3,
+			Index:    &indexValue,
 			Module: &perception.Module{
 				Reference: "tama/agentic/analyze",
 				Parameters: map[string]any{
@@ -994,11 +1001,12 @@ func TestPerceptionUpdateThought(t *testing.T) {
 }
 
 func TestPerceptionUpdateThoughtWithIndex(t *testing.T) {
+	indexValue := 3
 	request := perception.UpdateThoughtRequest{
 		Thought: perception.UpdateThoughtData{
 			Relation:      "updated-description",
 			OutputClassID: "class-789",
-			Index:         3,
+			Index:         &indexValue,
 			Module: &perception.Module{
 				Reference: "tama/agentic/analyze",
 				Parameters: map[string]any{
@@ -1044,11 +1052,15 @@ func TestPerceptionUpdateThoughtWithIndex(t *testing.T) {
 		}
 
 		// Validate that the index is properly included in the request body
-		if receivedRequest.Thought.Index != request.Thought.Index {
+		if receivedRequest.Thought.Index == nil || *receivedRequest.Thought.Index != *request.Thought.Index {
+			var receivedIndex int
+			if receivedRequest.Thought.Index != nil {
+				receivedIndex = *receivedRequest.Thought.Index
+			}
 			t.Errorf(
 				"Expected thought index %d, got %d",
-				request.Thought.Index,
-				receivedRequest.Thought.Index,
+				*request.Thought.Index,
+				receivedIndex,
 			)
 		}
 
@@ -1104,10 +1116,11 @@ func TestPerceptionUpdateThoughtWithIndex(t *testing.T) {
 }
 
 func TestPerceptionCreateThoughtWithZeroIndex(t *testing.T) {
+	zeroIndex := 0
 	request := perception.CreateThoughtRequest{
 		Thought: perception.ThoughtRequestData{
 			Relation: "description",
-			Index:    0, // Explicitly set zero index
+			Index:    &zeroIndex, // Explicitly set zero index
 			Module: &perception.Module{
 				Reference: "tama/agentic/generate",
 				Parameters: map[string]any{
@@ -1139,6 +1152,7 @@ func TestPerceptionCreateThoughtWithZeroIndex(t *testing.T) {
 		Data: expectedThought,
 	}
 
+	requestCount := 0
 	server := createMockServer(t, func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
 			t.Errorf("Expected POST request, got %s", r.Method)
@@ -1151,20 +1165,48 @@ func TestPerceptionCreateThoughtWithZeroIndex(t *testing.T) {
 			)
 		}
 
+		// Read and log the raw request body first
+		bodyBytes, err := io.ReadAll(r.Body)
+		if err != nil {
+			t.Fatalf("Failed to read request body: %v", err)
+		}
+		t.Logf("DEBUG: Raw request body: %s", string(bodyBytes))
+
+		// Reset the body for JSON decoding
+		r.Body = io.NopCloser(strings.NewReader(string(bodyBytes)))
+
 		var receivedRequest perception.CreateThoughtRequest
 		if err := json.NewDecoder(r.Body).Decode(&receivedRequest); err != nil {
 			t.Fatalf("Failed to decode request body: %v", err)
 		}
 
-		// Validate that zero index is properly included in the request body
-		if receivedRequest.Thought.Index != 0 {
-			t.Errorf("Expected thought index 0, got %d", receivedRequest.Thought.Index)
+		requestCount++
+		
+		// Validate based on which request this is
+		if requestCount == 1 {
+			// First request should have index 0
+			if receivedRequest.Thought.Index == nil || *receivedRequest.Thought.Index != 0 {
+				var receivedIndex int
+				if receivedRequest.Thought.Index != nil {
+					receivedIndex = *receivedRequest.Thought.Index
+				}
+				t.Logf("DEBUG: receivedRequest.Thought.Index == nil: %v", receivedRequest.Thought.Index == nil)
+				if receivedRequest.Thought.Index != nil {
+					t.Logf("DEBUG: *receivedRequest.Thought.Index: %d", *receivedRequest.Thought.Index)
+					t.Logf("DEBUG: *receivedRequest.Thought.Index != 0: %v", *receivedRequest.Thought.Index != 0)
+				}
+				t.Errorf("Expected thought index 0, got %d", receivedIndex)
+			}
+		} else if requestCount == 2 {
+			// Second request should have nil index
+			if receivedRequest.Thought.Index != nil {
+				t.Errorf("Expected nil index for second request, got %d", *receivedRequest.Thought.Index)
+			}
 		}
 
-		if receivedRequest.Thought.Relation != request.Thought.Relation {
+		if receivedRequest.Thought.Relation != "description" {
 			t.Errorf(
-				"Expected thought relation %s, got %s",
-				request.Thought.Relation,
+				"Expected thought relation description, got %s",
 				receivedRequest.Thought.Relation,
 			)
 		}
@@ -1192,7 +1234,245 @@ func TestPerceptionCreateThoughtWithZeroIndex(t *testing.T) {
 		t.Errorf("Expected thought index 0, got %d", thought.Index)
 	}
 
+	// Test with a nil index
+	requestNilIndex := perception.CreateThoughtRequest{
+		Thought: perception.ThoughtRequestData{
+			Relation: "description",
+			Index:    nil, // Do not set the index
+			Module: &perception.Module{
+				Reference: "tama/agentic/generate",
+				Parameters: map[string]any{
+					"temperature": 0.6,
+					"max_tokens":  100,
+				},
+			},
+		},
+	}
+
+	_, err = client.Perception.CreateThought("chain-123", requestNilIndex)
+	if err != nil {
+		t.Fatalf("Expected no error for nil index, got %v", err)
+	}
+
 	validateThoughtResponse(t, *thought, expectedThought)
+}
+
+// TestPerceptionOptionalIndexBehavior tests the comprehensive index behavior
+// This test ensures that:
+// 1. Index can be omitted (nil) - won't be sent in JSON
+// 2. Index can be set to 0 - will be sent as 0 in JSON
+// 3. Index can be set to any positive number - will be sent in JSON
+func TestPerceptionOptionalIndexBehavior(t *testing.T) {
+	// Test 1: Create delegated thought without index (nil)
+	t.Run("DelegatedThoughtWithoutIndex", func(t *testing.T) {
+		requestNilIndex := perception.CreateThoughtRequest{
+			Thought: perception.ThoughtRequestData{
+				Relation: "delegation",
+				Index:    nil, // Do not set the index
+				Delegation: &perception.Delegation{
+					TargetThoughtID: "target-thought-123",
+				},
+			},
+		}
+
+		expectedThought := perception.Thought{
+			ID:      "thought-nil-index",
+			ChainID: "chain-123",
+			Delegation: &perception.Delegation{
+				TargetThoughtID: "target-thought-123",
+			},
+			ProvisionState: "pending",
+			Relation:       "delegation",
+			Index:          5, // Server assigns an index
+		}
+
+		expectedResponse := perception.ThoughtResponse{
+			Data: expectedThought,
+		}
+
+		server := createMockServer(t, func(w http.ResponseWriter, r *http.Request) {
+			if r.Method != http.MethodPost {
+				t.Errorf("Expected POST request, got %s", r.Method)
+			}
+
+			var receivedRequest perception.CreateThoughtRequest
+			if err := json.NewDecoder(r.Body).Decode(&receivedRequest); err != nil {
+				t.Fatalf("Failed to decode request body: %v", err)
+			}
+
+			// Validate that index is NOT present in the request body (nil)
+			if receivedRequest.Thought.Index != nil {
+				t.Errorf("Expected thought index to be nil (omitted), got %d", *receivedRequest.Thought.Index)
+			}
+
+			// Validate delegation is present
+			if receivedRequest.Thought.Delegation == nil {
+				t.Error("Expected delegation to be present")
+			} else if receivedRequest.Thought.Delegation.TargetThoughtID != "target-thought-123" {
+				t.Errorf("Expected target thought ID %s, got %s", "target-thought-123", receivedRequest.Thought.Delegation.TargetThoughtID)
+			}
+
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusCreated)
+			json.NewEncoder(w).Encode(expectedResponse)
+		})
+		defer server.Close()
+
+		config := tama.Config{
+			BaseURL: server.URL,
+			APIKey:  "test-key",
+			Timeout: 10 * time.Second,
+		}
+
+		client := tama.NewClient(config)
+		thought, err := client.Perception.CreateThought("chain-123", requestNilIndex)
+
+		if err != nil {
+			t.Fatalf("Expected no error for nil index, got %v", err)
+		}
+
+		if thought.Index != 5 {
+			t.Errorf("Expected server-assigned index 5, got %d", thought.Index)
+		}
+	})
+
+	// Test 2: Create delegated thought with index = 0
+	t.Run("DelegatedThoughtWithZeroIndex", func(t *testing.T) {
+		zeroIndex := 0
+		requestZeroIndex := perception.CreateThoughtRequest{
+			Thought: perception.ThoughtRequestData{
+				Relation: "delegation",
+				Index:    &zeroIndex, // Explicitly set zero index
+				Delegation: &perception.Delegation{
+					TargetThoughtID: "target-thought-456",
+				},
+			},
+		}
+
+		expectedThought := perception.Thought{
+			ID:      "thought-zero-index",
+			ChainID: "chain-123",
+			Delegation: &perception.Delegation{
+				TargetThoughtID: "target-thought-456",
+			},
+			ProvisionState: "pending",
+			Relation:       "delegation",
+			Index:          0, // Server honors the 0 index
+		}
+
+		expectedResponse := perception.ThoughtResponse{
+			Data: expectedThought,
+		}
+
+		server := createMockServer(t, func(w http.ResponseWriter, r *http.Request) {
+			if r.Method != http.MethodPost {
+				t.Errorf("Expected POST request, got %s", r.Method)
+			}
+
+			var receivedRequest perception.CreateThoughtRequest
+			if err := json.NewDecoder(r.Body).Decode(&receivedRequest); err != nil {
+				t.Fatalf("Failed to decode request body: %v", err)
+			}
+
+			// Validate that index is present and set to 0
+			if receivedRequest.Thought.Index == nil {
+				t.Error("Expected thought index to be present (not nil), but got nil")
+			} else if *receivedRequest.Thought.Index != 0 {
+				t.Errorf("Expected thought index 0, got %d", *receivedRequest.Thought.Index)
+			}
+
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusCreated)
+			json.NewEncoder(w).Encode(expectedResponse)
+		})
+		defer server.Close()
+
+		config := tama.Config{
+			BaseURL: server.URL,
+			APIKey:  "test-key",
+			Timeout: 10 * time.Second,
+		}
+
+		client := tama.NewClient(config)
+		thought, err := client.Perception.CreateThought("chain-123", requestZeroIndex)
+
+		if err != nil {
+			t.Fatalf("Expected no error for zero index, got %v", err)
+		}
+
+		if thought.Index != 0 {
+			t.Errorf("Expected index 0, got %d", thought.Index)
+		}
+	})
+
+	// Test 3: Create delegated thought with positive index
+	t.Run("DelegatedThoughtWithPositiveIndex", func(t *testing.T) {
+		positiveIndex := 3
+		requestPositiveIndex := perception.CreateThoughtRequest{
+			Thought: perception.ThoughtRequestData{
+				Relation: "delegation",
+				Index:    &positiveIndex, // Explicitly set positive index
+				Delegation: &perception.Delegation{
+					TargetThoughtID: "target-thought-789",
+				},
+			},
+		}
+
+		expectedThought := perception.Thought{
+			ID:      "thought-positive-index",
+			ChainID: "chain-123",
+			Delegation: &perception.Delegation{
+				TargetThoughtID: "target-thought-789",
+			},
+			ProvisionState: "pending",
+			Relation:       "delegation",
+			Index:          3, // Server honors the positive index
+		}
+
+		expectedResponse := perception.ThoughtResponse{
+			Data: expectedThought,
+		}
+
+		server := createMockServer(t, func(w http.ResponseWriter, r *http.Request) {
+			if r.Method != http.MethodPost {
+				t.Errorf("Expected POST request, got %s", r.Method)
+			}
+
+			var receivedRequest perception.CreateThoughtRequest
+			if err := json.NewDecoder(r.Body).Decode(&receivedRequest); err != nil {
+				t.Fatalf("Failed to decode request body: %v", err)
+			}
+
+			// Validate that index is present and set to 3
+			if receivedRequest.Thought.Index == nil {
+				t.Error("Expected thought index to be present (not nil), but got nil")
+			} else if *receivedRequest.Thought.Index != 3 {
+				t.Errorf("Expected thought index 3, got %d", *receivedRequest.Thought.Index)
+			}
+
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusCreated)
+			json.NewEncoder(w).Encode(expectedResponse)
+		})
+		defer server.Close()
+
+		config := tama.Config{
+			BaseURL: server.URL,
+			APIKey:  "test-key",
+			Timeout: 10 * time.Second,
+		}
+
+		client := tama.NewClient(config)
+		thought, err := client.Perception.CreateThought("chain-123", requestPositiveIndex)
+
+		if err != nil {
+			t.Fatalf("Expected no error for positive index, got %v", err)
+		}
+
+		if thought.Index != 3 {
+			t.Errorf("Expected index 3, got %d", thought.Index)
+		}
+	})
 }
 
 func TestPerceptionDeleteThought(t *testing.T) {
@@ -1262,9 +1542,11 @@ func TestPerceptionDeleteThoughtEmptyID(t *testing.T) {
 }
 
 func TestPerceptionUpdateThoughtWithZeroIndex(t *testing.T) {
+	zeroIndex := 0
 	request := perception.UpdateThoughtRequest{
 		Thought: perception.UpdateThoughtData{
 			Relation: "updated-description",
+			Index:    &zeroIndex, // Explicitly set zero index
 			Module: &perception.Module{
 				Reference: "tama/agentic/analyze",
 				Parameters: map[string]any{
@@ -1309,8 +1591,12 @@ func TestPerceptionUpdateThoughtWithZeroIndex(t *testing.T) {
 		}
 
 		// Validate that zero index is properly included in the request body
-		if receivedRequest.Thought.Index != 0 {
-			t.Errorf("Expected thought index 0, got %d", receivedRequest.Thought.Index)
+		if receivedRequest.Thought.Index == nil || *receivedRequest.Thought.Index != 0 {
+			var receivedIndex int
+			if receivedRequest.Thought.Index != nil {
+				receivedIndex = *receivedRequest.Thought.Index
+			}
+			t.Errorf("Expected thought index 0, got %d", receivedIndex)
 		}
 
 		if receivedRequest.Thought.Relation != request.Thought.Relation {
