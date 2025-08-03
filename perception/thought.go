@@ -43,7 +43,7 @@ type CreateThoughtRequest struct {
 type ThoughtRequestData struct {
 	Relation      string      `json:"relation,omitempty"`
 	OutputClassID string      `json:"output_class_id,omitempty"`
-	Index         int         `json:"index,omitempty"`
+	Index         *int        `json:"index,omitempty"`
 	Module        *Module     `json:"module,omitempty"`
 	Delegation    *Delegation `json:"delegation,omitempty"`
 }
@@ -57,7 +57,7 @@ type UpdateThoughtRequest struct {
 type UpdateThoughtData struct {
 	Relation      string      `json:"relation,omitempty"`
 	OutputClassID string      `json:"output_class_id,omitempty"`
-	Index         int         `json:"index,omitempty"`
+	Index         *int        `json:"index,omitempty"`
 	Module        *Module     `json:"module,omitempty"`
 	Delegation    *Delegation `json:"delegation,omitempty"`
 }
