@@ -2,6 +2,15 @@
 
 Access via `client.Neural.*`
 
+## Table of Contents
+
+- [Space](#space)
+- [Processor](#processor)
+- [Node](#node)
+- [Bridge](#bridge)
+- [Class](#class)
+- [Corpus](#corpus)
+
 ## Space
 
 ### GetSpace(id string) (*Space, error)
