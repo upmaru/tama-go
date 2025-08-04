@@ -24,7 +24,7 @@ func TestSensoryGetSource(t *testing.T) {
 		Data: expectedSource,
 	}
 
-	server := createMockServer(t, func(w http.ResponseWriter, r *http.Request) {
+	server := CreateMockServer(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet {
 			t.Errorf("Expected GET request, got %s", r.Method)
 		}
@@ -82,7 +82,7 @@ func TestSensoryCreateSource(t *testing.T) {
 		Data: expectedSource,
 	}
 
-	server := createMockServer(t, func(w http.ResponseWriter, r *http.Request) {
+	server := CreateMockServer(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
 			t.Errorf("Expected POST request, got %s", r.Method)
 		}
@@ -248,7 +248,7 @@ func TestSensoryGetModel(t *testing.T) {
 		Data: expectedModel,
 	}
 
-	server := createMockServer(t, func(w http.ResponseWriter, r *http.Request) {
+	server := CreateMockServer(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet {
 			t.Errorf("Expected GET request, got %s", r.Method)
 		}
@@ -317,7 +317,7 @@ func TestSensoryCreateModel(t *testing.T) {
 		Data: expectedModel,
 	}
 
-	server := createMockServer(t, func(w http.ResponseWriter, r *http.Request) {
+	server := CreateMockServer(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
 			t.Errorf("Expected POST request, got %s", r.Method)
 		}
@@ -437,7 +437,7 @@ func TestSensoryGetLimit(t *testing.T) {
 		Data: expectedLimit,
 	}
 
-	server := createMockServer(t, func(w http.ResponseWriter, r *http.Request) {
+	server := CreateMockServer(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet {
 			t.Errorf("Expected GET request, got %s", r.Method)
 		}
@@ -492,7 +492,7 @@ func TestSensoryCreateLimit(t *testing.T) {
 		Data: expectedLimit,
 	}
 
-	server := createMockServer(t, func(w http.ResponseWriter, r *http.Request) {
+	server := CreateMockServer(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
 			t.Errorf("Expected POST request, got %s", r.Method)
 		}
@@ -627,7 +627,7 @@ func TestSensoryUpdateSource(t *testing.T) {
 		Data: expectedSource,
 	}
 
-	server := createMockServer(t, func(w http.ResponseWriter, r *http.Request) {
+	server := CreateMockServer(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPatch {
 			t.Errorf("Expected PATCH request, got %s", r.Method)
 		}
@@ -726,7 +726,7 @@ func TestSensoryReplaceSource(t *testing.T) {
 		Data: expectedSource,
 	}
 
-	server := createMockServer(t, func(w http.ResponseWriter, r *http.Request) {
+	server := CreateMockServer(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPut {
 			t.Errorf("Expected PUT request, got %s", r.Method)
 		}
@@ -829,7 +829,7 @@ func TestSensoryUpdateModel(t *testing.T) {
 		Data: expectedModel,
 	}
 
-	server := createMockServer(t, func(w http.ResponseWriter, r *http.Request) {
+	server := CreateMockServer(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPatch {
 			t.Errorf("Expected PATCH request, got %s", r.Method)
 		}
@@ -921,7 +921,7 @@ func TestSensoryReplaceModel(t *testing.T) {
 		Data: expectedModel,
 	}
 
-	server := createMockServer(t, func(w http.ResponseWriter, r *http.Request) {
+	server := CreateMockServer(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPut {
 			t.Errorf("Expected PUT request, got %s", r.Method)
 		}
@@ -983,7 +983,7 @@ func TestSensoryModelParameters(t *testing.T) {
 	expectedModel := createTestModelWithParameters()
 	expectedResponse := sensory.ModelResponse{Data: expectedModel}
 
-	server := createMockServer(t, func(w http.ResponseWriter, r *http.Request) {
+	server := CreateMockServer(func(w http.ResponseWriter, r *http.Request) {
 		validateParametersRequest(t, r, w, expectedResponse)
 	})
 	defer server.Close()
@@ -1267,7 +1267,7 @@ func validateRequestObjectParam(t *testing.T, params map[string]any) {
 
 func TestSensoryCreateSourceWithFieldErrors(t *testing.T) {
 	// Test API response with field validation errors
-	server := createMockServer(t, func(w http.ResponseWriter, r *http.Request) {
+	server := CreateMockServer(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
 			t.Errorf("Expected POST request, got %s", r.Method)
 		}
@@ -1345,7 +1345,7 @@ func TestSensoryGetSpecification(t *testing.T) {
 		Data: expectedSpec,
 	}
 
-	server := createMockServer(t, func(w http.ResponseWriter, r *http.Request) {
+	server := CreateMockServer(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet {
 			t.Errorf("Expected GET request, got %s", r.Method)
 		}
@@ -1421,7 +1421,7 @@ func TestSensoryCreateSpecification(t *testing.T) {
 		Data: expectedSpec,
 	}
 
-	server := createMockServer(t, func(w http.ResponseWriter, r *http.Request) {
+	server := CreateMockServer(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
 			t.Errorf("Expected POST request, got %s", r.Method)
 		}
@@ -1579,7 +1579,7 @@ func TestSensoryUpdateSpecification(t *testing.T) {
 		Data: expectedSpec,
 	}
 
-	server := createMockServer(t, func(w http.ResponseWriter, r *http.Request) {
+	server := CreateMockServer(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPatch {
 			t.Errorf("Expected PATCH request, got %s", r.Method)
 		}
@@ -1676,7 +1676,7 @@ func TestSensoryReplaceSpecification(t *testing.T) {
 		Data: expectedSpec,
 	}
 
-	server := createMockServer(t, func(w http.ResponseWriter, r *http.Request) {
+	server := CreateMockServer(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPut {
 			t.Errorf("Expected PUT request, got %s", r.Method)
 		}
@@ -1752,7 +1752,7 @@ func TestSensoryReplaceSpecification_EmptyIDValidation(t *testing.T) {
 }
 
 func TestSensoryDeleteSpecification(t *testing.T) {
-	server := createMockServer(t, func(w http.ResponseWriter, r *http.Request) {
+	server := CreateMockServer(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodDelete {
 			t.Errorf("Expected DELETE request, got %s", r.Method)
 		}
@@ -1806,7 +1806,7 @@ func TestSensoryGetIdentity(t *testing.T) {
 		Data: expectedIdentity,
 	}
 
-	server := createMockServer(t, func(w http.ResponseWriter, r *http.Request) {
+	server := CreateMockServer(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet {
 			t.Errorf("Expected GET request, got %s", r.Method)
 		}
@@ -1899,7 +1899,7 @@ func TestSensoryCreateIdentity(t *testing.T) {
 		Data: expectedIdentity,
 	}
 
-	server := createMockServer(t, func(w http.ResponseWriter, r *http.Request) {
+	server := CreateMockServer(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
 			t.Errorf("Expected POST request, got %s", r.Method)
 		}
@@ -2062,7 +2062,7 @@ func TestSensoryUpdateIdentity(t *testing.T) {
 		Data: expectedIdentity,
 	}
 
-	server := createMockServer(t, func(w http.ResponseWriter, r *http.Request) {
+	server := CreateMockServer(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPatch {
 			t.Errorf("Expected PATCH request, got %s", r.Method)
 		}
@@ -2150,7 +2150,7 @@ func TestSensoryReplaceIdentity(t *testing.T) {
 		Data: expectedIdentity,
 	}
 
-	server := createMockServer(t, func(w http.ResponseWriter, r *http.Request) {
+	server := CreateMockServer(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPut {
 			t.Errorf("Expected PUT request, got %s", r.Method)
 		}
@@ -2205,7 +2205,7 @@ func TestSensoryReplaceIdentity_EmptyIDValidation(t *testing.T) {
 }
 
 func TestSensoryDeleteIdentity(t *testing.T) {
-	server := createMockServer(t, func(w http.ResponseWriter, r *http.Request) {
+	server := CreateMockServer(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodDelete {
 			t.Errorf("Expected DELETE request, got %s", r.Method)
 		}
