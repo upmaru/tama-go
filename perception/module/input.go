@@ -14,6 +14,7 @@ type Input struct {
 	ID              string `json:"id,omitempty"`
 	Type            string `json:"type"`
 	ThoughtModuleID string `json:"thought_module_id,omitempty"`
+	ThoughtID       string `json:"thought_id,omitempty"`
 	ClassCorpusID   string `json:"class_corpus_id"`
 	ProvisionState  string `json:"provision_state,omitempty"`
 }
