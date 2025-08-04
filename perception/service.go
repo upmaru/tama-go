@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/go-resty/resty/v2"
+
 	"github.com/upmaru/tama-go/perception/module"
 )
 

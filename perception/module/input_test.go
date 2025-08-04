@@ -85,7 +85,7 @@ func TestModuleGetInput(t *testing.T) {
 }
 
 func TestModuleGetInputError(t *testing.T) {
-	server := createMockServer(func(w http.ResponseWriter, r *http.Request) {
+	server := createMockServer(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
 		response := map[string]interface{}{
 			"errors": map[string][]string{
@@ -179,7 +179,8 @@ func TestModuleCreateInput(t *testing.T) {
 	}
 
 	if receivedRequest.Input.ClassCorpusID != req.Input.ClassCorpusID {
-		t.Errorf("Expected request class_corpus_id %s, got %s", req.Input.ClassCorpusID, receivedRequest.Input.ClassCorpusID)
+		t.Errorf("Expected request class_corpus_id %s, got %s",
+			req.Input.ClassCorpusID, receivedRequest.Input.ClassCorpusID)
 	}
 }
 
@@ -296,7 +297,8 @@ func TestModuleUpdateInput(t *testing.T) {
 	}
 
 	if receivedRequest.Input.ClassCorpusID != req.Input.ClassCorpusID {
-		t.Errorf("Expected request class_corpus_id %s, got %s", req.Input.ClassCorpusID, receivedRequest.Input.ClassCorpusID)
+		t.Errorf("Expected request class_corpus_id %s, got %s",
+			req.Input.ClassCorpusID, receivedRequest.Input.ClassCorpusID)
 	}
 }
 
@@ -363,7 +365,8 @@ func TestModuleReplaceInput(t *testing.T) {
 	}
 
 	if receivedRequest.Input.ClassCorpusID != req.Input.ClassCorpusID {
-		t.Errorf("Expected request class_corpus_id %s, got %s", req.Input.ClassCorpusID, receivedRequest.Input.ClassCorpusID)
+		t.Errorf("Expected request class_corpus_id %s, got %s",
+			req.Input.ClassCorpusID, receivedRequest.Input.ClassCorpusID)
 	}
 }
 
@@ -475,7 +478,7 @@ func TestModuleDeleteInputEmptyID(t *testing.T) {
 }
 
 func TestModuleCreateInputWithFieldErrors(t *testing.T) {
-	server := createMockServer(func(w http.ResponseWriter, r *http.Request) {
+	server := createMockServer(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusUnprocessableEntity)
 		response := map[string]interface{}{
 			"errors": map[string][]string{
