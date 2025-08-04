@@ -448,7 +448,7 @@ req := tama.CreateClassRequest{
     },
 }
 class, err := client.Neural.CreateClass("space-123", req)
-```
+``
 
 #### UpdateClass(id string, req UpdateClassRequest) (*Class, error)
 
@@ -490,6 +490,108 @@ Deletes a class by ID.
 
 **Parameters:**
 - `id` (string): Class ID (required)
+
+**Returns:**
+- `error`: Error if request fails
+
+## Corpus Operations
+
+#### GetCorpus(id string) (*Corpus, error)
+
+Retrieves a specific corpus by ID.
+
+**Endpoint:** `GET /provision/neural/corpora/:id`
+
+**Parameters:**
+- `id` (string): Corpus ID (required)
+
+**Returns:**
+- `*Corpus`: Corpus object with ID, Main, Name, Slug, Template, and ProvisionState
+- `error`: Error if request fails
+
+**Example:**
+```go
+corpus, err := client.Neural.GetCorpus("corpus-123")
+if err != nil {
+    log.Fatal(err)
+}
+fmt.Printf("Corpus: %+v\n", corpus)
+``
+
+#### CreateCorpus(classID string, req CreateCorpusRequest) (*Corpus, error)
+
+Creates a new corpus within a class.
+
+**Endpoint:** `POST /provision/neural/classes/:class_id/corpora`
+
+**Parameters:**
+- `classID` (string): Class ID (required)
+- `req` (CreateCorpusRequest): Corpus creation request
+  - `Corpus` (CorpusRequestData): Corpus data (required)
+    - `Main` (bool): Whether this is the main corpus (required)
+    - `Name` (string): Corpus name (required)
+    - `Template` (string): Corpus template (required)
+
+**Returns:**
+- `*Corpus`: Created corpus object with ID, Main, Name, Slug, Template, and ProvisionState
+- `error`: Error if request fails
+
+**Example:**
+```go
+req := tama.CreateCorpusRequest{
+    Corpus: tama.CorpusRequestData{
+        Main:     true,
+        Name:     "My Corpus",
+        Template: "my-template",
+    },
+}
+corpus, err := client.Neural.CreateCorpus("class-123", req)
+``
+
+#### UpdateCorpus(id string, req UpdateCorpusRequest) (*Corpus, error)
+
+Updates an existing corpus using PATCH (partial update).
+
+**Endpoint:** `PATCH /provision/neural/corpora/:id`
+
+**Parameters:**
+- `id` (string): Corpus ID (required)
+- `req` (UpdateCorpusRequest): Corpus update request
+  - `Corpus` (UpdateCorpusData): Corpus update data (required)
+    - `Main` (*bool): New main flag (optional)
+    - `Name` (string): New corpus name (optional)
+    - `Template` (string): New corpus template (optional)
+
+**Returns:**
+- `*Corpus`: Updated corpus object with all fields including server-managed ProvisionState
+- `error`: Error if request fails
+
+#### ReplaceCorpus(id string, req UpdateCorpusRequest) (*Corpus, error)
+
+Replaces an existing corpus using PUT (full replacement).
+
+**Endpoint:** `PUT /provision/neural/corpora/:id`
+
+**Parameters:**
+- `id` (string): Corpus ID (required)
+- `req` (UpdateCorpusRequest): Corpus replacement request
+  - `Corpus` (UpdateCorpusData): Corpus replacement data (required)
+    - `Main` (*bool): New main flag (required)
+    - `Name` (string): New corpus name (required)
+    - `Template` (string): New corpus template (required)
+
+**Returns:**
+- `*Corpus`: Replaced corpus object with all fields including server-managed ProvisionState
+- `error`: Error if request fails
+
+#### DeleteCorpus(id string) error
+
+Deletes a corpus by ID.
+
+**Endpoint:** `DELETE /provision/neural/corpora/:id`
+
+**Parameters:**
+- `id` (string): Corpus ID (required)
 
 **Returns:**
 - `error`: Error if request fails
