@@ -31,6 +31,10 @@ func ValidateInputResponse(t *testing.T, actual, expected module.Input) {
 		t.Errorf("Expected input thought_module_id %s, got %s", expected.ThoughtModuleID, actual.ThoughtModuleID)
 	}
 
+	if actual.ThoughtID != expected.ThoughtID {
+		t.Errorf("Expected input thought_id %s, got %s", expected.ThoughtID, actual.ThoughtID)
+	}
+
 	if actual.ClassCorpusID != expected.ClassCorpusID {
 		t.Errorf("Expected input class_corpus_id %s, got %s", expected.ClassCorpusID, actual.ClassCorpusID)
 	}
@@ -45,6 +49,7 @@ func TestModuleGetInput(t *testing.T) {
 		ID:              "input-123",
 		Type:            "text",
 		ThoughtModuleID: "module-123",
+		ThoughtID:       "thought-123",
 		ClassCorpusID:   "corpus-123",
 		ProvisionState:  "active",
 	}
@@ -120,6 +125,7 @@ func TestModuleCreateInput(t *testing.T) {
 		ID:              "input-123",
 		Type:            "text",
 		ThoughtModuleID: "module-123",
+		ThoughtID:       "thought-123",
 		ClassCorpusID:   "corpus-123",
 		ProvisionState:  "active",
 	}
@@ -239,6 +245,7 @@ func TestModuleUpdateInput(t *testing.T) {
 		ID:              "input-123",
 		Type:            "image",
 		ThoughtModuleID: "module-123",
+		ThoughtID:       "thought-456",
 		ClassCorpusID:   "corpus-456",
 		ProvisionState:  "active",
 	}
@@ -307,6 +314,7 @@ func TestModuleReplaceInput(t *testing.T) {
 		ID:              "input-123",
 		Type:            "audio",
 		ThoughtModuleID: "module-123",
+		ThoughtID:       "thought-789",
 		ClassCorpusID:   "corpus-789",
 		ProvisionState:  "active",
 	}
