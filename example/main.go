@@ -13,6 +13,7 @@ import (
 	"github.com/upmaru/tama-go/memory"
 	"github.com/upmaru/tama-go/neural"
 	"github.com/upmaru/tama-go/perception"
+	"github.com/upmaru/tama-go/perception/module"
 	"github.com/upmaru/tama-go/sensory"
 )
 
@@ -24,6 +25,8 @@ const (
 	examplePromptID        = "prompt-123"
 	exampleChainID         = "chain-123"
 	exampleThoughtID       = "thought-123"
+	exampleInputID         = "input-123"
+	exampleCorpusID        = "corpus-123"
 	exampleIdentityID      = "identity-123"
 	exampleSpecificationID = "spec-456"
 	exampleIdentifier      = "test-service"
@@ -52,6 +55,7 @@ func main() {
 	runSensoryIdentityOperations(client)
 	runPerceptionChainOperations(client)
 	runPerceptionThoughtOperations(client)
+	runModuleInputOperations(client)
 
 	// Demonstrate enhanced error handling
 	demonstrateErrorHandling(client)
@@ -1186,4 +1190,76 @@ func demoIdentityErrorHandling(client *tama.Client) {
 	if err != nil {
 		log.Printf("Expected validation error: %v", err)
 	}
+}
+
+// runModuleInputOperations demonstrates module input CRUD operations.
+func runModuleInputOperations(client *tama.Client) {
+	log.Printf("--- Module Input Operations ---")
+
+	// Create a module input
+	createInput := module.CreateInputRequest{
+		Input: module.CreateInputData{
+			Type:          "text",
+			ClassCorpusID: exampleCorpusID,
+		},
+	}
+
+	newInput, err := client.Perception.Module.CreateInput(exampleThoughtID, createInput)
+	if err != nil {
+		log.Printf("Error creating module input: %v", err)
+	} else {
+		log.Printf("Created module input: ID=%s, Type=%s, ClassCorpusID=%s",
+			newInput.ID, newInput.Type, newInput.ClassCorpusID)
+	}
+
+	// Get the module input
+	input, err := client.Perception.Module.GetInput(exampleInputID)
+	if err != nil {
+		log.Printf("Error getting module input: %v", err)
+	} else {
+		log.Printf("Retrieved module input: ID=%s, Type=%s, ProvisionState=%s",
+			input.ID, input.Type, input.ProvisionState)
+	}
+
+	// Update the module input
+	updateInput := module.UpdateInputRequest{
+		Input: module.UpdateInputData{
+			Type:          "image",
+			ClassCorpusID: "new-corpus-456",
+		},
+	}
+
+	updatedInput, err := client.Perception.Module.UpdateInput(exampleInputID, updateInput)
+	if err != nil {
+		log.Printf("Error updating module input: %v", err)
+	} else {
+		log.Printf("Updated module input: ID=%s, Type=%s, ClassCorpusID=%s",
+			updatedInput.ID, updatedInput.Type, updatedInput.ClassCorpusID)
+	}
+
+	// Replace the module input
+	replaceInput := module.UpdateInputRequest{
+		Input: module.UpdateInputData{
+			Type:          "audio",
+			ClassCorpusID: "replace-corpus-789",
+		},
+	}
+
+	replacedInput, err := client.Perception.Module.ReplaceInput(exampleInputID, replaceInput)
+	if err != nil {
+		log.Printf("Error replacing module input: %v", err)
+	} else {
+		log.Printf("Replaced module input: ID=%s, Type=%s, ClassCorpusID=%s",
+			replacedInput.ID, replacedInput.Type, replacedInput.ClassCorpusID)
+	}
+
+	// Delete the module input
+	err = client.Perception.Module.DeleteInput(exampleInputID)
+	if err != nil {
+		log.Printf("Error deleting module input: %v", err)
+	} else {
+		log.Printf("Deleted module input: %s", exampleInputID)
+	}
+
+	log.Printf("Module input operations completed successfully!")
 }

@@ -24,7 +24,7 @@ func TestNeuralGetSpace(t *testing.T) {
 		Data: expectedSpace,
 	}
 
-	server := createMockServer(t, func(w http.ResponseWriter, r *http.Request) {
+	server := CreateMockServer(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet {
 			t.Errorf("Expected GET request, got %s", r.Method)
 		}
@@ -61,7 +61,7 @@ func TestNeuralGetSpace(t *testing.T) {
 }
 
 func TestNeuralGetSpaceError(t *testing.T) {
-	server := createMockServer(t, func(w http.ResponseWriter, _ *http.Request) {
+	server := CreateMockServer(func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusNotFound)
 		errorResp := neural.Error{
@@ -114,7 +114,7 @@ func TestNeuralCreateSpace(t *testing.T) {
 		Data: expectedSpace,
 	}
 
-	server := createMockServer(t, func(w http.ResponseWriter, r *http.Request) {
+	server := CreateMockServer(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
 			t.Errorf("Expected POST request, got %s", r.Method)
 		}
@@ -257,7 +257,7 @@ func TestNeuralUpdateSpace(t *testing.T) {
 		Data: expectedSpace,
 	}
 
-	server := createMockServer(t, func(w http.ResponseWriter, r *http.Request) {
+	server := CreateMockServer(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPatch {
 			t.Errorf("Expected PATCH request, got %s", r.Method)
 		}
@@ -298,7 +298,7 @@ func TestNeuralUpdateSpace(t *testing.T) {
 }
 
 func TestNeuralDeleteSpace(t *testing.T) {
-	server := createMockServer(t, func(w http.ResponseWriter, r *http.Request) {
+	server := CreateMockServer(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodDelete {
 			t.Errorf("Expected DELETE request, got %s", r.Method)
 		}
@@ -344,7 +344,7 @@ func TestNeuralGetProcessor(t *testing.T) {
 		Data: expectedProcessor,
 	}
 
-	server := createMockServer(t, func(w http.ResponseWriter, r *http.Request) {
+	server := CreateMockServer(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet {
 			t.Errorf("Expected GET request, got %s", r.Method)
 		}
@@ -389,7 +389,7 @@ func TestNeuralGetProcessor(t *testing.T) {
 }
 
 func TestNeuralGetProcessorError(t *testing.T) {
-	server := createMockServer(t, func(w http.ResponseWriter, _ *http.Request) {
+	server := CreateMockServer(func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusNotFound)
 		errorResp := neural.Error{
@@ -446,7 +446,7 @@ func TestNeuralCreateProcessor(t *testing.T) {
 		Data: expectedProcessor,
 	}
 
-	server := createMockServer(t, func(w http.ResponseWriter, r *http.Request) {
+	server := CreateMockServer(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
 			t.Errorf("Expected POST request, got %s", r.Method)
 		}
@@ -578,7 +578,7 @@ func TestNeuralUpdateProcessor(t *testing.T) {
 		Data: expectedProcessor,
 	}
 
-	server := createMockServer(t, func(w http.ResponseWriter, r *http.Request) {
+	server := CreateMockServer(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPatch {
 			t.Errorf("Expected PATCH request, got %s", r.Method)
 		}
@@ -636,7 +636,7 @@ func TestNeuralReplaceProcessor(t *testing.T) {
 		Data: expectedProcessor,
 	}
 
-	server := createMockServer(t, func(w http.ResponseWriter, r *http.Request) {
+	server := CreateMockServer(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPut {
 			t.Errorf("Expected PUT request, got %s", r.Method)
 		}
@@ -679,7 +679,7 @@ func TestNeuralReplaceProcessor(t *testing.T) {
 }
 
 func TestNeuralDeleteProcessor(t *testing.T) {
-	server := createMockServer(t, func(w http.ResponseWriter, r *http.Request) {
+	server := CreateMockServer(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodDelete {
 			t.Errorf("Expected DELETE request, got %s", r.Method)
 		}
@@ -726,7 +726,7 @@ func TestNeuralGetClass(t *testing.T) {
 		Data: expectedClass,
 	}
 
-	server := createMockServer(t, func(w http.ResponseWriter, r *http.Request) {
+	server := CreateMockServer(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet {
 			t.Errorf("Expected GET request, got %s", r.Method)
 		}
@@ -768,7 +768,7 @@ func TestNeuralGetClass(t *testing.T) {
 }
 
 func TestNeuralGetClassError(t *testing.T) {
-	server := createMockServer(t, func(w http.ResponseWriter, _ *http.Request) {
+	server := CreateMockServer(func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusNotFound)
 		json.NewEncoder(w).Encode(map[string]any{
@@ -822,7 +822,7 @@ func TestNeuralCreateClass(t *testing.T) {
 		Data: expectedClass,
 	}
 
-	server := createMockServer(t, func(w http.ResponseWriter, r *http.Request) {
+	server := CreateMockServer(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
 			t.Errorf("Expected POST request, got %s", r.Method)
 		}
@@ -936,7 +936,7 @@ func TestNeuralUpdateClass(t *testing.T) {
 		Data: expectedClass,
 	}
 
-	server := createMockServer(t, func(w http.ResponseWriter, r *http.Request) {
+	server := CreateMockServer(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPatch {
 			t.Errorf("Expected PATCH request, got %s", r.Method)
 		}
@@ -1009,7 +1009,7 @@ func TestNeuralReplaceClass(t *testing.T) {
 		Data: expectedClass,
 	}
 
-	server := createMockServer(t, func(w http.ResponseWriter, r *http.Request) {
+	server := CreateMockServer(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPut {
 			t.Errorf("Expected PUT request, got %s", r.Method)
 		}
@@ -1063,7 +1063,7 @@ func TestNeuralReplaceClass(t *testing.T) {
 }
 
 func TestNeuralDeleteClass(t *testing.T) {
-	server := createMockServer(t, func(w http.ResponseWriter, r *http.Request) {
+	server := CreateMockServer(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodDelete {
 			t.Errorf("Expected DELETE request, got %s", r.Method)
 		}
@@ -1095,7 +1095,7 @@ func TestNeuralCreateClassWithRealWorldSchema(t *testing.T) {
 	expectedClass := createActionCallClass()
 	expectedResponse := neural.ClassResponse{Data: expectedClass}
 
-	server := createMockServer(t, func(w http.ResponseWriter, r *http.Request) {
+	server := CreateMockServer(func(w http.ResponseWriter, r *http.Request) {
 		validateCreateClassRequest(t, r)
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusCreated)
@@ -1251,7 +1251,7 @@ func TestNeuralGetCorpus(t *testing.T) {
 		Data: expectedCorpus,
 	}
 
-	server := createMockServer(t, func(w http.ResponseWriter, r *http.Request) {
+	server := CreateMockServer(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet {
 			t.Errorf("Expected GET request, got %s", r.Method)
 		}
@@ -1296,7 +1296,7 @@ func TestNeuralGetCorpus(t *testing.T) {
 }
 
 func TestNeuralGetCorpusError(t *testing.T) {
-	server := createMockServer(t, func(w http.ResponseWriter, _ *http.Request) {
+	server := CreateMockServer(func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusNotFound)
 		errorResp := neural.Error{
@@ -1350,7 +1350,7 @@ func TestNeuralCreateCorpus(t *testing.T) {
 		Data: expectedCorpus,
 	}
 
-	server := createMockServer(t, func(w http.ResponseWriter, r *http.Request) {
+	server := CreateMockServer(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
 			t.Errorf("Expected POST request, got %s", r.Method)
 		}
@@ -1478,7 +1478,7 @@ func TestNeuralUpdateCorpus(t *testing.T) {
 		Data: expectedCorpus,
 	}
 
-	server := createMockServer(t, func(w http.ResponseWriter, r *http.Request) {
+	server := CreateMockServer(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPatch {
 			t.Errorf("Expected PATCH request, got %s", r.Method)
 		}
@@ -1543,7 +1543,7 @@ func TestNeuralReplaceCorpus(t *testing.T) {
 		Data: expectedCorpus,
 	}
 
-	server := createMockServer(t, func(w http.ResponseWriter, r *http.Request) {
+	server := CreateMockServer(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPut {
 			t.Errorf("Expected PUT request, got %s", r.Method)
 		}
@@ -1599,7 +1599,7 @@ func TestNeuralReplaceCorpus(t *testing.T) {
 }
 
 func TestNeuralDeleteCorpus(t *testing.T) {
-	server := createMockServer(t, func(w http.ResponseWriter, r *http.Request) {
+	server := CreateMockServer(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodDelete {
 			t.Errorf("Expected DELETE request, got %s", r.Method)
 		}
@@ -1639,7 +1639,7 @@ func TestNeuralGetBridge(t *testing.T) {
 		Data: expectedBridge,
 	}
 
-	server := createMockServer(t, func(w http.ResponseWriter, r *http.Request) {
+	server := CreateMockServer(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet {
 			t.Errorf("Expected GET request, got %s", r.Method)
 		}
@@ -1684,7 +1684,7 @@ func TestNeuralGetBridge(t *testing.T) {
 }
 
 func TestNeuralGetBridgeError(t *testing.T) {
-	server := createMockServer(t, func(w http.ResponseWriter, _ *http.Request) {
+	server := CreateMockServer(func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusNotFound)
 		errorResp := neural.Error{
@@ -1736,7 +1736,7 @@ func TestNeuralCreateBridge(t *testing.T) {
 		Data: expectedBridge,
 	}
 
-	server := createMockServer(t, func(w http.ResponseWriter, r *http.Request) {
+	server := CreateMockServer(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
 			t.Errorf("Expected POST request, got %s", r.Method)
 		}
@@ -1835,7 +1835,7 @@ func TestNeuralUpdateBridge(t *testing.T) {
 		Data: expectedBridge,
 	}
 
-	server := createMockServer(t, func(w http.ResponseWriter, r *http.Request) {
+	server := CreateMockServer(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPatch {
 			t.Errorf("Expected PATCH request, got %s", r.Method)
 		}
@@ -1925,7 +1925,7 @@ func TestNeuralReplaceBridge(t *testing.T) {
 		Data: expectedBridge,
 	}
 
-	server := createMockServer(t, func(w http.ResponseWriter, r *http.Request) {
+	server := CreateMockServer(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPut {
 			t.Errorf("Expected PUT request, got %s", r.Method)
 		}
@@ -2004,7 +2004,7 @@ func TestNeuralReplaceBridgeValidation(t *testing.T) {
 }
 
 func TestNeuralDeleteBridge(t *testing.T) {
-	server := createMockServer(t, func(w http.ResponseWriter, r *http.Request) {
+	server := CreateMockServer(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodDelete {
 			t.Errorf("Expected DELETE request, got %s", r.Method)
 		}
@@ -2064,7 +2064,7 @@ func TestNeuralGetNode(t *testing.T) {
 		Data: expectedNode,
 	}
 
-	server := createMockServer(t, func(w http.ResponseWriter, r *http.Request) {
+	server := CreateMockServer(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet {
 			t.Errorf("Expected GET request, got %s", r.Method)
 		}
@@ -2117,7 +2117,7 @@ func TestNeuralGetNode(t *testing.T) {
 }
 
 func TestNeuralGetNodeError(t *testing.T) {
-	server := createMockServer(t, func(w http.ResponseWriter, _ *http.Request) {
+	server := CreateMockServer(func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusNotFound)
 		errorResp := neural.Error{
@@ -2172,7 +2172,7 @@ func TestNeuralCreateNode(t *testing.T) {
 		Data: expectedNode,
 	}
 
-	server := createMockServer(t, func(w http.ResponseWriter, r *http.Request) {
+	server := CreateMockServer(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
 			t.Errorf("Expected POST request, got %s", r.Method)
 		}
@@ -2322,7 +2322,7 @@ func TestNeuralUpdateNode(t *testing.T) {
 		Data: expectedNode,
 	}
 
-	server := createMockServer(t, func(w http.ResponseWriter, r *http.Request) {
+	server := CreateMockServer(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPatch {
 			t.Errorf("Expected PATCH request, got %s", r.Method)
 		}
@@ -2386,7 +2386,7 @@ func TestNeuralReplaceNode(t *testing.T) {
 		Data: expectedNode,
 	}
 
-	server := createMockServer(t, func(w http.ResponseWriter, r *http.Request) {
+	server := CreateMockServer(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPut {
 			t.Errorf("Expected PUT request, got %s", r.Method)
 		}
@@ -2432,7 +2432,7 @@ func TestNeuralReplaceNode(t *testing.T) {
 }
 
 func TestNeuralDeleteNode(t *testing.T) {
-	server := createMockServer(t, func(w http.ResponseWriter, r *http.Request) {
+	server := CreateMockServer(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodDelete {
 			t.Errorf("Expected DELETE request, got %s", r.Method)
 		}

@@ -78,6 +78,11 @@ func (c *Client) SetHeader(header, value string) {
 	c.httpClient.SetHeader(header, value)
 }
 
+// GetHTTPClient returns the underlying HTTP client for use by services.
+func (c *Client) GetHTTPClient() *resty.Client {
+	return c.httpClient
+}
+
 // Error represents an API error response.
 type Error struct {
 	StatusCode int                 `json:"status_code"`

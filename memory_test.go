@@ -3,17 +3,12 @@ package tama_test
 import (
 	"encoding/json"
 	"net/http"
-	"net/http/httptest"
 	"strings"
 	"testing"
 
 	"github.com/upmaru/tama-go"
 	"github.com/upmaru/tama-go/memory"
 )
-
-func createMockServerForMemory(_ *testing.T, handler func(w http.ResponseWriter, r *http.Request)) *httptest.Server {
-	return httptest.NewServer(http.HandlerFunc(handler))
-}
 
 // TestMemoryGetPrompt tests retrieving a prompt by ID.
 func TestMemoryGetPrompt(t *testing.T) {
@@ -31,7 +26,7 @@ func TestMemoryGetPrompt(t *testing.T) {
 		Data: expectedPrompt,
 	}
 
-	server := createMockServerForMemory(t, func(w http.ResponseWriter, r *http.Request) {
+	server := CreateMockServer(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet {
 			t.Errorf("Expected GET request, got %s", r.Method)
 		}
@@ -97,7 +92,7 @@ func TestMemoryCreatePrompt(t *testing.T) {
 		Data: expectedPrompt,
 	}
 
-	server := createMockServerForMemory(t, func(w http.ResponseWriter, r *http.Request) {
+	server := CreateMockServer(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
 			t.Errorf("Expected POST request, got %s", r.Method)
 		}
@@ -280,7 +275,7 @@ func TestMemoryUpdatePrompt(t *testing.T) {
 		Data: expectedPrompt,
 	}
 
-	server := createMockServerForMemory(t, func(w http.ResponseWriter, r *http.Request) {
+	server := CreateMockServer(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPatch {
 			t.Errorf("Expected PATCH request, got %s", r.Method)
 		}
@@ -372,7 +367,7 @@ func TestMemoryReplacePrompt(t *testing.T) {
 		Data: expectedPrompt,
 	}
 
-	server := createMockServerForMemory(t, func(w http.ResponseWriter, r *http.Request) {
+	server := CreateMockServer(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPut {
 			t.Errorf("Expected PUT request, got %s", r.Method)
 		}
@@ -459,7 +454,7 @@ func TestMemoryReplacePrompt_EmptyIDValidation(t *testing.T) {
 
 // TestMemoryDeletePrompt tests deleting a prompt.
 func TestMemoryDeletePrompt(t *testing.T) {
-	server := createMockServerForMemory(t, func(w http.ResponseWriter, r *http.Request) {
+	server := CreateMockServer(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodDelete {
 			t.Errorf("Expected DELETE request, got %s", r.Method)
 		}
@@ -554,7 +549,7 @@ func TestMemoryFieldSpecificErrors(t *testing.T) {
 // TestMemoryCreatePromptWithFieldErrors tests creating a prompt with field validation errors.
 func TestMemoryCreatePromptWithFieldErrors(t *testing.T) {
 	// Test API response with field validation errors
-	server := createMockServerForMemory(t, func(w http.ResponseWriter, r *http.Request) {
+	server := CreateMockServer(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
 			t.Errorf("Expected POST request, got %s", r.Method)
 		}

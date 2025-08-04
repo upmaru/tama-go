@@ -1,8 +1,6 @@
 package tama_test
 
 import (
-	"net/http"
-	"net/http/httptest"
 	"strings"
 	"testing"
 	"time"
@@ -12,11 +10,6 @@ import (
 	"github.com/upmaru/tama-go/perception"
 	"github.com/upmaru/tama-go/sensory"
 )
-
-// createMockServer creates a test HTTP server with the given handler.
-func createMockServer(_ *testing.T, handler http.HandlerFunc) *httptest.Server {
-	return httptest.NewServer(handler)
-}
 
 func TestNewClient(t *testing.T) {
 	config := tama.Config{
@@ -114,16 +107,16 @@ func TestErrorStruct(t *testing.T) {
 
 	errorMsg := fieldErr.Error()
 	// Check that all field errors are included
-	if !contains(errorMsg, "source_id has already been taken") {
+	if !strings.Contains(errorMsg, "source_id has already been taken") {
 		t.Errorf("Expected error message to contain 'source_id has already been taken', got %s", errorMsg)
 	}
-	if !contains(errorMsg, "name is required") {
+	if !strings.Contains(errorMsg, "name is required") {
 		t.Errorf("Expected error message to contain 'name is required', got %s", errorMsg)
 	}
-	if !contains(errorMsg, "name must be at least 3 characters") {
+	if !strings.Contains(errorMsg, "name must be at least 3 characters") {
 		t.Errorf("Expected error message to contain 'name must be at least 3 characters', got %s", errorMsg)
 	}
-	if !contains(errorMsg, "API error 422:") {
+	if !strings.Contains(errorMsg, "API error 422:") {
 		t.Errorf("Expected error message to contain status code, got %s", errorMsg)
 	}
 
@@ -139,11 +132,6 @@ func TestErrorStruct(t *testing.T) {
 	if errorMsgNoStatus != expectedNoStatus {
 		t.Errorf("Expected error message %s, got %s", expectedNoStatus, errorMsgNoStatus)
 	}
-}
-
-// Helper function to check if a string contains a substring.
-func contains(s, substr string) bool {
-	return strings.Contains(s, substr)
 }
 
 func TestEmptyIDValidation(t *testing.T) {
