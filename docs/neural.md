@@ -4,14 +4,14 @@ Access via `client.Neural.*`
 
 ## Table of Contents
 
-- [Space](#space)
-- [Processor](#processor)
-- [Node](#node)
-- [Bridge](#bridge)
-- [Class](#class)
-- [Corpus](#corpus)
+- [Space Operations](#space-operations)
+- [Processor Operations](#processor-operations)
+- [Node Operations](#node-operations)
+- [Bridge Operations](#bridge-operations)
+- [Class Operations](#class-operations)
+- [Corpus Operations](#corpus-operations)
 
-## Space
+## Space Operations
 
 ### GetSpace(id string) (*Space, error)
 
