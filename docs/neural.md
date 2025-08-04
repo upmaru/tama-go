@@ -2,6 +2,8 @@
 
 Access via `client.Neural.*`
 
+## Space
+
 ### GetSpace(id string) (*Space, error)
 
 Retrieves a specific neural space by ID.
@@ -94,7 +96,7 @@ Deletes a space by ID.
 **Returns:**
 - `error`: Error if request fails
 
-### Processor Operations
+## Processor Operations
 
 #### GetProcessor(spaceID, processorType string) (*Processor, error)
 
@@ -220,7 +222,7 @@ Deletes a processor by space ID and processor type.
 **Returns:**
 - `error`: Error if request fails
 
-### Node Operations
+## Node Operations
 
 #### GetNode(id string) (*Node, error)
 
@@ -293,6 +295,201 @@ Deletes a node by ID.
 
 **Parameters:**
 - `id` (string): Node ID (required)
+
+**Returns:**
+- `error`: Error if request fails
+
+## Bridge Operations
+
+#### GetBridge(id string) (*Bridge, error)
+
+Retrieves a specific bridge by ID.
+
+**Endpoint:** `GET /provision/neural/bridges/:id`
+
+**Parameters:**
+- `id` (string): Bridge ID (required)
+
+**Returns:**
+- `*Bridge`: Bridge object with ID, SpaceID, TargetSpaceID, and ProvisionState
+- `error`: Error if request fails
+
+**Example:**
+```go
+bridge, err := client.Neural.GetBridge("bridge-123")
+if err != nil {
+    log.Fatal(err)
+}
+fmt.Printf("Bridge: %+v\n", bridge)
+```
+
+#### CreateBridge(spaceID string, req CreateBridgeRequest) (*Bridge, error)
+
+Creates a new bridge within a space.
+
+**Endpoint:** `POST /provision/neural/spaces/:space_id/bridges`
+
+**Parameters:**
+- `spaceID` (string): Space ID (required)
+- `req` (CreateBridgeRequest): Bridge creation request
+  - `Bridge` (BridgeRequestData): Bridge data (required)
+    - `TargetSpaceID` (string): Target space ID (required)
+
+**Returns:**
+- `*Bridge`: Created bridge object with ID, SpaceID, TargetSpaceID, and ProvisionState
+- `error`: Error if request fails
+
+**Example:**
+```go
+req := tama.CreateBridgeRequest{
+    Bridge: tama.BridgeRequestData{
+        TargetSpaceID: "target-space-456",
+    },
+}
+bridge, err := client.Neural.CreateBridge("space-123", req)
+```
+
+#### UpdateBridge(id string, req UpdateBridgeRequest) (*Bridge, error)
+
+Updates an existing bridge using PATCH (partial update).
+
+**Endpoint:** `PATCH /provision/neural/bridges/:id`
+
+**Parameters:**
+- `id` (string): Bridge ID (required)
+- `req` (UpdateBridgeRequest): Bridge update request
+  - `Bridge` (UpdateBridgeData): Bridge update data (required)
+    - `TargetSpaceID` (string): New target space ID (optional)
+
+**Returns:**
+- `*Bridge`: Updated bridge object with all fields including server-managed ProvisionState
+- `error`: Error if request fails
+
+#### ReplaceBridge(id string, req UpdateBridgeRequest) (*Bridge, error)
+
+Replaces an existing bridge using PUT (full replacement).
+
+**Endpoint:** `PUT /provision/neural/bridges/:id`
+
+**Parameters:**
+- `id` (string): Bridge ID (required)
+- `req` (UpdateBridgeRequest): Bridge replacement request
+  - `Bridge` (UpdateBridgeData): Bridge replacement data (required)
+    - `TargetSpaceID` (string): New target space ID (required)
+
+**Returns:**
+- `*Bridge`: Replaced bridge object with all fields including server-managed ProvisionState
+- `error`: Error if request fails
+
+#### DeleteBridge(id string) error
+
+Deletes a bridge by ID.
+
+**Endpoint:** `DELETE /provision/neural/bridges/:id`
+
+**Parameters:**
+- `id` (string): Bridge ID (required)
+
+**Returns:**
+- `error`: Error if request fails
+
+## Class Operations
+
+#### GetClass(id string) (*Class, error)
+
+Retrieves a specific class by ID.
+
+**Endpoint:** `GET /provision/neural/classes/:id`
+
+**Parameters:**
+- `id` (string): Class ID (required)
+
+**Returns:**
+- `*Class`: Class object with ID, SpaceID, ProvisionState, Schema, Name, and Description
+- `error`: Error if request fails
+
+**Example:**
+```go
+class, err := client.Neural.GetClass("class-123")
+if err != nil {
+    log.Fatal(err)
+}
+fmt.Printf("Class: %+v\n", class)
+```
+
+#### CreateClass(spaceID string, req CreateClassRequest) (*Class, error)
+
+Creates a new class within a space.
+
+**Endpoint:** `POST /provision/neural/spaces/:space_id/classes`
+
+**Parameters:**
+- `spaceID` (string): Space ID (required)
+- `req` (CreateClassRequest): Class creation request
+  - `Class` (ClassRequestData): Class data (required)
+    - `Schema` (map[string]any): Class schema (required)
+
+**Returns:**
+- `*Class`: Created class object with ID, SpaceID, ProvisionState, Schema, Name, and Description
+- `error`: Error if request fails
+
+**Example:**
+```go
+req := tama.CreateClassRequest{
+    Class: tama.ClassRequestData{
+        Schema: map[string]any{
+            "type": "object",
+            "properties": map[string]any{
+                "name": map[string]any{
+                    "type": "string",
+                },
+            },
+        },
+    },
+}
+class, err := client.Neural.CreateClass("space-123", req)
+```
+
+#### UpdateClass(id string, req UpdateClassRequest) (*Class, error)
+
+Updates an existing class using PATCH (partial update).
+
+**Endpoint:** `PATCH /provision/neural/classes/:id`
+
+**Parameters:**
+- `id` (string): Class ID (required)
+- `req` (UpdateClassRequest): Class update request
+  - `Class` (UpdateClassData): Class update data (required)
+    - `Schema` (map[string]any): New class schema (optional)
+
+**Returns:**
+- `*Class`: Updated class object with all fields including server-managed ProvisionState
+- `error`: Error if request fails
+
+#### ReplaceClass(id string, req UpdateClassRequest) (*Class, error)
+
+Replaces an existing class using PUT (full replacement).
+
+**Endpoint:** `PUT /provision/neural/classes/:id`
+
+**Parameters:**
+- `id` (string): Class ID (required)
+- `req` (UpdateClassRequest): Class replacement request
+  - `Class` (UpdateClassData): Class replacement data (required)
+    - `Schema` (map[string]any): New class schema (required)
+
+**Returns:**
+- `*Class`: Replaced class object with all fields including server-managed ProvisionState
+- `error`: Error if request fails
+
+#### DeleteClass(id string) error
+
+Deletes a class by ID.
+
+**Endpoint:** `DELETE /provision/neural/classes/:id`
+
+**Parameters:**
+- `id` (string): Class ID (required)
 
 **Returns:**
 - `error`: Error if request fails
