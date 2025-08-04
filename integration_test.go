@@ -12,6 +12,7 @@ import (
 	tama "github.com/upmaru/tama-go"
 	"github.com/upmaru/tama-go/neural"
 	"github.com/upmaru/tama-go/perception"
+	"github.com/upmaru/tama-go/perception/module"
 	"github.com/upmaru/tama-go/sensory"
 )
 
@@ -648,4 +649,44 @@ func TestIntegrationThoughtModuleParametersError(t *testing.T) {
 	}
 
 	t.Log("Thought module parameters error test completed")
+}
+
+func TestIntegrationModuleInputLifecycle(t *testing.T) {
+	if testing.Short() {
+		t.Skip("Skipping integration test")
+	}
+
+	config := tama.Config{
+		BaseURL: "https://api.upmaru.com",
+		APIKey:  "test-api-key",
+		Timeout: 30 * time.Second,
+	}
+
+	client := tama.NewClient(config)
+
+	t.Log("Testing module input service integration")
+
+	// Test that the module service is accessible through the perception service
+	if client.Perception.Module == nil {
+		t.Fatal("Module service is not initialized")
+	}
+
+	// Test creating a module input (this will fail with authentication, but we're testing the structure)
+	req := module.CreateInputRequest{
+		Input: module.CreateInputData{
+			Type:          "text",
+			ClassCorpusID: "test-corpus-123",
+		},
+	}
+
+	_, err := client.Perception.Module.CreateInput("test-thought-123", req)
+
+	// We expect this to fail with authentication error since we're using a test API key
+	if err != nil {
+		t.Logf("Expected authentication error: %v", err)
+	} else {
+		t.Log("Module input creation succeeded (unexpected in test environment)")
+	}
+
+	t.Log("Module input service integration test completed")
 }

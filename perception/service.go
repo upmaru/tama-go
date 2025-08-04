@@ -6,17 +6,20 @@ import (
 	"strings"
 
 	"github.com/go-resty/resty/v2"
+	"github.com/upmaru/tama-go/perception/module"
 )
 
 // Service handles all perception-related API operations.
 type Service struct {
 	client *resty.Client
+	Module *module.Service
 }
 
 // NewService creates a new perception service instance.
 func NewService(client *resty.Client) *Service {
 	return &Service{
 		client: client,
+		Module: module.NewService(client),
 	}
 }
 
