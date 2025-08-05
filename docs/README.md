@@ -9,6 +9,7 @@ This directory contains the API documentation for the Tama Go client library, or
 - [Neural Service](neural.md) - Space, Processor, Class, Corpus, and Bridge operations
 - [Memory Service](memory.md) - Prompt operations and memory management
 - [Sensory Service](sensory.md) - Source, Model, Limit, Specification, and Identity operations
+- [Motor Service](motor.md) - Action operations
 - [Perception Service](perception.md) - Chain, Thought, Path, and Context operations
 
 ## Quick Start
@@ -53,6 +54,7 @@ func main() {
 - **Neural Service**: Manages neural spaces, processors, classes, corpora, and bridges
 - **Memory Service**: Handles prompt operations and memory management
 - **Sensory Service**: Manages sources, models, limits, specifications, and identities
+- **Motor Service**: Handles action operations
 - **Perception Service**: Handles chains, thoughts, paths, and contexts
 
 Each service provides comprehensive CRUD operations with proper error handling and validation.

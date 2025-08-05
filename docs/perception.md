@@ -1,6 +1,20 @@
-### Delegation Operations
+# Perception Service
 
-#### GetDelegation(thoughtID string) (*Delegation, error)
+Access via `client.Perception.*`
+
+## Table of Contents
+
+- [Delegation Operations](#delegation-operations)
+- [Processor Operations](#processor-operations)
+- [Chain Operations](#chain-operations)
+- [Thought Operations](#thought-operations)
+- [Path Operations](#path-operations)
+- [Context Operations](#context-operations)
+- [Tool Operations](#tool-operations)
+
+## Delegation Operations
+
+### GetDelegation(thoughtID string) (*Delegation, error)
 
 Retrieves a specific delegation by thought ID.
 
@@ -23,7 +37,7 @@ if err != nil {
 log.Printf("Delegation: %s -> %s (%s)", delegation.ID, delegation.TargetThoughtID, delegation.ProvisionState)
 ```
 
-#### CreateDelegation(thoughtID string, req CreateDelegationRequest) (*Delegation, error)
+### CreateDelegation(thoughtID string, req CreateDelegationRequest) (*Delegation, error)
 
 Creates a new delegation within a thought.
 
@@ -56,7 +70,7 @@ delegation, err := client.Perception.CreateDelegation("thought-123", perception.
 })
 ```
 
-#### UpdateDelegation(thoughtID string, req UpdateDelegationRequest) (*Delegation, error)
+### UpdateDelegation(thoughtID string, req UpdateDelegationRequest) (*Delegation, error)
 
 Updates an existing delegation using PATCH.
 
@@ -72,23 +86,21 @@ type UpdateDelegationData struct {
 }
 ```
 
-#### ReplaceDelegation(thoughtID string, req UpdateDelegationRequest) (*Delegation, error)
+### ReplaceDelegation(thoughtID string, req UpdateDelegationRequest) (*Delegation, error)
 
 Replaces an existing delegation using PUT.
 
 **Endpoint:** `PUT /provision/perception/thoughts/:thought_id/delegation`
 
-#### DeleteDelegation(thoughtID string) error
+### DeleteDelegation(thoughtID string) error
 
 Deletes a delegation by thought ID.
 
 **Endpoint:** `DELETE /provision/perception/thoughts/:thought_id/delegation`
 
----
+## Processor Operations
 
-### Processor Operations
-
-#### GetProcessor(thoughtID, processorType string) (*Processor, error)
+### GetProcessor(thoughtID, processorType string) (*Processor, error)
 
 Retrieves a specific processor by thought ID and type.
 
@@ -112,7 +124,7 @@ if err != nil {
 log.Printf("Processor: %s (%s)", processor.ModelID, processor.ProvisionState)
 ```
 
-#### CreateProcessor(thoughtID, processorType string, req CreateProcessorRequest) (*Processor, error)
+### CreateProcessor(thoughtID, processorType string, req CreateProcessorRequest) (*Processor, error)
 
 Creates a new processor within a thought.
 
@@ -153,7 +165,7 @@ processor, err := client.Perception.CreateProcessor("thought-123", "text-generat
 })
 ```
 
-#### UpdateProcessor(thoughtID, processorType string, req UpdateProcessorRequest) (*Processor, error)
+### UpdateProcessor(thoughtID, processorType string, req UpdateProcessorRequest) (*Processor, error)
 
 Updates an existing processor using PATCH.
 
@@ -170,27 +182,21 @@ type UpdateProcessorData struct {
 }
 ```
 
-#### ReplaceProcessor(thoughtID, processorType string, req UpdateProcessorRequest) (*Processor, error)
+### ReplaceProcessor(thoughtID, processorType string, req UpdateProcessorRequest) (*Processor, error)
 
 Replaces an existing processor using PUT.
 
 **Endpoint:** `PUT /provision/perception/thoughts/:thought_id/types/:type/processor`
 
-#### DeleteProcessor(thoughtID, processorType string) error
+### DeleteProcessor(thoughtID, processorType string) error
 
 Deletes a processor by thought ID and type.
 
 **Endpoint:** `DELETE /provision/perception/thoughts/:thought_id/types/:type/processor`
 
----
+## Chain Operations
 
-## Perception Service
-
-Access via `client.Perception.*`
-
-### Chain Operations
-
-#### GetChain(id string) (*Chain, error)
+### GetChain(id string) (*Chain, error)
 
 Retrieves a specific chain by ID.
 
@@ -213,7 +219,7 @@ if err != nil {
 log.Printf("Chain: %s (%s)", chain.Name, chain.ProvisionState)
 ```
 
-#### CreateChain(spaceID string, req CreateChainRequest) (*Chain, error)
+### CreateChain(spaceID string, req CreateChainRequest) (*Chain, error)
 
 Creates a new chain within a space.
 
@@ -246,7 +252,7 @@ chain, err := client.Perception.CreateChain("space-123", perception.CreateChainR
 })
 ```
 
-#### UpdateChain(id string, req UpdateChainRequest) (*Chain, error)
+### UpdateChain(id string, req UpdateChainRequest) (*Chain, error)
 
 Updates an existing chain using PATCH.
 
@@ -262,21 +268,21 @@ type UpdateChainData struct {
 }
 ```
 
-#### ReplaceChain(id string, req UpdateChainRequest) (*Chain, error)
+### ReplaceChain(id string, req UpdateChainRequest) (*Chain, error)
 
 Replaces an existing chain using PUT.
 
 **Endpoint:** `PUT /provision/perception/chains/:id`
 
-#### DeleteChain(id string) error
+### DeleteChain(id string) error
 
 Deletes a chain by ID.
 
 **Endpoint:** `DELETE /provision/perception/chains/:id`
 
-#### Thought Operations
+## Thought Operations
 
-#### GetThought(id string) (*Thought, error)
+### GetThought(id string) (*Thought, error)
 
 Retrieves a specific thought by ID.
 
@@ -299,7 +305,7 @@ if err != nil {
 log.Printf("Thought: %s (%s)", thought.Relation, thought.ProvisionState)
 ```
 
-#### CreateThought(chainID string, req CreateThoughtRequest) (*Thought, error)
+### CreateThought(chainID string, req CreateThoughtRequest) (*Thought, error)
 
 Creates a new thought within a chain.
 
@@ -352,7 +358,7 @@ thought, err := client.Perception.CreateThought("chain-123", perception.CreateTh
 })
 ```
 
-#### UpdateThought(id string, req UpdateThoughtRequest) (*Thought, error)
+### UpdateThought(id string, req UpdateThoughtRequest) (*Thought, error)
 
 Updates an existing thought using PATCH.
 
@@ -371,15 +377,15 @@ type UpdateThoughtData struct {
 }
 ```
 
-#### DeleteThought(id string) error
+### DeleteThought(id string) error
 
 Deletes a thought by ID.
 
 **Endpoint:** `DELETE /provision/perception/thoughts/:id`
 
-### Path Operations
+## Path Operations
 
-#### GetPath(id string) (*Path, error)
+### GetPath(id string) (*Path, error)
 
 Retrieves a specific path by ID.
 
@@ -402,7 +408,7 @@ if err != nil {
 log.Printf("Path: %s (%s)", path.TargetClassID, path.ProvisionState)
 ```
 
-#### CreatePath(thoughtID string, req CreatePathRequest) (*Path, error)
+### CreatePath(thoughtID string, req CreatePathRequest) (*Path, error)
 
 Creates a new path within a thought.
 
@@ -441,7 +447,7 @@ path, err := client.Perception.CreatePath("thought-123", perception.CreatePathRe
 })
 ```
 
-#### UpdatePath(id string, req UpdatePathRequest) (*Path, error)
+### UpdatePath(id string, req UpdatePathRequest) (*Path, error)
 
 Updates an existing path using PATCH.
 
@@ -458,21 +464,21 @@ type UpdatePathData struct {
 }
 ```
 
-#### ReplacePath(id string, req UpdatePathRequest) (*Path, error)
+### ReplacePath(id string, req UpdatePathRequest) (*Path, error)
 
 Replaces an existing path using PUT.
 
 **Endpoint:** `PUT /provision/perception/paths/:id`
 
-#### DeletePath(id string) error
+### DeletePath(id string) error
 
 Deletes a path by ID.
 
 **Endpoint:** `DELETE /provision/perception/paths/:id`
 
-### Context Operations
+## Context Operations
 
-#### GetContext(id string) (*Context, error)
+### GetContext(id string) (*Context, error)
 
 Retrieves a specific context by ID.
 
@@ -495,7 +501,7 @@ if err != nil {
 log.Printf("Context: %s layer %d (%s)", context.PromptID, context.Layer, context.ProvisionState)
 ```
 
-#### CreateContext(thoughtID string, req CreateContextRequest) (*Context, error)
+### CreateContext(thoughtID string, req CreateContextRequest) (*Context, error)
 
 Creates a new context within a thought.
 
@@ -530,7 +536,7 @@ context, err := client.Perception.CreateContext("thought-123", perception.Create
 })
 ```
 
-#### UpdateContext(id string, req UpdateContextRequest) (*Context, error)
+### UpdateContext(id string, req UpdateContextRequest) (*Context, error)
 
 Updates an existing context using PATCH.
 
@@ -547,14 +553,100 @@ type UpdateContextData struct {
 }
 ```
 
-#### ReplaceContext(id string, req UpdateContextRequest) (*Context, error)
+### ReplaceContext(id string, req UpdateContextRequest) (*Context, error)
 
 Replaces an existing context using PUT.
 
 **Endpoint:** `PUT /provision/perception/contexts/:id`
 
-#### DeleteContext(id string) error
+### DeleteContext(id string) error
 
 Deletes a context by ID.
 
 **Endpoint:** `DELETE /provision/perception/contexts/:id`
+
+## Tool Operations
+
+### GetTool(id string) (*Tool, error)
+
+Retrieves a specific tool by ID.
+
+**Endpoint:** `GET /provision/perception/tools/:id`
+
+**Parameters:**
+- `id` (string): Tool ID (required)
+
+**Returns:**
+- `*Tool`: Tool object with ID, ThoughtID, ActionID, and ProvisionState
+- `error`: Error if request fails
+
+**Example:**
+```go
+tool, err := client.Perception.GetTool("tool-123")
+if err != nil {
+    log.Printf("Error: %v", err)
+    return
+}
+log.Printf("Tool: %s (%s)", tool.ActionID, tool.ProvisionState)
+```
+
+### CreateTool(thoughtID string, req CreateToolRequest) (*Tool, error)
+
+Creates a new tool within a thought.
+
+**Endpoint:** `POST /provision/perception/thoughts/:thought_id/tools`
+
+**Parameters:**
+- `thoughtID` (string): Thought ID (required)
+- `req` (CreateToolRequest): Tool creation request (required)
+
+```go
+type CreateToolRequest struct {
+    Tool CreateToolData `json:"tool"`
+}
+
+type CreateToolData struct {
+    ActionID string `json:"action_id"`
+}
+```
+
+**Returns:**
+- `*Tool`: Created tool object
+- `error`: Error if request fails
+
+**Example:**
+```go
+tool, err := client.Perception.CreateTool("thought-123", perception.CreateToolRequest{
+    Tool: perception.CreateToolData{
+        ActionID: "action-456",
+    },
+})
+```
+
+### UpdateTool(id string, req UpdateToolRequest) (*Tool, error)
+
+Updates an existing tool using PATCH.
+
+**Endpoint:** `PATCH /provision/perception/tools/:id`
+
+```go
+type UpdateToolRequest struct {
+    Tool UpdateToolData `json:"tool"`
+}
+
+type UpdateToolData struct {
+    ActionID string `json:"action_id,omitempty"`
+}
+```
+
+### ReplaceTool(id string, req UpdateToolRequest) (*Tool, error)
+
+Replaces an existing tool using PUT.
+
+**Endpoint:** `PUT /provision/perception/tools/:id`
+
+### DeleteTool(id string) error
+
+Deletes a tool by ID.
+
+**Endpoint:** `DELETE /provision/perception/tools/:id`
