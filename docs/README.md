@@ -11,6 +11,7 @@ This directory contains the API documentation for the Tama Go client library, or
 - [Sensory Service](sensory.md) - Source, Model, Limit, Specification, and Identity operations
 - [Motor Service](motor.md) - Action operations
 - [Perception Service](perception.md) - Chain, Thought, Path, and Context operations
+- [Contexts Service](contexts.md) - Input operations
 
 ## Quick Start
 
@@ -44,7 +45,7 @@ func main() {
     if err != nil {
         log.Fatal(err)
     }
-    
+
     log.Printf("Space: %+v", space)
 }
 ```
@@ -56,5 +57,6 @@ func main() {
 - **Sensory Service**: Manages sources, models, limits, specifications, and identities
 - **Motor Service**: Handles action operations
 - **Perception Service**: Handles chains, thoughts, paths, and contexts
+- **Contexts Service**: Handles input operations
 
 Each service provides comprehensive CRUD operations with proper error handling and validation.
