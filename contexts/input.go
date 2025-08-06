@@ -41,9 +41,8 @@ type UpdateInputData struct {
 	ClassCorpusID string `json:"class_corpus_id,omitempty"`
 }
 
-
 // GetInput retrieves a specific input by ID.
-// GET /provision/contexts/inputs/:id
+// GET /provision/contexts/inputs/:id.
 func (s *Service) GetInput(id string) (*Input, error) {
 	if id == "" {
 		return nil, errors.New("input ID is required")
@@ -66,7 +65,7 @@ func (s *Service) GetInput(id string) (*Input, error) {
 }
 
 // CreateInput creates a new contexts input within a thought context.
-// POST /provision/contexts/:thought_context_id/inputs
+// POST /provision/contexts/:thought_context_id/inputs.
 func (s *Service) CreateInput(thoughtContextID string, req CreateInputRequest) (*Input, error) {
 	if thoughtContextID == "" {
 		return nil, errors.New("thought context ID is required")
@@ -96,7 +95,7 @@ func (s *Service) CreateInput(thoughtContextID string, req CreateInputRequest) (
 }
 
 // UpdateInput updates an existing input using PATCH.
-// PATCH /provision/contexts/inputs/:id
+// PATCH /provision/contexts/inputs/:id.
 func (s *Service) UpdateInput(id string, req UpdateInputRequest) (*Input, error) {
 	if id == "" {
 		return nil, errors.New("input ID is required")
@@ -120,7 +119,7 @@ func (s *Service) UpdateInput(id string, req UpdateInputRequest) (*Input, error)
 }
 
 // ReplaceInput replaces an existing input using PUT.
-// PUT /provision/contexts/inputs/:id
+// PUT /provision/contexts/inputs/:id.
 func (s *Service) ReplaceInput(id string, req UpdateInputRequest) (*Input, error) {
 	if id == "" {
 		return nil, errors.New("input ID is required")
@@ -144,7 +143,7 @@ func (s *Service) ReplaceInput(id string, req UpdateInputRequest) (*Input, error
 }
 
 // DeleteInput deletes an input by ID.
-// DELETE /provision/contexts/inputs/:id
+// DELETE /provision/contexts/inputs/:id.
 func (s *Service) DeleteInput(id string) error {
 	if id == "" {
 		return errors.New("input ID is required")
@@ -163,4 +162,3 @@ func (s *Service) DeleteInput(id string) error {
 
 	return nil
 }
-
