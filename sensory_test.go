@@ -69,6 +69,61 @@ func TestSensoryGetSource(t *testing.T) {
 	}
 }
 
+func TestSensoryGetSourceBySpecificationAndSlug(t *testing.T) {
+	specID := "spec-123"
+	slug := "slugged-source"
+
+	expectedSource := sensory.Source{
+		ID:             "source-xyz",
+		Name:           "Slugged Source",
+		Slug:           slug,
+		Endpoint:       "https://api.slugged.com/v1",
+		SpaceID:        "space-999",
+		ProvisionState: "active",
+	}
+
+	expectedResponse := sensory.SourceResponse{Data: expectedSource}
+
+	expectedPath := "/provision/sensory/specifications/" + specID + "/sources/" + slug
+
+	server := CreateMockServer(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet {
+			t.Errorf("Expected GET request, got %s", r.Method)
+		}
+
+		if r.URL.Path != expectedPath {
+			t.Errorf("Expected path %s, got %s", expectedPath, r.URL.Path)
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(expectedResponse)
+	})
+	defer server.Close()
+
+	client := tama.NewClient(tama.Config{BaseURL: server.URL, APIKey: "test-key"})
+
+	source, err := client.Sensory.GetSourceBySpecificationAndSlug(specID, slug)
+	if err != nil {
+		t.Fatalf("Unexpected error: %v", err)
+	}
+
+	if source.ID != expectedSource.ID {
+		t.Errorf("Expected source ID %s, got %s", expectedSource.ID, source.ID)
+	}
+	if source.Name != expectedSource.Name {
+		t.Errorf("Expected source name %s, got %s", expectedSource.Name, source.Name)
+	}
+	if source.Slug != expectedSource.Slug {
+		t.Errorf("Expected source slug %s, got %s", expectedSource.Slug, source.Slug)
+	}
+	if source.Endpoint != expectedSource.Endpoint {
+		t.Errorf("Expected source endpoint %s, got %s", expectedSource.Endpoint, source.Endpoint)
+	}
+	if source.ProvisionState != expectedSource.ProvisionState {
+		t.Errorf("Expected source provision state %s, got %s", expectedSource.ProvisionState, source.ProvisionState)
+	}
+}
+
 func TestSensoryCreateSource(t *testing.T) {
 	expectedSource := sensory.Source{
 		ID:             "source-789",
