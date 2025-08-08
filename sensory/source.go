@@ -17,6 +17,7 @@ type SourceCredential struct {
 type Source struct {
 	ID             string `json:"id,omitempty"`
 	Name           string `json:"name"`
+	Slug           string `json:"slug"`
 	Endpoint       string `json:"endpoint"`
 	SpaceID        string `json:"space_id"`
 	Type           string `json:"type"`
@@ -70,6 +71,32 @@ func (s *Service) GetSource(id string) (*Source, error) {
 
 	if err != nil {
 		return nil, fmt.Errorf("failed to get source: %w", err)
+	}
+
+	if apiErr := s.handleAPIError(resp); apiErr != nil {
+		return nil, apiErr
+	}
+
+	return &sourceResp.Data, nil
+}
+
+// GetSourceBySpecificationAndSlug retrieves a source by specification ID and source slug.
+// GET /provision/sensory/specifications/:specification_id/sources/:id.
+func (s *Service) GetSourceBySpecificationAndSlug(specificationID string, slug string) (*Source, error) {
+	if specificationID == "" {
+		return nil, errors.New("specification ID is required")
+	}
+	if slug == "" {
+		return nil, errors.New("source slug is required")
+	}
+
+	var sourceResp SourceResponse
+	resp, err := s.client.R().
+		SetResult(&sourceResp).
+		Get(fmt.Sprintf("/provision/sensory/specifications/%s/sources/%s", specificationID, slug))
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to get source by specification and slug: %w", err)
 	}
 
 	if apiErr := s.handleAPIError(resp); apiErr != nil {
