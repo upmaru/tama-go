@@ -80,7 +80,7 @@ func (s *Service) GetSource(id string) (*Source, error) {
 	return &sourceResp.Data, nil
 }
 
-// GetBySpecificationAndSlug retrieves a source by specification ID and source slug.
+// GetSourceBySpecificationAndSlug retrieves a source by specification ID and source slug.
 // GET /provision/sensory/specifications/:specification_id/sources/:id.
 func (s *Service) GetSourceBySpecificationAndSlug(specificationID string, slug string) (*Source, error) {
 	if specificationID == "" {
