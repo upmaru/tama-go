@@ -1,4 +1,4 @@
-package tama_test
+package memory_test
 
 import (
 	"encoding/json"
