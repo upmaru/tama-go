@@ -426,6 +426,29 @@ if err != nil {
 fmt.Printf("Class: %+v\n", class)
 ```
 
+#### GetClassBySpecificationAndName(specificationID string, name string) (*Class, error)
+
+Retrieves a specific class by specification ID and name.
+
+**Endpoint:** `GET /provision/neural/specifications/:specification_id/classes/:name`
+
+**Parameters:**
+- `specificationID` (string): Specification ID (required)
+- `name` (string): Class name (required)
+
+**Returns:**
+- `*Class`: Class object with ID, SpaceID, ProvisionState, Schema, Name, and Description
+- `error`: Error if request fails
+
+**Example:**
+```go
+class, err := client.Neural.GetClassBySpecificationAndName("spec-123", "MyClassName")
+if err != nil {
+    log.Fatal(err)
+}
+fmt.Printf("Class: %+v\n", class)
+```
+
 #### CreateClass(spaceID string, req CreateClassRequest) (*Class, error)
 
 Creates a new class within a space.
@@ -497,8 +520,7 @@ Deletes a class by ID.
 
 **Endpoint:** `DELETE /provision/neural/classes/:id`
 
-**Parameters:**
-- `id` (string): Class ID (required)
+**Parameters硬 `id` (string): Class ID (required)
 
 **Returns:**
 - `error`: Error if request fails
