@@ -9,6 +9,7 @@ Access via `client.Neural.*`
 - [Node Operations](#node-operations)
 - [Bridge Operations](#bridge-operations)
 - [Class Operations](#class-operations)
+- [Operation Operations](#operation-operations)
 - [Corpus Operations](#corpus-operations)
 
 ## Space Operations
