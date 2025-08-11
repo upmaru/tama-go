@@ -450,6 +450,30 @@ if err != nil {
 fmt.Printf("Class: %+v\n", class)
 ```
 
+#### GetClassBySpaceAndName(spaceID string, name string) (*Class, error)
+
+Retrieves a specific class by space ID and name.
+
+**Endpoint:** `GET /provision/neural/spaces/:space_id/classes/:name`
+
+**Parameters:**
+- `spaceID` (string): Space ID (required)
+- `name` (string): Class name (required)
+
+**Returns:**
+- `*Class`: Class object with ID, SpaceID, ProvisionState, Schema, Name, and Description
+- `error`: Error if request fails
+
+**Example:**
+```go
+class, err := client.Neural.GetClassBySpaceAndName("space-123", "MyClassName")
+if err != nil {
+    log.Fatal(err)
+}
+fmt.Printf("Class: %+v\n", class)
+fmt.Printf("Schema: %+v\n", class.Schema)
+```
+
 ## Operation Operations
 
 The Operation operations are available through the `neural/class` package. You need to create a class service instance to use these operations.

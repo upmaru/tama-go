@@ -240,6 +240,139 @@ func TestNeuralGetClassBySpecificationAndNameValidation(t *testing.T) {
 	}
 }
 
+func TestNeuralGetClassBySpaceAndName(t *testing.T) {
+	expectedClass := neural.Class{
+		ID:             "class-789",
+		SpaceID:        "space-123",
+		ProvisionState: "active",
+		Schema: map[string]any{
+			"type": "object",
+			"properties": map[string]any{
+				"title": map[string]any{"type": "string"},
+				"body":  map[string]any{"type": "string"},
+			},
+		},
+		Name:        "Article",
+		Description: "Article class for space",
+	}
+
+	expectedResponse := neural.ClassResponse{
+		Data: expectedClass,
+	}
+
+	server := CreateMockServer(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet {
+			t.Errorf("Expected GET request, got %s", r.Method)
+		}
+
+		if r.URL.Path != "/provision/neural/spaces/space-123/classes/Article" {
+			t.Errorf("Expected path /provision/neural/spaces/space-123/classes/Article, got %s", r.URL.Path)
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(expectedResponse)
+	})
+	defer server.Close()
+
+	config := tama.Config{
+		BaseURL: server.URL,
+		APIKey:  "test-key",
+		Timeout: 10 * time.Second,
+	}
+
+	client := tama.NewClient(config)
+
+	class, err := client.Neural.GetClassBySpaceAndName("space-123", "Article")
+
+	if err != nil {
+		t.Fatalf("Expected no error, got %v", err)
+	}
+
+	if class.ID != expectedClass.ID {
+		t.Errorf("Expected class ID %s, got %s", expectedClass.ID, class.ID)
+	}
+
+	if class.SpaceID != expectedClass.SpaceID {
+		t.Errorf("Expected space ID %s, got %s", expectedClass.SpaceID, class.SpaceID)
+	}
+
+	if class.Name != expectedClass.Name {
+		t.Errorf("Expected class name %s, got %s", expectedClass.Name, class.Name)
+	}
+
+	if class.Description != expectedClass.Description {
+		t.Errorf("Expected class description %s, got %s", expectedClass.Description, class.Description)
+	}
+
+	if class.ProvisionState != expectedClass.ProvisionState {
+		t.Errorf("Expected provision state %s, got %s", expectedClass.ProvisionState, class.ProvisionState)
+	}
+}
+
+func TestNeuralGetClassBySpaceAndNameError(t *testing.T) {
+	server := CreateMockServer(func(w http.ResponseWriter, _ *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusNotFound)
+		json.NewEncoder(w).Encode(map[string]any{
+			"errors": map[string][]string{
+				"class": {"not found for space"},
+			},
+		})
+	})
+	defer server.Close()
+
+	config := tama.Config{
+		BaseURL: server.URL,
+		APIKey:  "test-key",
+		Timeout: 10 * time.Second,
+	}
+
+	client := tama.NewClient(config)
+
+	_, err := client.Neural.GetClassBySpaceAndName("nonexistent-space", "NonexistentClass")
+
+	if err == nil {
+		t.Fatal("Expected error, got nil")
+	}
+
+	var apiError *neural.Error
+	if !errors.As(err, &apiError) {
+		t.Fatalf("Expected neural.Error, got %T", err)
+	}
+
+	if apiError.StatusCode != http.StatusNotFound {
+		t.Errorf("Expected status code 404, got %d", apiError.StatusCode)
+	}
+}
+
+func TestNeuralGetClassBySpaceAndNameValidation(t *testing.T) {
+	config := tama.Config{
+		BaseURL: "http://localhost:8080",
+		APIKey:  "test-key",
+		Timeout: 10 * time.Second,
+	}
+
+	client := tama.NewClient(config)
+
+	// Test empty space ID
+	_, err := client.Neural.GetClassBySpaceAndName("", "Article")
+	if err == nil {
+		t.Error("Expected error for empty space ID, got nil")
+	}
+	if err.Error() != "space ID is required" {
+		t.Errorf("Expected 'space ID is required', got %q", err.Error())
+	}
+
+	// Test empty class name
+	_, err = client.Neural.GetClassBySpaceAndName("space-123", "")
+	if err == nil {
+		t.Error("Expected error for empty class name, got nil")
+	}
+	if err.Error() != "class name is required" {
+		t.Errorf("Expected 'class name is required', got %q", err.Error())
+	}
+}
+
 func TestNeuralCreateClass(t *testing.T) {
 	expectedClass := neural.Class{
 		ID:             "class-789",

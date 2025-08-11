@@ -89,6 +89,32 @@ func (s *Service) GetClassBySpecificationAndName(specificationID string, name st
 	return &classResp.Data, nil
 }
 
+// GetClassBySpaceAndName retrieves a specific class by space ID and name.
+// GET /provision/neural/spaces/:space_id/classes/:name.
+func (s *Service) GetClassBySpaceAndName(spaceID string, name string) (*Class, error) {
+	if spaceID == "" {
+		return nil, errors.New("space ID is required")
+	}
+	if name == "" {
+		return nil, errors.New("class name is required")
+	}
+
+	var classResp ClassResponse
+	resp, err := s.client.R().
+		SetResult(&classResp).
+		Get(fmt.Sprintf("/provision/neural/spaces/%s/classes/%s", spaceID, name))
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to get class by space and name: %w", err)
+	}
+
+	if apiErr := s.handleAPIError(resp); apiErr != nil {
+		return nil, apiErr
+	}
+
+	return &classResp.Data, nil
+}
+
 // CreateClass creates a new class within a space.
 // POST /provision/neural/spaces/:space_id/classes.
 func (s *Service) CreateClass(spaceID string, req CreateClassRequest) (*Class, error) {
