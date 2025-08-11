@@ -9,6 +9,7 @@ Access via `client.Neural.*`
 - [Node Operations](#node-operations)
 - [Bridge Operations](#bridge-operations)
 - [Class Operations](#class-operations)
+- [Operation Operations](#operation-operations)
 - [Corpus Operations](#corpus-operations)
 
 ## Space Operations
@@ -447,6 +448,131 @@ if err != nil {
     log.Fatal(err)
 }
 fmt.Printf("Class: %+v\n", class)
+```
+
+#### GetClassBySpaceAndName(spaceID string, name string) (*Class, error)
+
+Retrieves a specific class by space ID and name.
+
+**Endpoint:** `GET /provision/neural/spaces/:space_id/classes/:name`
+
+**Parameters:**
+- `spaceID` (string): Space ID (required)
+- `name` (string): Class name (required)
+
+**Returns:**
+- `*Class`: Class object with ID, SpaceID, ProvisionState, Schema, Name, and Description
+- `error`: Error if request fails
+
+**Example:**
+```go
+class, err := client.Neural.GetClassBySpaceAndName("space-123", "MyClassName")
+if err != nil {
+    log.Fatal(err)
+}
+fmt.Printf("Class: %+v\n", class)
+fmt.Printf("Schema: %+v\n", class.Schema)
+```
+
+## Operation Operations
+
+The Operation operations are available through the `neural/class` package. You need to create a class service instance to use these operations.
+
+**Setup:**
+```go
+import (
+    "github.com/upmaru/tama-go"
+    "github.com/upmaru/tama-go/neural/class"
+)
+
+// Create the main client
+config := tama.Config{
+    BaseURL: "https://your-api-endpoint.com",
+    APIKey:  "your-api-key",
+    Timeout: 30 * time.Second,
+}
+client := tama.NewClient(config)
+
+// Create the class operation service
+operationService := class.NewService(client.GetHTTPClient())
+```
+
+#### GetOperation(classID string, operationID string) (*Operation, error)
+
+Retrieves a specific operation by class ID and operation ID.
+
+**Endpoint:** `GET /provision/neural/classes/:class_id/operations/:id`
+
+**Parameters:**
+- `classID` (string): Class ID (required)
+- `operationID` (string): Operation ID (required)
+
+**Returns:**
+- `*Operation`: Operation object with ID, CurrentState, ClassID, and NodeIDs
+- `error`: Error if request fails
+
+**Example:**
+```go
+operation, err := operationService.GetOperation("class-123", "operation-456")
+if err != nil {
+    log.Fatal(err)
+}
+fmt.Printf("Operation: %+v\n", operation)
+fmt.Printf("Current State: %s\n", operation.CurrentState)
+fmt.Printf("Node IDs: %v\n", operation.NodeIDs)
+```
+
+#### CreateOperation(classID string, req CreateOperationRequest) (*Operation, error)
+
+Creates a new operation for a neural class.
+
+**Endpoint:** `POST /provision/neural/classes/:class_id/operations`
+
+**Parameters:**
+- `classID` (string): Class ID (required)
+- `req` (CreateOperationRequest): Request body containing ChainIDs and optional NodeType
+
+**Request Body:**
+- `ChainIDs` ([]string): List of chain IDs (required)
+- `NodeType` (*string): Optional node type (optional)
+
+**Returns:**
+- `*Operation`: Created operation object with ID, CurrentState, ClassID, and NodeIDs
+- `error`: Error if request fails
+
+**Example:**
+```go
+// Create a new operation with optional node type
+nodeType := "worker" // Optional
+req := class.CreateOperationRequest{
+    Operation: class.CreateOperationData{
+        ChainIDs: []string{"chain-1", "chain-2"},
+        NodeType: &nodeType, // Optional field
+    },
+}
+
+operation, err := operationService.CreateOperation("class-123", req)
+if err != nil {
+    log.Fatal(err)
+}
+fmt.Printf("Created Operation: %+v\n", operation)
+
+// Retrieve the operation by ID
+retrievedOperation, err := operationService.GetOperation("class-123", operation.ID)
+if err != nil {
+    log.Fatal(err)
+}
+fmt.Printf("Retrieved Operation: %+v\n", retrievedOperation)
+```
+
+**Operation Struct:**
+```go
+type Operation struct {
+    ID           string   `json:"id,omitempty"`
+    CurrentState string   `json:"current_state"`
+    ClassID      string   `json:"class_id"`
+    NodeIDs      []string `json:"node_ids"`
+}
 ```
 
 #### CreateClass(spaceID string, req CreateClassRequest) (*Class, error)
