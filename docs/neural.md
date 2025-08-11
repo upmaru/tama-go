@@ -449,6 +449,64 @@ if err != nil {
 fmt.Printf("Class: %+v\n", class)
 ```
 
+## Operation Operations
+
+#### GetOperation(classID string, operationID string) (*Operation, error)
+
+Retrieves a specific operation by class ID and operation ID.
+
+**Endpoint:** `GET /provision/neural/classes/:class_id/operations/:id`
+
+**Parameters:**
+- `classID` (string): Class ID (required)
+- `operationID` (string): Operation ID (required)
+
+**Returns:**
+- `*Operation`: Operation object with ID, CurrentState, ClassID, and NodeIDs
+- `error`: Error if request fails
+
+**Example:**
+```go
+operation, err := client.Neural.GetOperation("class-123", "operation-456")
+if err != nil {
+    log.Fatal(err)
+}
+fmt.Printf("Operation: %+v\n", operation)
+```
+
+#### CreateOperation(classID string, req CreateOperationRequest) (*Operation, error)
+
+Creates a new operation for a neural class.
+
+**Endpoint:** `POST /provision/neural/classes/:class_id/operations`
+
+**Parameters:**
+- `classID` (string): Class ID (required)
+- `req` (CreateOperationRequest): Request body containing ChainIDs and optional NodeType
+
+**Request Body:**
+- `ChainIDs` ([]string): List of chain IDs (required)
+- `NodeType` (*string): Optional node type (optional)
+
+**Returns:**
+- `*Operation`: Created operation object with ID, CurrentState, ClassID, and NodeIDs
+- `error`: Error if request fails
+
+**Example:**
+```go
+req := neural.CreateOperationRequest{
+    Operation: neural.CreateOperationData{
+        ChainIDs: []string{"chain-1", "chain-2"},
+        NodeType: stringPtr("worker"), // Optional
+    },
+}
+operation, err := client.Neural.CreateOperation("class-123", req)
+if err != nil {
+    log.Fatal(err)
+}
+fmt.Printf("Created Operation: %+v\n", operation)
+```
+
 #### CreateClass(spaceID string, req CreateClassRequest) (*Class, error)
 
 Creates a new class within a space.
