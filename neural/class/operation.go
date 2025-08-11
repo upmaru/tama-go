@@ -72,7 +72,7 @@ func (e *Error) Error() string {
 }
 
 // GetOperation retrieves a specific operation by ID.
-// GET /provision/neural/classes/:class_id/operations/:id
+// GET /provision/neural/classes/:class_id/operations/:id.
 func (s *Service) GetOperation(classID string, operationID string) (*Operation, error) {
 	if classID == "" {
 		return nil, errors.New("class ID is required")
@@ -98,7 +98,7 @@ func (s *Service) GetOperation(classID string, operationID string) (*Operation, 
 }
 
 // CreateOperation creates a new operation for a neural class.
-// POST /provision/neural/classes/:class_id/operations
+// POST /provision/neural/classes/:class_id/operations.
 func (s *Service) CreateOperation(classID string, req CreateOperationRequest) (*Operation, error) {
 	if classID == "" {
 		return nil, errors.New("class ID is required")
