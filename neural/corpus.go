@@ -145,6 +145,32 @@ func (s *Service) ReplaceCorpus(id string, req UpdateCorpusRequest) (*Corpus, er
 	return &corpusResp.Data, nil
 }
 
+// GetCorpusByClassAndSlug retrieves a specific corpus by class ID and slug.
+// GET /provision/neural/classes/:class_id/corpora/:id.
+func (s *Service) GetCorpusByClassAndSlug(classID string, slug string) (*Corpus, error) {
+	if classID == "" {
+		return nil, errors.New("class ID is required")
+	}
+	if slug == "" {
+		return nil, errors.New("corpus slug is required")
+	}
+
+	var corpusResp CorpusResponse
+	resp, err := s.client.R().
+		SetResult(&corpusResp).
+		Get(fmt.Sprintf("/provision/neural/classes/%s/corpora/%s", classID, slug))
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to get corpus: %w", err)
+	}
+
+	if apiErr := s.handleAPIError(resp); apiErr != nil {
+		return nil, apiErr
+	}
+
+	return &corpusResp.Data, nil
+}
+
 // DeleteCorpus deletes a corpus by ID.
 // DELETE /provision/neural/corpora/:id.
 func (s *Service) DeleteCorpus(id string) error {

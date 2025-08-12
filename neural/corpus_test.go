@@ -372,6 +372,137 @@ func TestNeuralReplaceCorpus(t *testing.T) {
 	}
 }
 
+func TestNeuralGetCorpusByClassAndSlug(t *testing.T) {
+	expectedCorpus := neural.Corpus{
+		ID:             "corpus-456",
+		Main:           false,
+		Name:           "test-corpus-by-slug",
+		Slug:           "test-slug",
+		Template:       "test-template",
+		ProvisionState: "active",
+	}
+
+	expectedResponse := neural.CorpusResponse{
+		Data: expectedCorpus,
+	}
+
+	server := CreateMockServer(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet {
+			t.Errorf("Expected GET request, got %s", r.Method)
+		}
+
+		if r.URL.Path != "/provision/neural/classes/class-789/corpora/test-slug" {
+			t.Errorf("Expected path /provision/neural/classes/class-789/corpora/test-slug, got %s", r.URL.Path)
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(expectedResponse)
+	})
+	defer server.Close()
+
+	config := tama.Config{
+		BaseURL: server.URL,
+		APIKey:  "test-key",
+		Timeout: 10 * time.Second,
+	}
+
+	client := tama.NewClient(config)
+	corpus, err := client.Neural.GetCorpusByClassAndSlug("class-789", "test-slug")
+
+	if err != nil {
+		t.Fatalf("Expected no error, got %v", err)
+	}
+
+	if corpus.ID != expectedCorpus.ID {
+		t.Errorf("Expected corpus ID %s, got %s", expectedCorpus.ID, corpus.ID)
+	}
+
+	if corpus.Main != expectedCorpus.Main {
+		t.Errorf("Expected corpus main %v, got %v", expectedCorpus.Main, corpus.Main)
+	}
+
+	if corpus.Name != expectedCorpus.Name {
+		t.Errorf("Expected corpus name %s, got %s", expectedCorpus.Name, corpus.Name)
+	}
+
+	if corpus.Slug != expectedCorpus.Slug {
+		t.Errorf("Expected corpus slug %s, got %s", expectedCorpus.Slug, corpus.Slug)
+	}
+
+	if corpus.Template != expectedCorpus.Template {
+		t.Errorf("Expected corpus template %s, got %s", expectedCorpus.Template, corpus.Template)
+	}
+}
+
+func TestNeuralGetCorpusByClassAndSlugValidation(t *testing.T) {
+	config := tama.Config{
+		BaseURL: "https://api.example.com",
+		APIKey:  "test-key",
+		Timeout: 10 * time.Second,
+	}
+
+	client := tama.NewClient(config)
+
+	// Test empty class ID validation
+	_, err := client.Neural.GetCorpusByClassAndSlug("", "test-slug")
+	if err == nil {
+		t.Error("Expected validation error for empty class ID")
+	}
+	if err.Error() != "class ID is required" {
+		t.Errorf("Expected error 'class ID is required', got %s", err.Error())
+	}
+
+	// Test empty slug validation
+	_, err = client.Neural.GetCorpusByClassAndSlug("class-789", "")
+	if err == nil {
+		t.Error("Expected validation error for empty slug")
+	}
+	if err.Error() != "corpus slug is required" {
+		t.Errorf("Expected error 'corpus slug is required', got %s", err.Error())
+	}
+}
+
+func TestNeuralGetCorpusByClassAndSlugError(t *testing.T) {
+	server := CreateMockServer(func(w http.ResponseWriter, _ *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusNotFound)
+		errorResp := neural.Error{
+			StatusCode: 404,
+			Errors: map[string][]string{
+				"corpus": {"not found"},
+			},
+		}
+		json.NewEncoder(w).Encode(errorResp)
+	})
+	defer server.Close()
+
+	config := tama.Config{
+		BaseURL: server.URL,
+		APIKey:  "test-key",
+		Timeout: 10 * time.Second,
+	}
+
+	client := tama.NewClient(config)
+	_, err := client.Neural.GetCorpusByClassAndSlug("class-789", "nonexistent-slug")
+
+	if err == nil {
+		t.Fatal("Expected error, got nil")
+	}
+
+	var neuralErr *neural.Error
+	if errors.As(err, &neuralErr) {
+		if neuralErr.StatusCode != http.StatusNotFound {
+			t.Errorf("Expected status code 404, got %d", neuralErr.StatusCode)
+		}
+		if neuralErr.Errors == nil || len(neuralErr.Errors["corpus"]) == 0 ||
+			neuralErr.Errors["corpus"][0] != "not found" {
+			t.Errorf("Expected error 'corpus not found', got %v", neuralErr.Errors)
+		}
+	} else {
+		t.Errorf("Expected neural.Error, got %T", err)
+	}
+}
+
 func TestNeuralDeleteCorpus(t *testing.T) {
 	server := CreateMockServer(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodDelete {
