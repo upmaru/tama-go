@@ -17,6 +17,20 @@ Retrieves a specific source by ID.
 - `*Source`: Source object
 - `error`: Error if request fails
 
+#### GetSourceBySpecificationAndSlug(specificationID string, slug string) (*Source, error)
+
+Retrieves a source by specification ID and source slug.
+
+**Endpoint:** `GET /provision/sensory/specifications/:specification_id/sources/:id`
+
+**Parameters:**
+- `specificationID` (string): Specification ID (required)
+- `slug` (string): Source slug (required)
+
+**Returns:**
+- `*Source`: Source object
+- `error`: Error if request fails
+
 #### CreateSource(spaceID string, req CreateSourceRequest) (*Source, error)
 
 Creates a new source in a specific space.
