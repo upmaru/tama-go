@@ -32,6 +32,34 @@ if err != nil {
 fmt.Printf("Action: %+v\n", action)
 ```
 
+### GetActionByPathAndMethod(specID, path, method string) (*Action, error)
+
+Retrieves a specific motor action by specification ID, path, and method.
+
+**Endpoint:** `GET /provision/motor/specifications/:spec_id/actions/:encoded_path`
+
+**Parameters:**
+- `specID` (string): Specification ID (required)
+- `path` (string): Action path to search for (required)
+- `method` (string): HTTP method to search for (required)
+
+**Returns:**
+- `*Action`: Action object with ID, Identifier, Path, Method, and SpecificationID
+- `error`: Error if request fails
+
+**Notes:**
+- The path is URL-safe base64 encoded before being used in the endpoint
+- The method is converted to lowercase before being passed as a query parameter
+
+**Example:**
+```go
+action, err := client.Motor.GetActionByPathAndMethod("spec-123", "/api/endpoint", "POST")
+if err != nil {
+    log.Fatal(err)
+}
+fmt.Printf("Action: %+v\n", action)
+```
+
 ### Execute() error
 
 Executes the motor action.
