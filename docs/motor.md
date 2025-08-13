@@ -93,7 +93,6 @@ if err != nil {
 The `Action` struct represents a motor action with the following fields:
 
 ```go
-```tama-go/motor/action.go#L11-17
 type Action struct {
     ID              string `json:"id"`
     Identifier      string `json:"identifier"`
@@ -101,7 +100,6 @@ type Action struct {
     Method          string `json:"method"`
     SpecificationID string `json:"specification_id"`
 }
-```
 ```
 
 **Fields:**
@@ -122,7 +120,7 @@ type ActionResponse struct {
 
 ## JSON Payloads
 
-The API responses are wrapped in an `ActionResponse` object.  
+The API responses are wrapped in an `ActionResponse` object.
 Example response:
 
 ```go
@@ -138,7 +136,6 @@ Example response:
 ```
 
 The request payloads for motor actions are not required for the current client methods, as all data is retrieved from the server.
-```
 
 **Fields:**
 - `Data` (Action): The action data returned by the API
