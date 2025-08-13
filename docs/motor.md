@@ -48,8 +48,9 @@ Retrieves a specific motor action by specification ID, path, and method.
 - `error`: Error if request fails
 
 **Notes:**
-- The path is URL-safe base64 encoded before being used in the endpoint
-- The method is converted to lowercase before being passed as a query parameter
+- The `path` argument is automatically **URL‑safe Base64 encoded** by the client before it is appended to the request URL.
+- The `method` string is converted to **lowercase** and sent as the `method` query parameter.
+- These transformations are handled internally, so callers provide raw values (e.g., `/api/endpoint`, `"POST"`).
 
 **Example:**
 ```go
@@ -69,6 +70,8 @@ Executes the motor action.
 
 **Returns:**
 - `error`: Error if execution fails
+
+*Note:* The current implementation of `Execute` is a placeholder and simply returns `nil`. It does not perform any network call or side effect.
 
 **Example:**
 ```go
@@ -90,6 +93,7 @@ if err != nil {
 The `Action` struct represents a motor action with the following fields:
 
 ```go
+```tama-go/motor/action.go#L11-17
 type Action struct {
     ID              string `json:"id"`
     Identifier      string `json:"identifier"`
@@ -97,6 +101,7 @@ type Action struct {
     Method          string `json:"method"`
     SpecificationID string `json:"specification_id"`
 }
+```
 ```
 
 **Fields:**
@@ -114,6 +119,25 @@ The `ActionResponse` struct wraps the Action data in API responses:
 type ActionResponse struct {
     Data Action `json:"data"`
 }
+
+## JSON Payloads
+
+The API responses are wrapped in an `ActionResponse` object.  
+Example response:
+
+```go
+{
+  "data": {
+    "id": "action-456",
+    "identifier": "CreateUser",
+    "path": "/api/endpoint",
+    "method": "POST",
+    "specification_id": "spec-123"
+  }
+}
+```
+
+The request payloads for motor actions are not required for the current client methods, as all data is retrieved from the server.
 ```
 
 **Fields:**
