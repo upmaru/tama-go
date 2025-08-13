@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"strings"
 )
 
 // Action represents a motor action.
@@ -42,19 +43,23 @@ func (s *Service) GetAction(specID, id string) (*Action, error) {
 	return &respWrapper.Data, nil
 }
 
-// GetActionByPath retrieves a specific action by specification ID and path.
-// The path is encoded using URL-safe base64 encoding before making the API call.
-func (s *Service) GetActionByPath(specID, path string) (*Action, error) {
-	if specID == "" || path == "" {
-		return nil, errors.New("specification ID and path are required")
+// GetActionByPathAndMethod retrieves a specific action by specification ID, path, and method.
+// The path is encoded using URL-safe base64 encoding and the method is passed as a query parameter.
+func (s *Service) GetActionByPathAndMethod(specID, path, method string) (*Action, error) {
+	if specID == "" || path == "" || method == "" {
+		return nil, errors.New("specification ID, path, and method are required")
 	}
 
 	// Encode the path using URL-safe base64 encoding
 	encodedPath := base64.URLEncoding.EncodeToString([]byte(path))
 
+	// Lowercase the method before sending as query parameter
+	lowercaseMethod := strings.ToLower(method)
+
 	var respWrapper ActionResponse
 	resp, err := s.client.R().
 		SetResult(&respWrapper).
+		SetQueryParam("method", lowercaseMethod).
 		Get(fmt.Sprintf("/provision/motor/specifications/%s/actions/%s", specID, encodedPath))
 
 	if err != nil {

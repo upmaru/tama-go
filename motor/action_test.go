@@ -6,6 +6,7 @@ import (
 	"errors"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 	"time"
 
@@ -206,15 +207,16 @@ func TestAction_Execute(t *testing.T) {
 	}
 }
 
-func TestMotorGetActionByPath(t *testing.T) {
+func TestMotorGetActionByPathAndMethod(t *testing.T) {
 	actionPath := "/3/movie/{movie_id}"
+	actionMethod := "GET"
 	encodedPath := base64.URLEncoding.EncodeToString([]byte(actionPath))
 
 	expectedAction := motor.Action{
 		ID:              "action-456",
 		Identifier:      "movie-details",
 		Path:            actionPath,
-		Method:          "GET",
+		Method:          actionMethod,
 		SpecificationID: "spec-789",
 	}
 
@@ -232,6 +234,13 @@ func TestMotorGetActionByPath(t *testing.T) {
 			t.Errorf("Expected path %s, got %s", expectedURLPath, r.URL.Path)
 		}
 
+		// Check for method query parameter (should be lowercase)
+		methodParam := r.URL.Query().Get("method")
+		expectedMethodParam := "get" // Method should be lowercased
+		if methodParam != expectedMethodParam {
+			t.Errorf("Expected method query parameter %s, got %s", expectedMethodParam, methodParam)
+		}
+
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(expectedResponse)
 	})
@@ -244,7 +253,7 @@ func TestMotorGetActionByPath(t *testing.T) {
 	}
 
 	client := tama.NewClient(config)
-	action, err := client.Motor.GetActionByPath("spec-789", actionPath)
+	action, err := client.Motor.GetActionByPathAndMethod("spec-789", actionPath, actionMethod)
 
 	if err != nil {
 		t.Fatalf("Expected no error, got %v", err)
@@ -271,7 +280,7 @@ func TestMotorGetActionByPath(t *testing.T) {
 	}
 }
 
-func TestMotorGetActionByPathError(t *testing.T) {
+func TestMotorGetActionByPathAndMethodError(t *testing.T) {
 	server := createMockServer(func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusNotFound)
@@ -292,7 +301,7 @@ func TestMotorGetActionByPathError(t *testing.T) {
 	}
 
 	client := tama.NewClient(config)
-	_, err := client.Motor.GetActionByPath("spec-789", "/nonexistent/path")
+	_, err := client.Motor.GetActionByPathAndMethod("spec-789", "/nonexistent/path", "GET")
 
 	if err == nil {
 		t.Fatal("Expected error, got nil")
@@ -312,24 +321,24 @@ func TestMotorGetActionByPathError(t *testing.T) {
 	}
 }
 
-func TestMotorGetActionByPathValidation(t *testing.T) {
+func TestMotorGetActionByPathAndMethodValidation(t *testing.T) {
 	client := tama.NewClient(tama.Config{
 		BaseURL: "https://api.example.com",
 		APIKey:  "test-key",
 	})
 
 	// Test empty specification ID
-	_, err := client.Motor.GetActionByPath("", "/some/path")
+	_, err := client.Motor.GetActionByPathAndMethod("", "/some/path", "GET")
 	if err == nil {
 		t.Error("Expected validation error for empty specification ID")
 	}
-	expectedMsg := "specification ID and path are required"
+	expectedMsg := "specification ID, path, and method are required"
 	if err.Error() != expectedMsg {
 		t.Errorf("Expected error message '%s', got '%s'", expectedMsg, err.Error())
 	}
 
 	// Test empty path
-	_, err = client.Motor.GetActionByPath("spec-789", "")
+	_, err = client.Motor.GetActionByPathAndMethod("spec-789", "", "GET")
 	if err == nil {
 		t.Error("Expected validation error for empty path")
 	}
@@ -337,17 +346,26 @@ func TestMotorGetActionByPathValidation(t *testing.T) {
 		t.Errorf("Expected error message '%s', got '%s'", expectedMsg, err.Error())
 	}
 
-	// Test both empty
-	_, err = client.Motor.GetActionByPath("", "")
+	// Test empty method
+	_, err = client.Motor.GetActionByPathAndMethod("spec-789", "/some/path", "")
 	if err == nil {
-		t.Error("Expected validation error for both empty parameters")
+		t.Error("Expected validation error for empty method")
+	}
+	if err.Error() != expectedMsg {
+		t.Errorf("Expected error message '%s', got '%s'", expectedMsg, err.Error())
+	}
+
+	// Test all empty
+	_, err = client.Motor.GetActionByPathAndMethod("", "", "")
+	if err == nil {
+		t.Error("Expected validation error for all empty parameters")
 	}
 	if err.Error() != expectedMsg {
 		t.Errorf("Expected error message '%s', got '%s'", expectedMsg, err.Error())
 	}
 }
 
-func TestMotorGetActionByPathValidationNoHTTPCall(t *testing.T) {
+func TestMotorGetActionByPathAndMethodValidationNoHTTPCall(t *testing.T) {
 	// Create a mock server that should never be called
 	serverCalled := false
 	server := createMockServer(func(_ http.ResponseWriter, _ *http.Request) {
@@ -365,7 +383,7 @@ func TestMotorGetActionByPathValidationNoHTTPCall(t *testing.T) {
 	client := tama.NewClient(config)
 
 	// Test empty specification ID - should not make HTTP call
-	_, err := client.Motor.GetActionByPath("", "/some/path")
+	_, err := client.Motor.GetActionByPathAndMethod("", "/some/path", "GET")
 	if err == nil {
 		t.Error("Expected validation error for empty specification ID")
 	}
@@ -375,35 +393,49 @@ func TestMotorGetActionByPathValidationNoHTTPCall(t *testing.T) {
 
 	// Reset and test empty path - should not make HTTP call
 	serverCalled = false
-	_, err = client.Motor.GetActionByPath("spec-789", "")
+	_, err = client.Motor.GetActionByPathAndMethod("spec-789", "", "GET")
 	if err == nil {
 		t.Error("Expected validation error for empty path")
 	}
 	if serverCalled {
 		t.Error("HTTP call was made despite validation error")
 	}
+
+	// Reset and test empty method - should not make HTTP call
+	serverCalled = false
+	_, err = client.Motor.GetActionByPathAndMethod("spec-789", "/some/path", "")
+	if err == nil {
+		t.Error("Expected validation error for empty method")
+	}
+	if serverCalled {
+		t.Error("HTTP call was made despite validation error")
+	}
 }
 
-func TestMotorGetActionByPathEncoding(t *testing.T) {
-	// Test that the path is correctly encoded
+func TestMotorGetActionByPathAndMethodEncoding(t *testing.T) {
+	// Test that the path is correctly encoded and method is lowercased
 	testCases := []struct {
 		name         string
 		path         string
+		method       string
 		expectedPath string
 	}{
 		{
-			name:         "simple path",
+			name:         "simple path with GET",
 			path:         "/api/v1/test",
+			method:       "GET",
 			expectedPath: base64.URLEncoding.EncodeToString([]byte("/api/v1/test")),
 		},
 		{
-			name:         "path with parameters",
+			name:         "path with parameters and POST",
 			path:         "/3/movie/{movie_id}",
+			method:       "POST",
 			expectedPath: base64.URLEncoding.EncodeToString([]byte("/3/movie/{movie_id}")),
 		},
 		{
-			name:         "path with special characters",
+			name:         "path with special characters and PUT",
 			path:         "/api/users/{id}/posts?filter=active",
+			method:       "PUT",
 			expectedPath: base64.URLEncoding.EncodeToString([]byte("/api/users/{id}/posts?filter=active")),
 		},
 	}
@@ -414,7 +446,7 @@ func TestMotorGetActionByPathEncoding(t *testing.T) {
 				ID:              "test-action",
 				Identifier:      "test-identifier",
 				Path:            tc.path,
-				Method:          "GET",
+				Method:          tc.method,
 				SpecificationID: "test-spec",
 			}
 
@@ -426,6 +458,13 @@ func TestMotorGetActionByPathEncoding(t *testing.T) {
 				expectedURLPath := "/provision/motor/specifications/test-spec/actions/" + tc.expectedPath
 				if r.URL.Path != expectedURLPath {
 					t.Errorf("Expected path %s, got %s", expectedURLPath, r.URL.Path)
+				}
+
+				// Check for method query parameter (should be lowercase)
+				methodParam := r.URL.Query().Get("method")
+				expectedMethodParam := strings.ToLower(tc.method)
+				if methodParam != expectedMethodParam {
+					t.Errorf("Expected method query parameter %s, got %s", expectedMethodParam, methodParam)
 				}
 
 				w.Header().Set("Content-Type", "application/json")
@@ -440,7 +479,7 @@ func TestMotorGetActionByPathEncoding(t *testing.T) {
 			}
 
 			client := tama.NewClient(config)
-			action, err := client.Motor.GetActionByPath("test-spec", tc.path)
+			action, err := client.Motor.GetActionByPathAndMethod("test-spec", tc.path, tc.method)
 
 			if err != nil {
 				t.Fatalf("Expected no error, got %v", err)
@@ -448,6 +487,10 @@ func TestMotorGetActionByPathEncoding(t *testing.T) {
 
 			if action.Path != tc.path {
 				t.Errorf("Expected action path %s, got %s", tc.path, action.Path)
+			}
+
+			if action.Method != tc.method {
+				t.Errorf("Expected action method %s, got %s", tc.method, action.Method)
 			}
 		})
 	}
