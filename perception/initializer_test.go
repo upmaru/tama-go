@@ -234,7 +234,8 @@ func TestPerceptionCreateInitializerWithIndex(t *testing.T) {
 		}
 
 		// Validate that the index is properly included in the request body
-		if receivedRequest.Initializer.Index == nil || *receivedRequest.Initializer.Index != *request.Initializer.Index {
+		if receivedRequest.Initializer.Index == nil ||
+			*receivedRequest.Initializer.Index != *request.Initializer.Index {
 			var receivedIndex int
 			if receivedRequest.Initializer.Index != nil {
 				receivedIndex = *receivedRequest.Initializer.Index
@@ -638,7 +639,7 @@ func TestPerceptionCreateInitializerWithFieldErrors(t *testing.T) {
 	client := tama.NewClient(config)
 	request := perception.CreateInitializerRequest{
 		Initializer: perception.InitializerRequestData{
-			ClassID:   "invalid-class",   // Valid format to bypass client validation
+			ClassID:   "invalid-class",     // Valid format to bypass client validation
 			Reference: "invalid/reference", // Valid format to bypass client validation
 		},
 	}
