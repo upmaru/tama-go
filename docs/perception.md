@@ -11,6 +11,7 @@ Access via `client.Perception.*`
 - [Path Operations](#path-operations)
 - [Context Operations](#context-operations)
 - [Tool Operations](#tool-operations)
+- [Initializer Operations](#initializer-operations)
 
 ## Delegation Operations
 
@@ -278,7 +279,7 @@ Replaces an existing chain using PUT.
 
 Deletes a chain by ID.
 
-**Endpoint:** `DELETE /provision/perception/chains/:id`
+**Endpoint:** `DELETE /provision/perpection/chains/:id`
 
 ## Thought Operations
 
@@ -650,3 +651,100 @@ Replaces an existing tool using PUT.
 Deletes a tool by ID.
 
 **Endpoint:** `DELETE /provision/perception/tools/:id`
+
+## Initializer Operations
+
+### GetInitializer(id string) (*Initializer, error)
+
+Retrieves a specific initializer by ID.
+
+**Endpoint:** `GET /provision/perception/initializers/:id`
+
+**Parameters:**
+- `id` (string): Initializer ID (required)
+
+**Returns:**
+- `*Initializer`: Initializer object with ID, Parameters, Index, ProvisionState, ThoughtID, ClassID, and Reference
+- `error`: Error if request fails
+
+**Example:**
+```go
+initializer, err := client.Perception.GetInitializer("initializer-123")
+if err != nil {
+    log.Printf("Error: %v", err)
+    return
+}
+log.Printf("Initializer: %s (%s)", initializer.ClassID, initializer.ProvisionState)
+```
+
+### CreateInitializer(thoughtID string, req CreateInitializerRequest) (*Initializer, error)
+
+Creates a new initializer within a thought.
+
+**Endpoint:** `POST /provision/perception/thoughts/:thought_id/initializers`
+
+**Parameters:**
+- `thoughtID` (string): Thought ID (required)
+- `req` (CreateInitializerRequest): Initializer creation request (required)
+
+```go
+type CreateInitializerRequest struct {
+    Initializer InitializerRequestData `json:"initializer"`
+}
+
+type InitializerRequestData struct {
+    Parameters map[string]any `json:"parameters,omitempty"`
+    Index      *int           `json:"index,omitempty"`
+    ClassID    string         `json:"class_id"`
+    Reference  string         `json:"reference"`
+}
+```
+
+**Returns:**
+- `*Initializer`: Created initializer object
+- `error`: Error if request fails
+
+**Example:**
+```go
+initializer, err := client.Perception.CreateInitializer("thought-123", perception.CreateInitializerRequest{
+    Initializer: perception.InitializerRequestData{
+        ClassID:   "class-456",
+        Reference: "reference-789",
+        Parameters: map[string]any{
+            "param1": "value1",
+            "param2": 42,
+        },
+    },
+})
+```
+
+### UpdateInitializer(id string, req UpdateInitializerRequest) (*Initializer, error)
+
+Updates an existing initializer using PATCH.
+
+**Endpoint:** `PATCH /provision/perception/initializers/:id`
+
+```go
+type UpdateInitializerRequest struct {
+    Initializer UpdateInitializerData `json:"initializer"`
+}
+
+type UpdateInitializerData struct {
+    Parameters map[string]any `json:"parameters,omitempty"`
+    Index      *int           `json:"index,omitempty"`
+    ClassID    string         `json:"class_id,omitempty"`
+    Reference  string         `json:"reference,omitempty"`
+}
+```
+
+### ReplaceInitializer(id string, req UpdateInitializerRequest) (*Initializer, error)
+
+Replaces an existing initializer using PUT.
+
+**Endpoint:** `PUT /provision/perception/initializers/:id`
+
+### DeleteInitializer(id string) error
+
+Deletes an initializer by ID.
+
+**Endpoint:** `DELETE /provision/perception/initializers/:id`
