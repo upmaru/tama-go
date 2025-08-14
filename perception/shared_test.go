@@ -162,6 +162,47 @@ func ValidateRequestIndex(t *testing.T, receivedRequest *perception.CreateThough
 	}
 }
 
+// ValidateInitializerResponse validates that actual initializer matches expected initializer.
+func ValidateInitializerResponse(t *testing.T, actual, expected perception.Initializer) {
+	if actual.ID != expected.ID {
+		t.Errorf("Expected initializer ID %s, got %s", expected.ID, actual.ID)
+	}
+
+	if actual.ThoughtID != expected.ThoughtID {
+		t.Errorf("Expected initializer thought_id %s, got %s", expected.ThoughtID, actual.ThoughtID)
+	}
+
+	if actual.ClassID != expected.ClassID {
+		t.Errorf("Expected initializer class_id %s, got %s", expected.ClassID, actual.ClassID)
+	}
+
+	if actual.Reference != expected.Reference {
+		t.Errorf("Expected initializer reference %s, got %s", expected.Reference, actual.Reference)
+	}
+
+	if actual.ProvisionState != expected.ProvisionState {
+		t.Errorf(
+			"Expected initializer provision_state %s, got %s",
+			expected.ProvisionState,
+			actual.ProvisionState,
+		)
+	}
+
+	// Handle Index pointer comparison
+	if (actual.Index == nil) != (expected.Index == nil) {
+		t.Errorf(
+			"Expected index nil status %v, got %v",
+			expected.Index == nil,
+			actual.Index == nil,
+		)
+	}
+	if actual.Index != nil && expected.Index != nil {
+		if *actual.Index != *expected.Index {
+			t.Errorf("Expected index %d, got %d", *expected.Index, *actual.Index)
+		}
+	}
+}
+
 // GetKeys returns the keys from a map for debugging purposes.
 func GetKeys(m map[string][]string) []string {
 	keys := make([]string, 0, len(m))

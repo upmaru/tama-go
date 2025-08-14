@@ -32,6 +32,35 @@ if err != nil {
 fmt.Printf("Action: %+v\n", action)
 ```
 
+### GetActionByPathAndMethod(specID, path, method string) (*Action, error)
+
+Retrieves a specific motor action by specification ID, path, and method.
+
+**Endpoint:** `GET /provision/motor/specifications/:spec_id/actions/:encoded_path`
+
+**Parameters:**
+- `specID` (string): Specification ID (required)
+- `path` (string): Action path to search for (required)
+- `method` (string): HTTP method to search for (required)
+
+**Returns:**
+- `*Action`: Action object with ID, Identifier, Path, Method, and SpecificationID
+- `error`: Error if request fails
+
+**Notes:**
+- The `path` argument is automatically **URL‑safe Base64 encoded** by the client before it is appended to the request URL.
+- The `method` string is converted to **lowercase** and sent as the `method` query parameter.
+- These transformations are handled internally, so callers provide raw values (e.g., `/api/endpoint`, `"POST"`).
+
+**Example:**
+```go
+action, err := client.Motor.GetActionByPathAndMethod("spec-123", "/api/endpoint", "POST")
+if err != nil {
+    log.Fatal(err)
+}
+fmt.Printf("Action: %+v\n", action)
+```
+
 ### Execute() error
 
 Executes the motor action.
@@ -41,6 +70,8 @@ Executes the motor action.
 
 **Returns:**
 - `error`: Error if execution fails
+
+*Note:* The current implementation of `Execute` is a placeholder and simply returns `nil`. It does not perform any network call or side effect.
 
 **Example:**
 ```go
@@ -86,7 +117,25 @@ The `ActionResponse` struct wraps the Action data in API responses:
 type ActionResponse struct {
     Data Action `json:"data"`
 }
+
+## JSON Payloads
+
+The API responses are wrapped in an `ActionResponse` object.
+Example response:
+
+```go
+{
+  "data": {
+    "id": "action-456",
+    "identifier": "CreateUser",
+    "path": "/api/endpoint",
+    "method": "POST",
+    "specification_id": "spec-123"
+  }
+}
 ```
+
+The request payloads for motor actions are not required for the current client methods, as all data is retrieved from the server.
 
 **Fields:**
 - `Data` (Action): The action data returned by the API
