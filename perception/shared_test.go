@@ -203,6 +203,29 @@ func ValidateInitializerResponse(t *testing.T, actual, expected perception.Initi
 	}
 }
 
+// ValidateActivationResponse validates that actual activation matches expected activation.
+func ValidateActivationResponse(t *testing.T, actual, expected perception.Activation) {
+	if actual.ID != expected.ID {
+		t.Errorf("Expected activation ID %s, got %s", expected.ID, actual.ID)
+	}
+
+	if actual.ThoughtPathID != expected.ThoughtPathID {
+		t.Errorf("Expected activation thought_path_id %s, got %s", expected.ThoughtPathID, actual.ThoughtPathID)
+	}
+
+	if actual.ChainID != expected.ChainID {
+		t.Errorf("Expected activation chain_id %s, got %s", expected.ChainID, actual.ChainID)
+	}
+
+	if actual.ProvisionState != expected.ProvisionState {
+		t.Errorf(
+			"Expected activation provision_state %s, got %s",
+			expected.ProvisionState,
+			actual.ProvisionState,
+		)
+	}
+}
+
 // GetKeys returns the keys from a map for debugging purposes.
 func GetKeys(m map[string][]string) []string {
 	keys := make([]string, 0, len(m))
