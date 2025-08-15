@@ -11,6 +11,8 @@ Access via `client.Perception.*`
 - [Path Operations](#path-operations)
 - [Context Operations](#context-operations)
 - [Tool Operations](#tool-operations)
+- [Initializer Operations](#initializer-operations)
+- [Activation Operations](#activation-operations)
 
 ## Delegation Operations
 
@@ -278,7 +280,7 @@ Replaces an existing chain using PUT.
 
 Deletes a chain by ID.
 
-**Endpoint:** `DELETE /provision/perception/chains/:id`
+**Endpoint:** `DELETE /provision/perpection/chains/:id`
 
 ## Thought Operations
 
@@ -650,3 +652,186 @@ Replaces an existing tool using PUT.
 Deletes a tool by ID.
 
 **Endpoint:** `DELETE /provision/perception/tools/:id`
+
+## Initializer Operations
+
+### GetInitializer(id string) (*Initializer, error)
+
+Retrieves a specific initializer by ID.
+
+**Endpoint:** `GET /provision/perception/initializers/:id`
+
+**Parameters:**
+- `id` (string): Initializer ID (required)
+
+**Returns:**
+- `*Initializer`: Initializer object with ID, Parameters, Index, ProvisionState, ThoughtID, ClassID, and Reference
+- `error`: Error if request fails
+
+**Example:**
+```go
+initializer, err := client.Perception.GetInitializer("initializer-123")
+if err != nil {
+    log.Printf("Error: %v", err)
+    return
+}
+log.Printf("Initializer: %s (%s)", initializer.ClassID, initializer.ProvisionState)
+```
+
+### CreateInitializer(thoughtID string, req CreateInitializerRequest) (*Initializer, error)
+
+Creates a new initializer within a thought.
+
+**Endpoint:** `POST /provision/perception/thoughts/:thought_id/initializers`
+
+**Parameters:**
+- `thoughtID` (string): Thought ID (required)
+- `req` (CreateInitializerRequest): Initializer creation request (required)
+
+```go
+type CreateInitializerRequest struct {
+    Initializer InitializerRequestData `json:"initializer"`
+}
+
+type InitializerRequestData struct {
+    Parameters map[string]any `json:"parameters,omitempty"`
+    Index      *int           `json:"index,omitempty"`
+    ClassID    string         `json:"class_id"`
+    Reference  string         `json:"reference"`
+}
+```
+
+**Returns:**
+- `*Initializer`: Created initializer object
+- `error`: Error if request fails
+
+**Example:**
+```go
+initializer, err := client.Perception.CreateInitializer("thought-123", perception.CreateInitializerRequest{
+    Initializer: perception.InitializerRequestData{
+        ClassID:   "class-456",
+        Reference: "reference-789",
+        Parameters: map[string]any{
+            "param1": "value1",
+            "param2": 42,
+        },
+    },
+})
+```
+
+### UpdateInitializer(id string, req UpdateInitializerRequest) (*Initializer, error)
+
+Updates an existing initializer using PATCH.
+
+**Endpoint:** `PATCH /provision/perception/initializers/:id`
+
+```go
+type UpdateInitializerRequest struct {
+    Initializer UpdateInitializerData `json:"initializer"`
+}
+
+type UpdateInitializerData struct {
+    Parameters map[string]any `json:"parameters,omitempty"`
+    Index      *int           `json:"index,omitempty"`
+    ClassID    string         `json:"class_id,omitempty"`
+    Reference  string         `json:"reference,omitempty"`
+}
+```
+
+### ReplaceInitializer(id string, req UpdateInitializerRequest) (*Initializer, error)
+
+Replaces an existing initializer using PUT.
+
+**Endpoint:** `PUT /provision/perception/initializers/:id`
+
+### DeleteInitializer(id string) error
+
+Deletes an initializer by ID.
+
+**Endpoint:** `DELETE /provision/perception/initializers/:id`
+
+## Activation Operations
+
+### GetActivation(id string) (*Activation, error)
+
+Retrieves a specific activation by ID.
+
+**Endpoint:** `GET /provision/perception/activations/:id`
+
+**Parameters:**
+- `id` (string): Activation ID (required)
+
+**Returns:**
+- `*Activation`: Activation object with ID, ThoughtPathID, ChainID, and ProvisionState
+- `error`: Error if request fails
+
+**Example:**
+```go
+activation, err := client.Perception.GetActivation("activation-123")
+if err != nil {
+    log.Printf("Error: %v", err)
+    return
+}
+log.Printf("Activation: %s (%s)", activation.ChainID, activation.ProvisionState)
+```
+
+### CreateActivation(pathID string, req CreateActivationRequest) (*Activation, error)
+
+Creates a new activation within a path.
+
+**Endpoint:** `POST /provision/perception/paths/:path_id/activations`
+
+**Parameters:**
+- `pathID` (string): Path ID (required)
+- `req` (CreateActivationRequest): Activation creation request (required)
+
+```go
+type CreateActivationRequest struct {
+    Activation ActivationRequestData `json:"activation"`
+}
+
+type ActivationRequestData struct {
+    ChainID string `json:"chain_id"`
+}
+```
+
+**Returns:**
+- `*Activation`: Created activation object
+- `error`: Error if request fails
+
+**Example:**
+```go
+activation, err := client.Perception.CreateActivation("path-123", perception.CreateActivationRequest{
+    Activation: perception.ActivationRequestData{
+        ChainID: "chain-456",
+    },
+})
+```
+
+### UpdateActivation(id string, req UpdateActivationRequest) (*Activation, error)
+
+Updates an existing activation using PATCH.
+
+**Endpoint:** `PATCH /provision/perception/activations/:id`
+
+```go
+type UpdateActivationRequest struct {
+    Activation UpdateActivationData `json:"activation"`
+}
+
+type UpdateActivationData struct {
+    ChainID string `json:"chain_id,omitempty"`
+}
+```
+
+### ReplaceActivation(id string, req UpdateActivationRequest) (*Activation, error)
+
+Replaces an existing activation using PUT.
+
+**Endpoint:** `PUT /provision/perception/activations/:id`
+
+### DeleteActivation(id string) error
+
+Deletes an activation by ID.
+
+**Endpoint:** `DELETE /provision/perception/activations/:id`
