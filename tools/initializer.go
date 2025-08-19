@@ -9,7 +9,7 @@ import (
 type Initializer struct {
 	ID             string         `json:"id,omitempty"`
 	Reference      string         `json:"reference"`
-	Index          string         `json:"index"`
+	Index          int            `json:"index"`
 	Parameters     map[string]any `json:"parameters"`
 	ThoughtToolID  string         `json:"thought_tool_id,omitempty"`
 	ProvisionState string         `json:"provision_state"`
@@ -28,7 +28,7 @@ type CreateInitializerRequest struct {
 // InitializerRequestData represents the initializer data in the request.
 type InitializerRequestData struct {
 	Reference  string         `json:"reference"`
-	Index      string         `json:"index"`
+	Index      *int           `json:"index,omitempty"`
 	Parameters map[string]any `json:"parameters,omitempty"`
 }
 
@@ -40,7 +40,7 @@ type UpdateInitializerRequest struct {
 // UpdateInitializerData represents the initializer update data.
 type UpdateInitializerData struct {
 	Reference  string         `json:"reference,omitempty"`
-	Index      string         `json:"index,omitempty"`
+	Index      *int           `json:"index,omitempty"`
 	Parameters map[string]any `json:"parameters,omitempty"`
 }
 
@@ -75,9 +75,6 @@ func (s *Service) CreateInitializer(thoughtToolID string, req CreateInitializerR
 	}
 	if req.Initializer.Reference == "" {
 		return nil, errors.New("initializer reference is required")
-	}
-	if req.Initializer.Index == "" {
-		return nil, errors.New("initializer index is required")
 	}
 
 	// Initialize parameters map if nil

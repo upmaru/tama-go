@@ -52,7 +52,7 @@ func ValidateInitializerResponse(t *testing.T, actual, expected tools.Initialize
 	}
 
 	if actual.Index != expected.Index {
-		t.Errorf("Expected initializer index %s, got %s", expected.Index, actual.Index)
+		t.Errorf("Expected initializer index %d, got %d", expected.Index, actual.Index)
 	}
 
 	if actual.ThoughtToolID != expected.ThoughtToolID {
