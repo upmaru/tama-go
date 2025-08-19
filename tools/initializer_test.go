@@ -16,7 +16,7 @@ func TestToolsGetInitializer(t *testing.T) {
 	expectedInitializer := tools.Initializer{
 		ID:             "initializer-123",
 		Reference:      "test-reference",
-		Index:          "0",
+		Index:          0,
 		Parameters:     map[string]any{"temperature": 0.7, "max_tokens": 100},
 		ThoughtToolID:  "tool-456",
 		ProvisionState: "active",
@@ -98,10 +98,11 @@ func TestToolsGetInitializerError(t *testing.T) {
 }
 
 func TestToolsCreateInitializer(t *testing.T) {
+	indexValue := 0
 	request := tools.CreateInitializerRequest{
 		Initializer: tools.InitializerRequestData{
 			Reference:  "test-reference",
-			Index:      "0",
+			Index:      &indexValue,
 			Parameters: map[string]any{"temperature": 0.7, "max_tokens": 100},
 		},
 	}
@@ -109,7 +110,7 @@ func TestToolsCreateInitializer(t *testing.T) {
 	expectedInitializer := tools.Initializer{
 		ID:             "initializer-456",
 		Reference:      "test-reference",
-		Index:          "0",
+		Index:          0,
 		Parameters:     map[string]any{"temperature": 0.7, "max_tokens": 100},
 		ThoughtToolID:  "tool-123",
 		ProvisionState: "pending",
@@ -141,11 +142,21 @@ func TestToolsCreateInitializer(t *testing.T) {
 			)
 		}
 
-		if receivedRequest.Initializer.Index != request.Initializer.Index {
+		if (receivedRequest.Initializer.Index == nil && request.Initializer.Index != nil) ||
+			(receivedRequest.Initializer.Index != nil && request.Initializer.Index == nil) ||
+			(receivedRequest.Initializer.Index != nil && request.Initializer.Index != nil &&
+				*receivedRequest.Initializer.Index != *request.Initializer.Index) {
+			var receivedIndex, expectedIndex interface{}
+			if receivedRequest.Initializer.Index != nil {
+				receivedIndex = *receivedRequest.Initializer.Index
+			}
+			if request.Initializer.Index != nil {
+				expectedIndex = *request.Initializer.Index
+			}
 			t.Errorf(
-				"Expected initializer index %s, got %s",
-				request.Initializer.Index,
-				receivedRequest.Initializer.Index,
+				"Expected initializer index %v, got %v",
+				expectedIndex,
+				receivedIndex,
 			)
 		}
 
@@ -186,11 +197,12 @@ func TestToolsCreateInitializerValidation(t *testing.T) {
 		APIKey:  "test-key",
 	})
 
+	indexValue := 0
 	// Test empty thought tool ID
 	_, err := client.Tools.CreateInitializer("", tools.CreateInitializerRequest{
 		Initializer: tools.InitializerRequestData{
 			Reference: "test-ref",
-			Index:     "0",
+			Index:     &indexValue,
 		},
 	})
 	if err == nil {
@@ -201,30 +213,20 @@ func TestToolsCreateInitializerValidation(t *testing.T) {
 	_, err = client.Tools.CreateInitializer("tool-123", tools.CreateInitializerRequest{
 		Initializer: tools.InitializerRequestData{
 			Reference: "",
-			Index:     "0",
+			Index:     &indexValue,
 		},
 	})
 	if err == nil {
 		t.Error("Expected validation error for empty initializer reference")
 	}
-
-	// Test empty initializer index
-	_, err = client.Tools.CreateInitializer("tool-123", tools.CreateInitializerRequest{
-		Initializer: tools.InitializerRequestData{
-			Reference: "test-ref",
-			Index:     "",
-		},
-	})
-	if err == nil {
-		t.Error("Expected validation error for empty initializer index")
-	}
 }
 
 func TestToolsCreateInitializerWithNilParameters(t *testing.T) {
+	indexValue := 0
 	request := tools.CreateInitializerRequest{
 		Initializer: tools.InitializerRequestData{
 			Reference:  "test-reference",
-			Index:      "0",
+			Index:      &indexValue,
 			Parameters: nil, // Will be initialized to empty map
 		},
 	}
@@ -232,7 +234,7 @@ func TestToolsCreateInitializerWithNilParameters(t *testing.T) {
 	expectedInitializer := tools.Initializer{
 		ID:             "initializer-456",
 		Reference:      "test-reference",
-		Index:          "0",
+		Index:          0,
 		Parameters:     map[string]any{},
 		ThoughtToolID:  "tool-123",
 		ProvisionState: "pending",
@@ -304,10 +306,11 @@ func TestToolsCreateInitializerFieldValidationDelegated(t *testing.T) {
 	}
 
 	client := tama.NewClient(config)
+	invalidIndex := -1 // Use an invalid int value instead of string
 	_, err := client.Tools.CreateInitializer("tool-123", tools.CreateInitializerRequest{
 		Initializer: tools.InitializerRequestData{
 			Reference: "invalid",
-			Index:     "invalid",
+			Index:     &invalidIndex,
 		},
 	})
 
@@ -329,10 +332,11 @@ func TestToolsCreateInitializerFieldValidationDelegated(t *testing.T) {
 }
 
 func TestToolsUpdateInitializer(t *testing.T) {
+	indexValue := 1
 	request := tools.UpdateInitializerRequest{
 		Initializer: tools.UpdateInitializerData{
 			Reference:  "updated-reference",
-			Index:      "1",
+			Index:      &indexValue,
 			Parameters: map[string]any{"temperature": 0.8},
 		},
 	}
@@ -340,7 +344,7 @@ func TestToolsUpdateInitializer(t *testing.T) {
 	expectedInitializer := tools.Initializer{
 		ID:             "initializer-123",
 		Reference:      "updated-reference",
-		Index:          "1",
+		Index:          1,
 		Parameters:     map[string]any{"temperature": 0.8},
 		ThoughtToolID:  "tool-456",
 		ProvisionState: "active",
@@ -381,10 +385,11 @@ func TestToolsUpdateInitializer(t *testing.T) {
 }
 
 func TestToolsReplaceInitializer(t *testing.T) {
+	indexValue := 2
 	request := tools.UpdateInitializerRequest{
 		Initializer: tools.UpdateInitializerData{
 			Reference:  "replaced-reference",
-			Index:      "2",
+			Index:      &indexValue,
 			Parameters: map[string]any{"max_tokens": 200},
 		},
 	}
@@ -392,7 +397,7 @@ func TestToolsReplaceInitializer(t *testing.T) {
 	expectedInitializer := tools.Initializer{
 		ID:             "initializer-123",
 		Reference:      "replaced-reference",
-		Index:          "2",
+		Index:          2,
 		Parameters:     map[string]any{"max_tokens": 200},
 		ThoughtToolID:  "tool-456",
 		ProvisionState: "active",
@@ -545,10 +550,11 @@ func TestToolsCreateInitializerWithFieldErrors(t *testing.T) {
 	}
 
 	client := tama.NewClient(config)
+	invalidIndex := -1
 	request := tools.CreateInitializerRequest{
 		Initializer: tools.InitializerRequestData{
 			Reference:  "invalid-reference",
-			Index:      "invalid-index",
+			Index:      &invalidIndex,
 			Parameters: map[string]any{"invalid": "value"},
 		},
 	}
