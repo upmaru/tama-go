@@ -97,6 +97,65 @@ func TestToolsGetInitializerError(t *testing.T) {
 	}
 }
 
+func validateCreateInitializerRequest(t *testing.T, r *http.Request, expectedRequest tools.CreateInitializerRequest) {
+	if r.Method != http.MethodPost {
+		t.Errorf("Expected POST request, got %s", r.Method)
+	}
+
+	if r.URL.Path != "/provision/tools/tool-123/initializers" {
+		t.Errorf("Expected path /provision/tools/tool-123/initializers, got %s", r.URL.Path)
+	}
+
+	var receivedRequest tools.CreateInitializerRequest
+	if err := json.NewDecoder(r.Body).Decode(&receivedRequest); err != nil {
+		t.Fatalf("Failed to decode request body: %v", err)
+	}
+
+	validateInitializerReference(t, receivedRequest, expectedRequest)
+	validateInitializerIndex(t, receivedRequest, expectedRequest)
+	validateInitializerParameters(t, receivedRequest, expectedRequest)
+}
+
+func validateInitializerReference(t *testing.T, received, expected tools.CreateInitializerRequest) {
+	if received.Initializer.Reference != expected.Initializer.Reference {
+		t.Errorf(
+			"Expected initializer reference %s, got %s",
+			expected.Initializer.Reference,
+			received.Initializer.Reference,
+		)
+	}
+}
+
+func validateInitializerIndex(t *testing.T, received, expected tools.CreateInitializerRequest) {
+	if (received.Initializer.Index == nil && expected.Initializer.Index != nil) ||
+		(received.Initializer.Index != nil && expected.Initializer.Index == nil) ||
+		(received.Initializer.Index != nil && expected.Initializer.Index != nil &&
+			*received.Initializer.Index != *expected.Initializer.Index) {
+		var receivedIndex, expectedIndex interface{}
+		if received.Initializer.Index != nil {
+			receivedIndex = *received.Initializer.Index
+		}
+		if expected.Initializer.Index != nil {
+			expectedIndex = *expected.Initializer.Index
+		}
+		t.Errorf(
+			"Expected initializer index %v, got %v",
+			expectedIndex,
+			receivedIndex,
+		)
+	}
+}
+
+func validateInitializerParameters(t *testing.T, received, expected tools.CreateInitializerRequest) {
+	if len(received.Initializer.Parameters) != len(expected.Initializer.Parameters) {
+		t.Errorf(
+			"Expected %d parameters, got %d",
+			len(expected.Initializer.Parameters),
+			len(received.Initializer.Parameters),
+		)
+	}
+}
+
 func TestToolsCreateInitializer(t *testing.T) {
 	indexValue := 0
 	request := tools.CreateInitializerRequest{
@@ -121,53 +180,7 @@ func TestToolsCreateInitializer(t *testing.T) {
 	}
 
 	server := createMockServer(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			t.Errorf("Expected POST request, got %s", r.Method)
-		}
-
-		if r.URL.Path != "/provision/tools/tool-123/initializers" {
-			t.Errorf("Expected path /provision/tools/tool-123/initializers, got %s", r.URL.Path)
-		}
-
-		var receivedRequest tools.CreateInitializerRequest
-		if err := json.NewDecoder(r.Body).Decode(&receivedRequest); err != nil {
-			t.Fatalf("Failed to decode request body: %v", err)
-		}
-
-		if receivedRequest.Initializer.Reference != request.Initializer.Reference {
-			t.Errorf(
-				"Expected initializer reference %s, got %s",
-				request.Initializer.Reference,
-				receivedRequest.Initializer.Reference,
-			)
-		}
-
-		if (receivedRequest.Initializer.Index == nil && request.Initializer.Index != nil) ||
-			(receivedRequest.Initializer.Index != nil && request.Initializer.Index == nil) ||
-			(receivedRequest.Initializer.Index != nil && request.Initializer.Index != nil &&
-				*receivedRequest.Initializer.Index != *request.Initializer.Index) {
-			var receivedIndex, expectedIndex interface{}
-			if receivedRequest.Initializer.Index != nil {
-				receivedIndex = *receivedRequest.Initializer.Index
-			}
-			if request.Initializer.Index != nil {
-				expectedIndex = *request.Initializer.Index
-			}
-			t.Errorf(
-				"Expected initializer index %v, got %v",
-				expectedIndex,
-				receivedIndex,
-			)
-		}
-
-		// Validate parameters
-		if len(receivedRequest.Initializer.Parameters) != len(request.Initializer.Parameters) {
-			t.Errorf(
-				"Expected %d parameters, got %d",
-				len(request.Initializer.Parameters),
-				len(receivedRequest.Initializer.Parameters),
-			)
-		}
+		validateCreateInitializerRequest(t, r, request)
 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusCreated)
