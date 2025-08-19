@@ -8,7 +8,7 @@ import (
 //
 // The tools service operations are organized in a separate package:
 // - tools/input.go: Input operations (tools inputs with type, class corpus ID, and CRUD operations)
-// - tools/initializer.go: Initializer operations (tools initializers with reference, index, parameters, and CRUD operations)
+// - tools/initializer.go: Initializer operations (tools initializers with reference, index, parameters, and CRUD operations).
 type ToolsService struct {
 	*tools.Service
 }
