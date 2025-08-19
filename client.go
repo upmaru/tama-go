@@ -24,6 +24,7 @@ type Client struct {
 	Perception *PerceptionService
 	Motor      *MotorService
 	Contexts   *ContextsService
+	Tools      *ToolsService
 }
 
 // Config holds configuration options for the client.
@@ -62,6 +63,7 @@ func NewClient(config Config) *Client {
 	client.Perception = newPerceptionService(client)
 	client.Motor = newMotorService(client)
 	client.Contexts = newContextsService(client)
+	client.Tools = newToolsService(client)
 
 	return client
 }
