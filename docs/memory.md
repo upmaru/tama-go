@@ -86,3 +86,102 @@ Deletes a prompt by ID.
 
 **Returns:**
 - `error`: Error if request fails
+
+### Topic Operations
+
+#### GetTopic(id string) (*Topic, error)
+
+Retrieves a specific topic by ID.
+
+**Endpoint:** `GET /provision/memory/topics/:id`
+
+**Parameters:**
+- `id` (string): Topic ID (required)
+
+**Returns:**
+- `*Topic`: The topic resource (ID, ListenerID, ClassID, ProvisionState)
+- `error`: Error if request fails
+
+**Example:**
+```go
+topic, err := client.Memory.GetTopic("topic-123")
+if err != nil {
+    log.Fatal(err)
+}
+fmt.Printf("Topic: %s -> class %s\n", topic.ID, topic.ClassID)
+```
+
+#### CreateTopic(listenerID string, req CreateTopicRequest) (*Topic, error)
+
+Creates a new topic under a listener.
+
+**Endpoint:** `POST /provision/memory/listeners/:listener_id/topics`
+
+**Parameters:**
+- `listenerID` (string): Listener ID (required)
+- `req` (CreateTopicRequest): Topic creation request (required)
+  - `Topic` (TopicRequestData): Topic data (required)
+    - `ClassID` (string): Class ID for the topic (required)
+
+**Returns:**
+- `*Topic`: The created topic resource
+- `error`: Error if request fails
+
+**Example:**
+```go
+req := memory.CreateTopicRequest{
+    Topic: memory.TopicRequestData{
+        ClassID: "class-456",
+    },
+}
+
+topic, err := client.Memory.CreateTopic("listener-123", req)
+if err != nil {
+    log.Fatal(err)
+}
+fmt.Printf("Created topic: %s\n", topic.ID)
+```
+
+#### UpdateTopic(id string, req UpdateTopicRequest) (*Topic, error)
+
+Updates an existing topic using PATCH (partial update).
+
+**Endpoint:** `PATCH /provision/memory/topics/:id`
+
+**Parameters:**
+- `id` (string): Topic ID (required)
+- `req` (UpdateTopicRequest): Topic update request (required)
+  - `Topic` (UpdateTopicData): Topic update data (required)
+    - `ClassID` (string): New class ID (required)
+
+**Returns:**
+- `*Topic`: The updated topic resource
+- `error`: Error if request fails
+
+#### ReplaceTopic(id string, req UpdateTopicRequest) (*Topic, error)
+
+Replaces an existing topic using PUT (full replacement).
+
+**Endpoint:** `PUT /provision/memory/topics/:id`
+
+**Parameters:**
+- `id` (string): Topic ID (required)
+- `req` (UpdateTopicRequest): Topic replacement request (required)
+  - `Topic` (UpdateTopicData): Topic replacement data (required)
+    - `ClassID` (string): Class ID (required)
+
+**Returns:**
+- `*Topic`: The replaced topic resource
+- `error`: Error if request fails
+
+#### DeleteTopic(id string) error
+
+Deletes a topic by ID.
+
+**Endpoint:** `DELETE /provision/memory/topics/:id`
+
+**Parameters:**
+- `id` (string): Topic ID (required)
+
+**Returns:**
+- `error`: Error if request fails

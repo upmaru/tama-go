@@ -8,6 +8,7 @@ Access via `client.Neural.*`
 - [Processor Operations](#processor-operations)
 - [Node Operations](#node-operations)
 - [Bridge Operations](#bridge-operations)
+- [Listener Operations](#listener-operations)
 - [Class Operations](#class-operations)
 - [Operation Operations](#operation-operations)
 - [Corpus Operations](#corpus-operations)
@@ -399,6 +400,100 @@ Deletes a bridge by ID.
 
 **Parameters:**
 - `id` (string): Bridge ID (required)
+
+**Returns:**
+- `error`: Error if request fails
+
+## Listener Operations
+
+#### GetListener(id string) (*Listener, error)
+
+Retrieves a specific listener by ID.
+
+**Endpoint:** `GET /provision/neural/listeners/:id`
+
+**Parameters:**
+- `id` (string): Listener ID (required)
+
+**Returns:**
+- `*Listener`: Listener object with ID, SpaceID, Endpoint, and ProvisionState
+- `error`: Error if request fails
+
+**Example:**
+```go
+listener, err := client.Neural.GetListener("listener-123")
+if err != nil {
+    log.Fatal(err)
+}
+fmt.Printf("Listener: %+v\n", listener)
+```
+
+#### CreateListener(spaceID string, req CreateListenerRequest) (*Listener, error)
+
+Creates a new listener within a space.
+
+**Endpoint:** `POST /provision/neural/spaces/:space_id/listeners`
+
+**Parameters:**
+- `spaceID` (string): Space ID (required)
+- `req` (CreateListenerRequest): Listener creation request
+  - `Listener` (ListenerRequestData): Listener data (required)
+    - `Endpoint` (string): Destination endpoint (required)
+
+**Returns:**
+- `*Listener`: Created listener object with ID, SpaceID, Endpoint, and ProvisionState
+- `error`: Error if request fails
+
+**Example:**
+```go
+req := neural.CreateListenerRequest{
+    Listener: neural.ListenerRequestData{
+        Endpoint: "https://example.com/webhook",
+    },
+}
+listener, err := client.Neural.CreateListener("space-123", req)
+```
+
+#### UpdateListener(id string, req UpdateListenerRequest) (*Listener, error)
+
+Updates an existing listener using PATCH (partial update).
+
+**Endpoint:** `PATCH /provision/neural/listeners/:id`
+
+**Parameters:**
+- `id` (string): Listener ID (required)
+- `req` (UpdateListenerRequest): Listener update request
+  - `Listener` (UpdateListenerData): Listener update data (required)
+    - `Endpoint` (string): New endpoint (required)
+
+**Returns:**
+- `*Listener`: Updated listener object
+- `error`: Error if request fails
+
+#### ReplaceListener(id string, req UpdateListenerRequest) (*Listener, error)
+
+Replaces an existing listener using PUT (full replacement).
+
+**Endpoint:** `PUT /provision/neural/listeners/:id`
+
+**Parameters:**
+- `id` (string): Listener ID (required)
+- `req` (UpdateListenerRequest): Listener replacement request
+  - `Listener` (UpdateListenerData): Listener replacement data (required)
+    - `Endpoint` (string): Endpoint (required)
+
+**Returns:**
+- `*Listener`: Replaced listener object
+- `error`: Error if request fails
+
+#### DeleteListener(id string) error
+
+Deletes a listener by ID.
+
+**Endpoint:** `DELETE /provision/neural/listeners/:id`
+
+**Parameters:**
+- `id` (string): Listener ID (required)
 
 **Returns:**
 - `error`: Error if request fails
