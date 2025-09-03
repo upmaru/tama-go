@@ -114,7 +114,11 @@ func TestMemoryCreateTopic(t *testing.T) {
 	})
 	defer server.Close()
 
-	client := tama.NewClient(tama.Config{BaseURL: server.URL, APIKey: "test-key", Timeout: 10 * time.Second})
+	client := tama.NewClient(tama.Config{
+		BaseURL: server.URL,
+		APIKey:  "test-key",
+		Timeout: 10 * time.Second,
+	})
 
 	createReq := memory.CreateTopicRequest{Topic: memory.TopicRequestData{ClassID: "class-456"}}
 	topic, err := client.Memory.CreateTopic("listener-123", createReq)
@@ -130,10 +134,21 @@ func TestMemoryCreateTopic(t *testing.T) {
 }
 
 func TestMemoryCreateTopicValidation(t *testing.T) {
-	client := tama.NewClient(tama.Config{BaseURL: "https://api.example.com", APIKey: "test-key", Timeout: 10 * time.Second})
+	client := tama.NewClient(tama.Config{
+		BaseURL: "https://api.example.com",
+		APIKey:  "test-key",
+		Timeout: 10 * time.Second,
+	})
 
 	// Empty listener ID
-	_, err := client.Memory.CreateTopic("", memory.CreateTopicRequest{Topic: memory.TopicRequestData{ClassID: "class-123"}})
+	_, err := client.Memory.CreateTopic(
+		"",
+		memory.CreateTopicRequest{
+			Topic: memory.TopicRequestData{
+				ClassID: "class-123",
+			},
+		},
+	)
 	if err == nil {
 		t.Error("Expected validation error for empty listener ID")
 	}
@@ -185,7 +200,11 @@ func TestMemoryUpdateTopic(t *testing.T) {
 }
 
 func TestMemoryUpdateTopicValidation(t *testing.T) {
-	client := tama.NewClient(tama.Config{BaseURL: "https://api.example.com", APIKey: "test-key", Timeout: 10 * time.Second})
+	client := tama.NewClient(tama.Config{
+		BaseURL: "https://api.example.com",
+		APIKey:  "test-key",
+		Timeout: 10 * time.Second,
+	})
 
 	// Empty topic ID
 	_, err := client.Memory.UpdateTopic("", memory.UpdateTopicRequest{Topic: memory.UpdateTopicData{ClassID: "x"}})
@@ -240,7 +259,11 @@ func TestMemoryReplaceTopic(t *testing.T) {
 }
 
 func TestMemoryReplaceTopicValidation(t *testing.T) {
-	client := tama.NewClient(tama.Config{BaseURL: "https://api.example.com", APIKey: "test-key", Timeout: 10 * time.Second})
+	client := tama.NewClient(tama.Config{
+		BaseURL: "https://api.example.com",
+		APIKey:  "test-key",
+		Timeout: 10 * time.Second,
+	})
 
 	// Empty topic ID
 	_, err := client.Memory.ReplaceTopic("", memory.UpdateTopicRequest{Topic: memory.UpdateTopicData{ClassID: "x"}})
@@ -274,9 +297,12 @@ func TestMemoryDeleteTopic(t *testing.T) {
 }
 
 func TestMemoryDeleteTopicValidation(t *testing.T) {
-	client := tama.NewClient(tama.Config{BaseURL: "https://api.example.com", APIKey: "test-key", Timeout: 10 * time.Second})
+	client := tama.NewClient(tama.Config{
+		BaseURL: "https://api.example.com",
+		APIKey:  "test-key",
+		Timeout: 10 * time.Second,
+	})
 	if err := client.Memory.DeleteTopic(""); err == nil {
 		t.Error("Expected validation error for empty topic ID")
 	}
 }
-

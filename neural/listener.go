@@ -1,3 +1,4 @@
+//nolint:dupl // Similar CRUD shape as bridge; intentional duplication for consistent service pattern
 package neural
 
 import (
@@ -163,4 +164,3 @@ func (s *Service) DeleteListener(id string) error {
 
 	return nil
 }
-

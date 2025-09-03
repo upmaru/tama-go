@@ -163,4 +163,3 @@ func (s *Service) DeleteTopic(id string) error {
 
 	return nil
 }
-

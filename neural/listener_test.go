@@ -54,7 +54,6 @@ func TestNeuralGetListener(t *testing.T) {
 	}
 }
 
-
 func TestNeuralGetListenerError(t *testing.T) {
 	server := CreateMockServer(func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
@@ -120,7 +119,11 @@ func TestNeuralCreateListener(t *testing.T) {
 
 	client := tama.NewClient(tama.Config{BaseURL: server.URL, APIKey: "test-key", Timeout: 10 * time.Second})
 
-	createReq := neural.CreateListenerRequest{Listener: neural.ListenerRequestData{Endpoint: "https://example.com/hook"}}
+	createReq := neural.CreateListenerRequest{
+		Listener: neural.ListenerRequestData{
+			Endpoint: "https://example.com/hook",
+		},
+	}
 	listener, err := client.Neural.CreateListener("space-123", createReq)
 	if err != nil {
 		t.Fatalf("Expected no error, got %v", err)
@@ -134,16 +137,30 @@ func TestNeuralCreateListener(t *testing.T) {
 }
 
 func TestNeuralCreateListenerValidation(t *testing.T) {
-	client := tama.NewClient(tama.Config{BaseURL: "https://api.example.com", APIKey: "test-key", Timeout: 10 * time.Second})
+	client := tama.NewClient(tama.Config{
+		BaseURL: "https://api.example.com",
+		APIKey:  "test-key",
+		Timeout: 10 * time.Second,
+	})
 
 	// Empty space ID
-	_, err := client.Neural.CreateListener("", neural.CreateListenerRequest{Listener: neural.ListenerRequestData{Endpoint: "https://example.com/hook"}})
+	_, err := client.Neural.CreateListener(
+		"",
+		neural.CreateListenerRequest{
+			Listener: neural.ListenerRequestData{
+				Endpoint: "https://example.com/hook",
+			},
+		},
+	)
 	if err == nil {
 		t.Error("Expected validation error for empty space ID")
 	}
 
 	// Empty endpoint
-	_, err = client.Neural.CreateListener("space-123", neural.CreateListenerRequest{Listener: neural.ListenerRequestData{}})
+	_, err = client.Neural.CreateListener(
+		"space-123",
+		neural.CreateListenerRequest{Listener: neural.ListenerRequestData{}},
+	)
 	if err == nil {
 		t.Error("Expected validation error for empty endpoint")
 	}
@@ -190,15 +207,25 @@ func TestNeuralUpdateListener(t *testing.T) {
 }
 
 func TestNeuralUpdateListenerValidation(t *testing.T) {
-	client := tama.NewClient(tama.Config{BaseURL: "https://api.example.com", APIKey: "test-key", Timeout: 10 * time.Second})
+	client := tama.NewClient(tama.Config{
+		BaseURL: "https://api.example.com",
+		APIKey:  "test-key",
+		Timeout: 10 * time.Second,
+	})
 
 	// Empty listener ID
-	_, err := client.Neural.UpdateListener("", neural.UpdateListenerRequest{Listener: neural.UpdateListenerData{Endpoint: "x"}})
+	_, err := client.Neural.UpdateListener(
+		"",
+		neural.UpdateListenerRequest{Listener: neural.UpdateListenerData{Endpoint: "x"}},
+	)
 	if err == nil {
 		t.Error("Expected validation error for empty listener ID")
 	}
 	// Empty endpoint
-	_, err = client.Neural.UpdateListener("listener-123", neural.UpdateListenerRequest{Listener: neural.UpdateListenerData{}})
+	_, err = client.Neural.UpdateListener(
+		"listener-123",
+		neural.UpdateListenerRequest{Listener: neural.UpdateListenerData{}},
+	)
 	if err == nil {
 		t.Error("Expected validation error for empty endpoint")
 	}
@@ -234,7 +261,9 @@ func TestNeuralReplaceListener(t *testing.T) {
 
 	client := tama.NewClient(tama.Config{BaseURL: server.URL, APIKey: "test-key", Timeout: 10 * time.Second})
 
-	replaceReq := neural.UpdateListenerRequest{Listener: neural.UpdateListenerData{Endpoint: "https://example.com/replace"}}
+	replaceReq := neural.UpdateListenerRequest{
+		Listener: neural.UpdateListenerData{Endpoint: "https://example.com/replace"},
+	}
 	listener, err := client.Neural.ReplaceListener("listener-123", replaceReq)
 	if err != nil {
 		t.Fatalf("Expected no error, got %v", err)
@@ -245,15 +274,25 @@ func TestNeuralReplaceListener(t *testing.T) {
 }
 
 func TestNeuralReplaceListenerValidation(t *testing.T) {
-	client := tama.NewClient(tama.Config{BaseURL: "https://api.example.com", APIKey: "test-key", Timeout: 10 * time.Second})
+	client := tama.NewClient(tama.Config{
+		BaseURL: "https://api.example.com",
+		APIKey:  "test-key",
+		Timeout: 10 * time.Second,
+	})
 
 	// Empty listener ID
-	_, err := client.Neural.ReplaceListener("", neural.UpdateListenerRequest{Listener: neural.UpdateListenerData{Endpoint: "x"}})
+	_, err := client.Neural.ReplaceListener(
+		"",
+		neural.UpdateListenerRequest{Listener: neural.UpdateListenerData{Endpoint: "x"}},
+	)
 	if err == nil {
 		t.Error("Expected validation error for empty listener ID")
 	}
 	// Empty endpoint
-	_, err = client.Neural.ReplaceListener("listener-123", neural.UpdateListenerRequest{Listener: neural.UpdateListenerData{}})
+	_, err = client.Neural.ReplaceListener(
+		"listener-123",
+		neural.UpdateListenerRequest{Listener: neural.UpdateListenerData{}},
+	)
 	if err == nil {
 		t.Error("Expected validation error for empty endpoint")
 	}
@@ -279,9 +318,12 @@ func TestNeuralDeleteListener(t *testing.T) {
 }
 
 func TestNeuralDeleteListenerValidation(t *testing.T) {
-	client := tama.NewClient(tama.Config{BaseURL: "https://api.example.com", APIKey: "test-key", Timeout: 10 * time.Second})
+	client := tama.NewClient(tama.Config{
+		BaseURL: "https://api.example.com",
+		APIKey:  "test-key",
+		Timeout: 10 * time.Second,
+	})
 	if err := client.Neural.DeleteListener(""); err == nil {
 		t.Error("Expected validation error for empty listener ID")
 	}
 }
-
