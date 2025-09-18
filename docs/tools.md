@@ -4,6 +4,7 @@ The **Tools** service provides three main categories of operations:
 - **Input** – Manage tool inputs (type, class corpus ID, CRUD).
 - **Initializer** – Manage tool initializers (reference, index, parameters, CRUD).
 - **Output** – Manage tool outputs (class corpus ID, CRUD).
+- **Option** – Manage tool options (maps outputs to action modifiers, CRUD).
 
 These are exposed via the `Client.Tools` field and can be accessed as follows:
 
@@ -34,6 +35,7 @@ initializer, err := tools.Initializer.Create(ctx, newInitializer)
   - [Update](#update-initializer)
   - [Delete](#delete-initializer)
 - [Output Operations](#output-operations)
+- [Option Operations](#option-operations)
 
 ## Overview
 
@@ -305,5 +307,169 @@ Wraps an Output in API responses:
 ```go
 type OutputResponse struct {
     Data Output `json:"data"`
+}
+```
+
+## Option Operations
+
+The Option resource binds a Thought Tool Output to a Motor Action Modifier. This allows you to specify which action should be taken when a particular tool output is selected.
+
+### GetOption(id string) (*Option, error)
+
+Retrieves a specific tools option by ID.
+
+**Endpoint:** `GET /provision/tools/options/:id`
+
+**Parameters:**
+- `id` (string): Option ID (required)
+
+**Returns:**
+- `*Option`: Option object with ID, ThoughtToolOutputID, ActionModifierID, and ProvisionState
+- `error`: Error if request fails
+
+**Example:**
+```go
+option, err := client.Tools.GetOption("option-123")
+```
+
+### CreateOption(outputID string, req CreateOptionRequest) (*Option, error)
+
+Creates a new option under a specific thought tool output.
+
+**Endpoint:** `POST /provision/tools/outputs/:output_id/options`
+
+**Parameters:**
+- `outputID` (string): Parent thought tool output ID (required)
+- `req` (CreateOptionRequest): Option creation request (required)
+  - `Option` (OptionRequestData): Option data (required)
+    - `ActionModifierID` (string): Action modifier ID (required)
+
+**Returns:**
+- `*Option`: Created option object
+- `error`: Error if request fails
+
+**Request Structure:**
+```go
+type CreateOptionRequest struct {
+    Option OptionRequestData `json:"option"`
+}
+
+type OptionRequestData struct {
+    ActionModifierID string `json:"action_modifier_id"`
+}
+```
+
+**Example:**
+```go
+req := tools.CreateOptionRequest{
+    Option: tools.OptionRequestData{
+        ActionModifierID: "modifier-789",
+    },
+}
+created, err := client.Tools.CreateOption("output-123", req)
+```
+
+### UpdateOption(id string, req UpdateOptionRequest) (*Option, error)
+
+Updates an existing option using PATCH (partial update).
+
+**Endpoint:** `PATCH /provision/tools/options/:id`
+
+**Parameters:**
+- `id` (string): Option ID (required)
+- `req` (UpdateOptionRequest): Option update request (required)
+  - `Option` (UpdateOptionData): Updatable fields
+    - `ActionModifierID` (string, optional)
+
+**Returns:**
+- `*Option`: Updated option object
+- `error`: Error if request fails
+
+**Request Structure:**
+```go
+type UpdateOptionRequest struct {
+    Option UpdateOptionData `json:"option"`
+}
+
+type UpdateOptionData struct {
+    ActionModifierID string `json:"action_modifier_id,omitempty"`
+}
+```
+
+**Example:**
+```go
+update := tools.UpdateOptionRequest{
+    Option: tools.UpdateOptionData{
+        ActionModifierID: "modifier-updated",
+    },
+}
+updated, err := client.Tools.UpdateOption("option-123", update)
+```
+
+### ReplaceOption(id string, req UpdateOptionRequest) (*Option, error)
+
+Replaces an existing option using PUT (full replacement semantics on the server side).
+
+**Endpoint:** `PUT /provision/tools/options/:id`
+
+**Parameters:**
+- `id` (string): Option ID (required)
+- `req` (UpdateOptionRequest): Replacement request (required)
+
+**Returns:**
+- `*Option`: Replaced option object
+- `error`: Error if request fails
+
+**Example:**
+```go
+replace := tools.UpdateOptionRequest{
+    Option: tools.UpdateOptionData{
+        ActionModifierID: "modifier-replaced",
+    },
+}
+replaced, err := client.Tools.ReplaceOption("option-123", replace)
+```
+
+### DeleteOption(id string) error
+
+Deletes an option by ID.
+
+**Endpoint:** `DELETE /provision/tools/options/:id`
+
+**Parameters:**
+- `id` (string): Option ID (required)
+
+**Returns:**
+- `error`: Error if request fails
+
+**Example:**
+```go
+if err := client.Tools.DeleteOption("option-123"); err != nil {
+    log.Fatal(err)
+}
+```
+
+## Option Structure
+
+### Option
+
+Represents a tool option and its binding to an action modifier:
+
+```go
+type Option struct {
+    ID                  string `json:"id,omitempty"`
+    ThoughtToolOutputID string `json:"thought_tool_output_id,omitempty"`
+    ActionModifierID    string `json:"action_modifier_id"`
+    ProvisionState      string `json:"provision_state"`
+}
+```
+
+### OptionResponse
+
+Wraps an Option in API responses:
+
+```go
+type OptionResponse struct {
+    Data Option `json:"data"`
 }
 ```

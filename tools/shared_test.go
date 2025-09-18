@@ -57,6 +57,28 @@ func ValidateInputResponse(t *testing.T, actual, expected tools.Input) {
 	}
 }
 
+// ValidateOptionResponse validates that actual option matches expected option.
+func ValidateOptionResponse(t *testing.T, actual, expected tools.Option) {
+	if actual.ID != expected.ID {
+		t.Errorf("Expected option ID %s, got %s", expected.ID, actual.ID)
+	}
+
+	if actual.ThoughtToolOutputID != expected.ThoughtToolOutputID {
+		t.Errorf(
+			"Expected option thought_tool_output_id %s, got %s",
+			expected.ThoughtToolOutputID, actual.ThoughtToolOutputID,
+		)
+	}
+
+	if actual.ActionModifierID != expected.ActionModifierID {
+		t.Errorf("Expected option action_modifier_id %s, got %s", expected.ActionModifierID, actual.ActionModifierID)
+	}
+
+	if actual.ProvisionState != expected.ProvisionState {
+		t.Errorf("Expected option provision_state %s, got %s", expected.ProvisionState, actual.ProvisionState)
+	}
+}
+
 // ValidateInitializerResponse validates that actual initializer matches expected initializer.
 func ValidateInitializerResponse(t *testing.T, actual, expected tools.Initializer) {
 	if actual.ID != expected.ID {
