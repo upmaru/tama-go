@@ -14,6 +14,22 @@ func createMockServer(handler http.HandlerFunc) *httptest.Server {
 	return httptest.NewServer(handler)
 }
 
+// ValidateOutputResponse validates that actual output matches expected output.
+func ValidateOutputResponse(t *testing.T, actual, expected tools.Output) {
+	if actual.ID != expected.ID {
+		t.Errorf("Expected output ID %s, got %s", expected.ID, actual.ID)
+	}
+	if actual.ThoughtToolID != expected.ThoughtToolID {
+		t.Errorf("Expected output thought_tool_id %s, got %s", expected.ThoughtToolID, actual.ThoughtToolID)
+	}
+	if actual.ClassCorpusID != expected.ClassCorpusID {
+		t.Errorf("Expected output class_corpus_id %s, got %s", expected.ClassCorpusID, actual.ClassCorpusID)
+	}
+	if actual.ProvisionState != expected.ProvisionState {
+		t.Errorf("Expected output provision_state %s, got %s", expected.ProvisionState, actual.ProvisionState)
+	}
+}
+
 // ValidateInputResponse validates that actual input matches expected input.
 func ValidateInputResponse(t *testing.T, actual, expected tools.Input) {
 	if actual.ID != expected.ID {
@@ -38,6 +54,28 @@ func ValidateInputResponse(t *testing.T, actual, expected tools.Input) {
 			expected.ProvisionState,
 			actual.ProvisionState,
 		)
+	}
+}
+
+// ValidateOptionResponse validates that actual option matches expected option.
+func ValidateOptionResponse(t *testing.T, actual, expected tools.Option) {
+	if actual.ID != expected.ID {
+		t.Errorf("Expected option ID %s, got %s", expected.ID, actual.ID)
+	}
+
+	if actual.ThoughtToolOutputID != expected.ThoughtToolOutputID {
+		t.Errorf(
+			"Expected option thought_tool_output_id %s, got %s",
+			expected.ThoughtToolOutputID, actual.ThoughtToolOutputID,
+		)
+	}
+
+	if actual.ActionModifierID != expected.ActionModifierID {
+		t.Errorf("Expected option action_modifier_id %s, got %s", expected.ActionModifierID, actual.ActionModifierID)
+	}
+
+	if actual.ProvisionState != expected.ProvisionState {
+		t.Errorf("Expected option provision_state %s, got %s", expected.ProvisionState, actual.ProvisionState)
 	}
 }
 
