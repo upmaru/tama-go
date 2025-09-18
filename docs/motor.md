@@ -6,6 +6,8 @@ Access via `client.Motor.*`
 
 - [Action Operations](#action-operations)
 - [Action Structure](#action-structure)
+- [Modifier Operations](#modifier-operations)
+- [Modifier Structure](#modifier-structure)
 
 ## Action Operations
 
@@ -139,3 +141,177 @@ The request payloads for motor actions are not required for the current client m
 
 **Fields:**
 - `Data` (Action): The action data returned by the API
+
+## Modifier Operations
+
+### GetModifier(id string) (*Modifier, error)
+
+Retrieves a specific motor modifier by ID.
+
+**Endpoint:** `GET /provision/motor/modifiers/:id`
+
+**Parameters:**
+- `id` (string): Modifier ID (required)
+
+**Returns:**
+- `*Modifier`: Modifier object with ID, Name, ActionID, Schema, and ProvisionState
+- `error`: Error if request fails
+
+**Example:**
+```go
+modifier, err := client.Motor.GetModifier("modifier-123")
+if err != nil {
+    log.Fatal(err)
+}
+fmt.Printf("Modifier: %+v\n", modifier)
+```
+
+### CreateModifier(actionID string, req CreateModifierRequest) (*Modifier, error)
+
+Creates a new modifier under a specific action.
+
+**Endpoint:** `POST /provision/motor/actions/:action_id/modifiers`
+
+**Parameters:**
+- `actionID` (string): Parent action ID (required)
+- `req` (CreateModifierRequest): Modifier creation request (required)
+  - `Modifier` (ModifierRequestData): Modifier data (required)
+    - `Name` (string): Modifier name (required)
+    - `Schema` (map[string]any): Arbitrary configuration (required)
+
+**Returns:**
+- `*Modifier`: Created modifier object
+- `error`: Error if request fails
+
+**Request Structure:**
+```go
+type CreateModifierRequest struct {
+    Modifier ModifierRequestData `json:"modifier"`
+}
+
+type ModifierRequestData struct {
+    Name   string         `json:"name"`
+    Schema map[string]any `json:"schema"`
+}
+```
+
+**Example:**
+```go
+req := motor.CreateModifierRequest{
+    Modifier: motor.ModifierRequestData{
+        Name:   "sanitize",
+        Schema: map[string]any{"rule": "trim"},
+    },
+}
+created, err := client.Motor.CreateModifier("action-456", req)
+```
+
+### UpdateModifier(id string, req UpdateModifierRequest) (*Modifier, error)
+
+Updates an existing modifier using PATCH (partial update).
+
+**Endpoint:** `PATCH /provision/motor/modifiers/:id`
+
+**Parameters:**
+- `id` (string): Modifier ID (required)
+- `req` (UpdateModifierRequest): Modifier update request (required)
+  - `Modifier` (UpdateModifierData): Updatable fields
+    - `Name` (string, optional)
+    - `Schema` (map[string]any, optional)
+
+**Returns:**
+- `*Modifier`: Updated modifier object
+- `error`: Error if request fails
+
+**Request Structure:**
+```go
+type UpdateModifierRequest struct {
+    Modifier UpdateModifierData `json:"modifier"`
+}
+
+type UpdateModifierData struct {
+    Name   string         `json:"name,omitempty"`
+    Schema map[string]any `json:"schema,omitempty"`
+}
+```
+
+**Example:**
+```go
+update := motor.UpdateModifierRequest{
+    Modifier: motor.UpdateModifierData{
+        Name:   "normalize",
+        Schema: map[string]any{"rule": "lowercase"},
+    },
+}
+updated, err := client.Motor.UpdateModifier("modifier-123", update)
+```
+
+### ReplaceModifier(id string, req UpdateModifierRequest) (*Modifier, error)
+
+Replaces an existing modifier using PUT (full replacement semantics on the server side).
+
+**Endpoint:** `PUT /provision/motor/modifiers/:id`
+
+**Parameters:**
+- `id` (string): Modifier ID (required)
+- `req` (UpdateModifierRequest): Replacement request (required)
+
+**Returns:**
+- `*Modifier`: Replaced modifier object
+- `error`: Error if request fails
+
+**Example:**
+```go
+replace := motor.UpdateModifierRequest{
+    Modifier: motor.UpdateModifierData{
+        Name:   "sanitize",
+        Schema: map[string]any{"rule": "strip"},
+    },
+}
+replaced, err := client.Motor.ReplaceModifier("modifier-123", replace)
+```
+
+### DeleteModifier(id string) error
+
+Deletes a modifier by ID.
+
+**Endpoint:** `DELETE /provision/motor/modifiers/:id`
+
+**Parameters:**
+- `id` (string): Modifier ID (required)
+
+**Returns:**
+- `error`: Error if request fails
+
+**Example:**
+```go
+if err := client.Motor.DeleteModifier("modifier-123"); err != nil {
+    log.Fatal(err)
+}
+```
+
+## Modifier Structure
+
+### Modifier
+
+The `Modifier` struct represents a motor modifier with the following fields:
+
+```go
+type Modifier struct {
+    ID             string         `json:"id,omitempty"`
+    Name           string         `json:"name"`
+    ActionID       string         `json:"action_id,omitempty"`
+    Schema         map[string]any `json:"schema"`
+    ProvisionState string         `json:"provision_state,omitempty"`
+}
+```
+
+### ModifierResponse
+
+Wraps a Modifier in API responses:
+
+```go
+type ModifierResponse struct {
+    Data Modifier `json:"data"`
+}
+```
