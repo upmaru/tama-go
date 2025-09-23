@@ -37,8 +37,10 @@ type CreateIdentityRequest struct {
 
 // IdentityRequestData represents the identity data in the request.
 type IdentityRequestData struct {
-	APIKey     string     `json:"api_key"`
-	Validation Validation `json:"validation"`
+	APIKey       string     `json:"api_key,omitempty"`
+	ClientID     string     `json:"client_id,omitempty"`
+	ClientSecret string     `json:"client_secret,omitempty"`
+	Validation   Validation `json:"validation"`
 }
 
 // UpdateIdentityRequest represents the request payload for updating an identity.
@@ -48,8 +50,10 @@ type UpdateIdentityRequest struct {
 
 // UpdateIdentityData represents the identity update data.
 type UpdateIdentityData struct {
-	APIKey     string      `json:"api_key,omitempty"`
-	Validation *Validation `json:"validation,omitempty"`
+	APIKey       string      `json:"api_key,omitempty"`
+	ClientID     string      `json:"client_id,omitempty"`
+	ClientSecret string      `json:"client_secret,omitempty"`
+	Validation   *Validation `json:"validation,omitempty"`
 }
 
 // Identity operations
