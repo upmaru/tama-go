@@ -191,12 +191,50 @@ func TestSensoryCreateIdentityValidation(t *testing.T) {
 		t.Errorf("Expected 'identifier is required' error, got: %v", err)
 	}
 
-	// Test empty API key
+	// Test missing authentication (no API key or client credentials)
 	_, err = client.Sensory.CreateIdentity("spec-123", "identifier", sensory.CreateIdentityRequest{
 		Identity: sensory.IdentityRequestData{},
 	})
-	if err == nil || err.Error() != "API key is required" {
-		t.Errorf("Expected 'API key is required' error, got: %v", err)
+	if err == nil || err.Error() != "either API key or client credentials (client_id and client_secret) are required" {
+		t.Errorf(
+			"Expected 'either API key or client credentials (client_id and client_secret) are required' error, got: %v",
+			err)
+	}
+
+	// Test providing both API key and client credentials (should fail)
+	_, err = client.Sensory.CreateIdentity("spec-123", "identifier", sensory.CreateIdentityRequest{
+		Identity: sensory.IdentityRequestData{
+			APIKey:       "test-api-key",
+			ClientID:     "test-client-id",
+			ClientSecret: "test-client-secret",
+		},
+	})
+	if err == nil || err.Error() != "provide either API key or client credentials, not both" {
+		t.Errorf("Expected 'provide either API key or client credentials, not both' error, got: %v", err)
+	}
+
+	// Test incomplete client credentials (only client_id)
+	_, err = client.Sensory.CreateIdentity("spec-123", "identifier", sensory.CreateIdentityRequest{
+		Identity: sensory.IdentityRequestData{
+			ClientID: "test-client-id",
+		},
+	})
+	if err == nil || err.Error() != "either API key or client credentials (client_id and client_secret) are required" {
+		t.Errorf(
+			"Expected 'either API key or client credentials (client_id and client_secret) are required' error, got: %v",
+			err)
+	}
+
+	// Test incomplete client credentials (only client_secret)
+	_, err = client.Sensory.CreateIdentity("spec-123", "identifier", sensory.CreateIdentityRequest{
+		Identity: sensory.IdentityRequestData{
+			ClientSecret: "test-client-secret",
+		},
+	})
+	if err == nil || err.Error() != "either API key or client credentials (client_id and client_secret) are required" {
+		t.Errorf(
+			"Expected 'either API key or client credentials (client_id and client_secret) are required' error, got: %v",
+			err)
 	}
 
 	// Test empty validation path
@@ -459,5 +497,99 @@ func TestSensoryDeleteIdentity_EmptyIDValidation(t *testing.T) {
 	err := client.Sensory.DeleteIdentity("")
 	if err == nil || err.Error() != "identity ID is required" {
 		t.Errorf("Expected 'identity ID is required' error, got: %v", err)
+	}
+}
+
+func TestSensoryCreateIdentityWithClientCredentials(t *testing.T) {
+	requestData := sensory.CreateIdentityRequest{
+		Identity: sensory.IdentityRequestData{
+			ClientID:     "test-client-id",
+			ClientSecret: "test-client-secret",
+			Validation: sensory.Validation{
+				Path:   "/health",
+				Method: "GET",
+				Codes:  []int{200},
+			},
+		},
+	}
+
+	expectedIdentity := sensory.Identity{
+		ID:              "identity-789",
+		SpecificationID: "spec-123",
+		ProvisionState:  "pending",
+		CurrentState:    "initializing",
+		Identifier:      "test-identifier",
+		Validation: sensory.Validation{
+			Path:   "/health",
+			Method: "GET",
+			Codes:  []int{200},
+		},
+	}
+
+	expectedResponse := sensory.IdentityResponse{
+		Data: expectedIdentity,
+	}
+
+	server := CreateMockServer(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			t.Errorf("Expected POST request, got %s", r.Method)
+		}
+
+		expectedPath := "/provision/sensory/specifications/spec-123/identifiers/test-identifier/identities"
+		if r.URL.Path != expectedPath {
+			t.Errorf("Expected path %s, got %s", expectedPath, r.URL.Path)
+		}
+
+		var receivedRequest sensory.CreateIdentityRequest
+		if err := json.NewDecoder(r.Body).Decode(&receivedRequest); err != nil {
+			t.Fatalf("Failed to decode request body: %v", err)
+		}
+
+		if receivedRequest.Identity.ClientID != requestData.Identity.ClientID {
+			t.Errorf("Expected client ID %s, got %s", requestData.Identity.ClientID, receivedRequest.Identity.ClientID)
+		}
+
+		if receivedRequest.Identity.ClientSecret != requestData.Identity.ClientSecret {
+			t.Errorf(
+				"Expected client secret %s, got %s",
+				requestData.Identity.ClientSecret,
+				receivedRequest.Identity.ClientSecret)
+		}
+
+		if receivedRequest.Identity.APIKey != "" {
+			t.Errorf("Expected empty API key, got %s", receivedRequest.Identity.APIKey)
+		}
+
+		if receivedRequest.Identity.Validation.Path != requestData.Identity.Validation.Path {
+			t.Errorf("Expected validation path %s, got %s",
+				requestData.Identity.Validation.Path, receivedRequest.Identity.Validation.Path)
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusCreated)
+		json.NewEncoder(w).Encode(expectedResponse)
+	})
+	defer server.Close()
+
+	client := tama.NewClient(tama.Config{
+		BaseURL: server.URL,
+		APIKey:  "test-key",
+	})
+
+	identity, err := client.Sensory.CreateIdentity("spec-123", "test-identifier", requestData)
+	if err != nil {
+		t.Fatalf("Unexpected error: %v", err)
+	}
+
+	if identity.ID != expectedIdentity.ID {
+		t.Errorf("Expected identity ID %s, got %s", expectedIdentity.ID, identity.ID)
+	}
+
+	if identity.SpecificationID != expectedIdentity.SpecificationID {
+		t.Errorf("Expected specification ID %s, got %s", expectedIdentity.SpecificationID, identity.SpecificationID)
+	}
+
+	if identity.ProvisionState != expectedIdentity.ProvisionState {
+		t.Errorf("Expected provision state %s, got %s", expectedIdentity.ProvisionState, identity.ProvisionState)
 	}
 }
