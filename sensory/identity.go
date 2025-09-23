@@ -90,8 +90,16 @@ func (s *Service) CreateIdentity(specificationID, identifier string, req CreateI
 	if identifier == "" {
 		return nil, errors.New("identifier is required")
 	}
-	if req.Identity.APIKey == "" {
-		return nil, errors.New("API key is required")
+	// Validate authentication: either API key OR client credentials must be provided
+	hasAPIKey := req.Identity.APIKey != ""
+	hasClientCredentials := req.Identity.ClientID != "" && req.Identity.ClientSecret != ""
+
+	if !hasAPIKey && !hasClientCredentials {
+		return nil, errors.New("either API key or client credentials (client_id and client_secret) are required")
+	}
+
+	if hasAPIKey && hasClientCredentials {
+		return nil, errors.New("provide either API key or client credentials, not both")
 	}
 	if req.Identity.Validation.Path == "" {
 		return nil, errors.New("validation path is required")
