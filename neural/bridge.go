@@ -1,4 +1,3 @@
-//nolint:dupl // Similar CRUD shape as listener; intentional duplication for consistent service pattern
 package neural
 
 import (

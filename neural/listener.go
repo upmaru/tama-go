@@ -1,4 +1,3 @@
-//nolint:dupl // Similar CRUD shape as bridge; intentional duplication for consistent service pattern
 package neural
 
 import (
@@ -12,6 +11,7 @@ type Listener struct {
 	ID             string `json:"id,omitempty"`
 	SpaceID        string `json:"space_id"`
 	Endpoint       string `json:"endpoint"`
+	Secret         string `json:"secret"`
 	ProvisionState string `json:"provision_state"`
 }
 
@@ -28,6 +28,7 @@ type CreateListenerRequest struct {
 // ListenerRequestData represents the listener data in the create request.
 type ListenerRequestData struct {
 	Endpoint string `json:"endpoint"`
+	Secret   string `json:"secret"`
 }
 
 // UpdateListenerRequest represents the request payload for updating or replacing a listener.
@@ -38,6 +39,7 @@ type UpdateListenerRequest struct {
 // UpdateListenerData represents the listener update data.
 type UpdateListenerData struct {
 	Endpoint string `json:"endpoint,omitempty"`
+	Secret   string `json:"secret,omitempty"`
 }
 
 // GetListener retrieves a specific listener by ID.
@@ -72,6 +74,9 @@ func (s *Service) CreateListener(spaceID string, req CreateListenerRequest) (*Li
 	if req.Listener.Endpoint == "" {
 		return nil, errors.New("endpoint is required")
 	}
+	if req.Listener.Secret == "" {
+		return nil, errors.New("secret is required")
+	}
 
 	var listenerResp ListenerResponse
 	resp, err := s.client.R().
@@ -96,8 +101,8 @@ func (s *Service) UpdateListener(id string, req UpdateListenerRequest) (*Listene
 	if id == "" {
 		return nil, errors.New("listener ID is required")
 	}
-	if req.Listener.Endpoint == "" {
-		return nil, errors.New("endpoint is required")
+	if req.Listener.Endpoint == "" && req.Listener.Secret == "" {
+		return nil, errors.New("at least one field (endpoint or secret) is required for update")
 	}
 
 	var listenerResp ListenerResponse
@@ -123,8 +128,8 @@ func (s *Service) ReplaceListener(id string, req UpdateListenerRequest) (*Listen
 	if id == "" {
 		return nil, errors.New("listener ID is required")
 	}
-	if req.Listener.Endpoint == "" {
-		return nil, errors.New("endpoint is required")
+	if req.Listener.Endpoint == "" && req.Listener.Secret == "" {
+		return nil, errors.New("at least one field (endpoint or secret) is required for replace")
 	}
 
 	var listenerResp ListenerResponse
