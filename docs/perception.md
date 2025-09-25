@@ -13,6 +13,7 @@ Access via `client.Perception.*`
 - [Tool Operations](#tool-operations)
 - [Initializer Operations](#initializer-operations)
 - [Activation Operations](#activation-operations)
+- [Directive Operations](#directive-operations)
 
 ## Delegation Operations
 
@@ -566,6 +567,92 @@ Replaces an existing context using PUT.
 Deletes a context by ID.
 
 **Endpoint:** `DELETE /provision/perception/contexts/:id`
+
+## Directive Operations
+
+### GetDirective(id string) (*Directive, error)
+
+Retrieves a specific directive by ID.
+
+**Endpoint:** `GET /provision/perception/directives/:id`
+
+**Parameters:**
+- `id` (string): Directive ID (required)
+
+**Returns:**
+- `*Directive`: Directive object with ID, ThoughtPathID, PromptID, and ProvisionState
+- `error`: Error if request fails
+
+**Example:**
+```go
+directive, err := client.Perception.GetDirective("directive-123")
+if err != nil {
+    log.Printf("Error: %v", err)
+    return
+}
+log.Printf("Directive: %s (%s)", directive.PromptID, directive.ProvisionState)
+```
+
+### CreateDirective(pathID string, req CreateDirectiveRequest) (*Directive, error)
+
+Creates a new directive within a path.
+
+**Endpoint:** `POST /provision/perception/paths/:path_id/directives`
+
+**Parameters:**
+- `pathID` (string): Path ID (required)
+- `req` (CreateDirectiveRequest): Directive creation request (required)
+
+```go
+type CreateDirectiveRequest struct {
+    Directive DirectiveRequestData `json:"directive"`
+}
+
+type DirectiveRequestData struct {
+    PromptID string `json:"prompt_id"`
+}
+```
+
+**Returns:**
+- `*Directive`: Created directive object
+- `error`: Error if request fails
+
+**Example:**
+```go
+directive, err := client.Perception.CreateDirective("path-123", perception.CreateDirectiveRequest{
+    Directive: perception.DirectiveRequestData{
+        PromptID: "prompt-456",
+    },
+})
+```
+
+### UpdateDirective(id string, req UpdateDirectiveRequest) (*Directive, error)
+
+Updates an existing directive using PATCH.
+
+**Endpoint:** `PATCH /provision/perception/directives/:id`
+
+```go
+type UpdateDirectiveRequest struct {
+    Directive UpdateDirectiveData `json:"directive"`
+}
+
+type UpdateDirectiveData struct {
+    PromptID string `json:"prompt_id,omitempty"`
+}
+```
+
+### ReplaceDirective(id string, req UpdateDirectiveRequest) (*Directive, error)
+
+Replaces an existing directive using PUT.
+
+**Endpoint:** `PUT /provision/perception/directives/:id`
+
+### DeleteDirective(id string) error
+
+Deletes a directive by ID.
+
+**Endpoint:** `DELETE /provision/perception/directives/:id`
 
 ## Tool Operations
 
