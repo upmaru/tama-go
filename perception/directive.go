@@ -1,14 +1,14 @@
-//nolint:dupl // directive follows similar CRUD patterns
 package perception
 
 import "errors"
 
 // Directive represents a perception directive resource.
 type Directive struct {
-	ID             string `json:"id,omitempty"`
-	ThoughtPathID  string `json:"thought_path_id,omitempty"`
-	PromptID       string `json:"prompt_id,omitempty"`
-	ProvisionState string `json:"provision_state"`
+	ID              string `json:"id,omitempty"`
+	ThoughtPathID   string `json:"thought_path_id,omitempty"`
+	PromptID        string `json:"prompt_id,omitempty"`
+	TargetThoughtID string `json:"target_thought_id,omitempty"`
+	ProvisionState  string `json:"provision_state"`
 }
 
 // DirectiveResponse represents the API response for directive operations.
@@ -23,7 +23,8 @@ type CreateDirectiveRequest struct {
 
 // DirectiveRequestData represents the directive data in the request.
 type DirectiveRequestData struct {
-	PromptID string `json:"prompt_id"`
+	PromptID        string `json:"prompt_id"`
+	TargetThoughtID string `json:"target_thought_id"`
 }
 
 // UpdateDirectiveRequest represents the request payload for updating a directive.
@@ -33,7 +34,8 @@ type UpdateDirectiveRequest struct {
 
 // UpdateDirectiveData represents the directive update data.
 type UpdateDirectiveData struct {
-	PromptID string `json:"prompt_id,omitempty"`
+	PromptID        string `json:"prompt_id,omitempty"`
+	TargetThoughtID string `json:"target_thought_id,omitempty"`
 }
 
 // GetDirective retrieves a specific directive by ID.
@@ -51,6 +53,9 @@ func (s *Service) GetDirective(id string) (*Directive, error) {
 func (s *Service) CreateDirective(pathID string, req CreateDirectiveRequest) (*Directive, error) {
 	if req.Directive.PromptID == "" {
 		return nil, errors.New("prompt ID is required")
+	}
+	if req.Directive.TargetThoughtID == "" {
+		return nil, errors.New("target thought ID is required")
 	}
 
 	var directiveResp DirectiveResponse

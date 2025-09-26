@@ -1,3 +1,4 @@
+//nolint:dupl // Similar CRUD patterns to filter.go are intentional by design.
 package neural
 
 import (
