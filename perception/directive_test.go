@@ -14,10 +14,11 @@ import (
 
 func TestPerceptionGetDirective(t *testing.T) {
 	expected := perception.Directive{
-		ID:             "directive-123",
-		ThoughtPathID:  "path-123",
-		PromptID:       "prompt-123",
-		ProvisionState: "active",
+		ID:              "directive-123",
+		ThoughtPathID:   "path-123",
+		PromptID:        "prompt-123",
+		TargetThoughtID: "thought-999",
+		ProvisionState:  "active",
 	}
 
 	expectedResp := perception.DirectiveResponse{Data: expected}
@@ -43,6 +44,7 @@ func TestPerceptionGetDirective(t *testing.T) {
 	if directive.ID != expected.ID ||
 		directive.ThoughtPathID != expected.ThoughtPathID ||
 		directive.PromptID != expected.PromptID ||
+		directive.TargetThoughtID != expected.TargetThoughtID ||
 		directive.ProvisionState != expected.ProvisionState {
 		t.Errorf("Directive mismatch: got %+v, expected %+v", directive, expected)
 	}
@@ -78,13 +80,17 @@ func TestPerceptionGetDirectiveError(t *testing.T) {
 
 func TestPerceptionCreateDirective(t *testing.T) {
 	request := perception.CreateDirectiveRequest{
-		Directive: perception.DirectiveRequestData{PromptID: "prompt-123"},
+		Directive: perception.DirectiveRequestData{
+			PromptID:        "prompt-123",
+			TargetThoughtID: "thought-999",
+		},
 	}
 	expected := perception.Directive{
-		ID:             "directive-456",
-		ThoughtPathID:  "path-123",
-		PromptID:       "prompt-123",
-		ProvisionState: "pending",
+		ID:              "directive-456",
+		ThoughtPathID:   "path-123",
+		PromptID:        "prompt-123",
+		TargetThoughtID: "thought-999",
+		ProvisionState:  "pending",
 	}
 	expectedResp := perception.DirectiveResponse{Data: expected}
 
@@ -100,7 +106,18 @@ func TestPerceptionCreateDirective(t *testing.T) {
 			t.Fatalf("Failed to decode request: %v", err)
 		}
 		if recv.Directive.PromptID != request.Directive.PromptID {
-			t.Errorf("Expected prompt_id %s, got %s", request.Directive.PromptID, recv.Directive.PromptID)
+			t.Errorf(
+				"Expected prompt_id %s, got %s",
+				request.Directive.PromptID,
+				recv.Directive.PromptID,
+			)
+		}
+		if recv.Directive.TargetThoughtID != request.Directive.TargetThoughtID {
+			t.Errorf(
+				"Expected target_thought_id %s, got %s",
+				request.Directive.TargetThoughtID,
+				recv.Directive.TargetThoughtID,
+			)
 		}
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusCreated)
@@ -138,6 +155,17 @@ func TestPerceptionCreateDirectiveValidation(t *testing.T) {
 	if err == nil {
 		t.Error("Expected validation error for empty prompt ID")
 	}
+
+	// Empty target_thought_id
+	_, err = client.Perception.CreateDirective(
+		"path-123",
+		perception.CreateDirectiveRequest{
+			Directive: perception.DirectiveRequestData{PromptID: "p", TargetThoughtID: ""},
+		},
+	)
+	if err == nil {
+		t.Error("Expected validation error for empty target thought ID")
+	}
 }
 
 func TestPerceptionCreateDirectiveWithFieldErrors(t *testing.T) {
@@ -160,7 +188,7 @@ func TestPerceptionCreateDirectiveWithFieldErrors(t *testing.T) {
 	_, err := client.Perception.CreateDirective(
 		"path-123",
 		perception.CreateDirectiveRequest{
-			Directive: perception.DirectiveRequestData{PromptID: "invalid"},
+			Directive: perception.DirectiveRequestData{PromptID: "invalid", TargetThoughtID: "thought-999"},
 		},
 	)
 	if err == nil {
@@ -173,12 +201,18 @@ func TestPerceptionCreateDirectiveWithFieldErrors(t *testing.T) {
 }
 
 func TestPerceptionUpdateDirective(t *testing.T) {
-	request := perception.UpdateDirectiveRequest{Directive: perception.UpdateDirectiveData{PromptID: "prompt-updated"}}
+	request := perception.UpdateDirectiveRequest{
+		Directive: perception.UpdateDirectiveData{
+			PromptID:        "prompt-updated",
+			TargetThoughtID: "thought-999",
+		},
+	}
 	expected := perception.Directive{
-		ID:             "directive-123",
-		ThoughtPathID:  "path-123",
-		PromptID:       "prompt-updated",
-		ProvisionState: "active",
+		ID:              "directive-123",
+		ThoughtPathID:   "path-123",
+		PromptID:        "prompt-updated",
+		TargetThoughtID: "thought-999",
+		ProvisionState:  "active",
 	}
 	expectedResp := perception.DirectiveResponse{Data: expected}
 
@@ -202,15 +236,24 @@ func TestPerceptionUpdateDirective(t *testing.T) {
 	if directive.PromptID != expected.PromptID {
 		t.Errorf("Expected prompt_id %s, got %s", expected.PromptID, directive.PromptID)
 	}
+	if directive.TargetThoughtID != expected.TargetThoughtID {
+		t.Errorf("Expected target_thought_id %s, got %s", expected.TargetThoughtID, directive.TargetThoughtID)
+	}
 }
 
 func TestPerceptionReplaceDirective(t *testing.T) {
-	request := perception.UpdateDirectiveRequest{Directive: perception.UpdateDirectiveData{PromptID: "prompt-replaced"}}
+	request := perception.UpdateDirectiveRequest{
+		Directive: perception.UpdateDirectiveData{
+			PromptID:        "prompt-replaced",
+			TargetThoughtID: "thought-999",
+		},
+	}
 	expected := perception.Directive{
-		ID:             "directive-123",
-		ThoughtPathID:  "path-123",
-		PromptID:       "prompt-replaced",
-		ProvisionState: "active",
+		ID:              "directive-123",
+		ThoughtPathID:   "path-123",
+		PromptID:        "prompt-replaced",
+		TargetThoughtID: "thought-999",
+		ProvisionState:  "active",
 	}
 	expectedResp := perception.DirectiveResponse{Data: expected}
 
@@ -233,6 +276,9 @@ func TestPerceptionReplaceDirective(t *testing.T) {
 	}
 	if directive.PromptID != expected.PromptID {
 		t.Errorf("Expected prompt_id %s, got %s", expected.PromptID, directive.PromptID)
+	}
+	if directive.TargetThoughtID != expected.TargetThoughtID {
+		t.Errorf("Expected target_thought_id %s, got %s", expected.TargetThoughtID, directive.TargetThoughtID)
 	}
 }
 
