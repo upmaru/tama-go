@@ -42,18 +42,6 @@ func (t *Token) IsExpired() bool {
 
 // Client represents the main Tama API client.
 type Client struct {
-<<<<<<< HEAD
-	httpClient *resty.Client
-	baseURL    string
-	apiKey     string
-	Neural     *NeuralService
-	Sensory    *SensoryService
-	Memory     *MemoryService
-	Perception *PerceptionService
-	Motor      *MotorService
-	Contexts   *ContextsService
-	Tools      *ToolsService
-=======
 	httpClient     *resty.Client
 	baseURL        string
 	clientID       string
@@ -67,7 +55,6 @@ type Client struct {
 	Perception     *PerceptionService
 	Motor          *MotorService
 	Contexts       *ContextsService
->>>>>>> 1b8e91d (Implement Oauth2 authentication for the client)
 }
 
 // Config holds configuration options for the client.
