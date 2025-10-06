@@ -8,6 +8,33 @@ A Go client library for the Tama API, providing easy access to Neural and Sensor
 go get github.com/upmaru/tama-go
 ```
 
+## Authentication
+
+The Tama Go client uses OAuth2 with client credentials flow for authentication. You'll need:
+
+- **Client ID**: Your OAuth2 client identifier
+- **Client Secret**: Your OAuth2 client secret
+
+The client automatically handles token acquisition and refresh using the `/auth/tokens` endpoint with:
+- Grant type: `client_credentials`
+- Scope: `provision.all`
+- Authentication: HTTP Basic Auth with base64 encoded `client_id:client_secret`
+
+### Testing
+
+For testing purposes, you can skip OAuth2 token fetching by setting `SkipTokenFetch: true` in the config:
+
+```go
+config := tama.Config{
+    BaseURL:        "https://api.tama.io",
+    ClientID:       "test-client-id",
+    ClientSecret:   "test-client-secret",
+    SkipTokenFetch: true, // Skip token fetching for tests
+}
+```
+
+This prevents the client from making actual HTTP requests to obtain tokens during initialization, which is useful for unit tests with mock servers.
+
 ## Quick Start
 
 ```go
@@ -23,14 +50,18 @@ import (
 )
 
 func main() {
-    // Initialize the client
+    // Initialize the client with OAuth2 credentials
     config := tama.Config{
-        BaseURL: "https://api.tama.io",
-        APIKey:  "your-api-key",
-        Timeout: 30 * time.Second,
+        BaseURL:      "https://api.tama.io",
+        ClientID:     "your-client-id",
+        ClientSecret: "your-client-secret",
+        Timeout:      30 * time.Second,
     }
     
-    client := tama.NewClient(config)
+    client, err := tama.NewClient(config)
+    if err != nil {
+        panic(err)
+    }
     
     // Create a neural space
     space, err := client.Neural.CreateSpace(neural.CreateSpaceRequest{

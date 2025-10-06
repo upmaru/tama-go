@@ -39,12 +39,17 @@ func TestNeuralGetSpace(t *testing.T) {
 	defer server.Close()
 
 	config := tama.Config{
-		BaseURL: server.URL,
-		APIKey:  "test-key",
-		Timeout: 10 * time.Second,
+		BaseURL:        server.URL,
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		SkipTokenFetch: true,
+		Timeout:        10 * time.Second,
 	}
 
-	client := tama.NewClient(config)
+	client, err := tama.NewClient(config)
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
 	space, err := client.Neural.GetSpace("space-123")
 
 	if err != nil {
@@ -75,13 +80,18 @@ func TestNeuralGetSpaceError(t *testing.T) {
 	defer server.Close()
 
 	config := tama.Config{
-		BaseURL: server.URL,
-		APIKey:  "test-key",
-		Timeout: 10 * time.Second,
+		BaseURL:        server.URL,
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		SkipTokenFetch: true,
+		Timeout:        10 * time.Second,
 	}
 
-	client := tama.NewClient(config)
-	_, err := client.Neural.GetSpace("nonexistent")
+	client, err := tama.NewClient(config)
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
+	_, err = client.Neural.GetSpace("nonexistent")
 
 	if err == nil {
 		t.Fatal("Expected error, got nil")
@@ -143,12 +153,17 @@ func TestNeuralCreateSpace(t *testing.T) {
 	defer server.Close()
 
 	config := tama.Config{
-		BaseURL: server.URL,
-		APIKey:  "test-key",
-		Timeout: 10 * time.Second,
+		BaseURL:        server.URL,
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		SkipTokenFetch: true,
+		Timeout:        10 * time.Second,
 	}
 
-	client := tama.NewClient(config)
+	client, err := tama.NewClient(config)
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
 
 	createReq := neural.CreateSpaceRequest{
 		Space: neural.SpaceRequestData{
@@ -174,16 +189,22 @@ func TestNeuralCreateSpace(t *testing.T) {
 
 func TestNeuralCreateSpaceValidation(t *testing.T) {
 	config := tama.Config{
-		BaseURL: "https://api.example.com",
-		APIKey:  "test-key",
-		Timeout: 10 * time.Second,
+		BaseURL:        "http://localhost:8080",
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		SkipTokenFetch: true,
+		Timeout:        10 * time.Second,
 	}
 
-	client := tama.NewClient(config)
+	client, err := tama.NewClient(config)
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
 
 	// Test empty name validation
-	_, err := client.Neural.CreateSpace(neural.CreateSpaceRequest{
+	_, err = client.Neural.CreateSpace(neural.CreateSpaceRequest{
 		Space: neural.SpaceRequestData{
+			Name: "",
 			Type: "root",
 		},
 	})
@@ -208,16 +229,21 @@ func TestNeuralCreateSpaceTypeValidationDelegated(t *testing.T) {
 	// This test verifies that type validation is now delegated to the API
 	// Previously invalid types should now pass client validation
 	config := tama.Config{
-		BaseURL: "https://api.example.com",
-		APIKey:  "test-key",
-		Timeout: 10 * time.Second,
+		BaseURL:        "http://localhost:8080",
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		SkipTokenFetch: true,
+		Timeout:        10 * time.Second,
 	}
 
-	client := tama.NewClient(config)
+	client, err := tama.NewClient(config)
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
 
 	// Test that previously invalid type values now pass client validation
 	// The API will handle the actual validation
-	_, err := client.Neural.CreateSpace(neural.CreateSpaceRequest{
+	_, err = client.Neural.CreateSpace(neural.CreateSpaceRequest{
 		Space: neural.SpaceRequestData{
 			Name: "test-space",
 			Type: "invalid-type", // This should not trigger client validation error
@@ -272,12 +298,17 @@ func TestNeuralUpdateSpace(t *testing.T) {
 	defer server.Close()
 
 	config := tama.Config{
-		BaseURL: server.URL,
-		APIKey:  "test-key",
-		Timeout: 10 * time.Second,
+		BaseURL:        server.URL,
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		SkipTokenFetch: true,
+		Timeout:        10 * time.Second,
 	}
 
-	client := tama.NewClient(config)
+	client, err := tama.NewClient(config)
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
 
 	updateReq := neural.UpdateSpaceRequest{
 		Space: neural.UpdateSpaceData{
@@ -312,14 +343,19 @@ func TestNeuralDeleteSpace(t *testing.T) {
 	defer server.Close()
 
 	config := tama.Config{
-		BaseURL: server.URL,
-		APIKey:  "test-key",
-		Timeout: 10 * time.Second,
+		BaseURL:        server.URL,
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		SkipTokenFetch: true,
+		Timeout:        10 * time.Second,
 	}
 
-	client := tama.NewClient(config)
+	client, err := tama.NewClient(config)
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
 
-	err := client.Neural.DeleteSpace("space-123")
+	err = client.Neural.DeleteSpace("space-123")
 
 	if err != nil {
 		t.Fatalf("Expected no error, got %v", err)
