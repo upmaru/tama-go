@@ -15,6 +15,6 @@ type NeuralService struct {
 // newNeuralService creates a new neural service instance.
 func newNeuralService(client *Client) *NeuralService {
 	return &NeuralService{
-		Service: neural.NewService(client.httpClient),
+		Service: neural.NewService(client.GetHTTPClient()),
 	}
 }

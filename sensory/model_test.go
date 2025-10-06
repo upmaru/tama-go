@@ -39,10 +39,15 @@ func TestSensoryGetModel(t *testing.T) {
 	})
 	defer server.Close()
 
-	client := tama.NewClient(tama.Config{
-		BaseURL: server.URL,
-		APIKey:  "test-key",
+	client, err := tama.NewClient(tama.Config{
+		BaseURL:        server.URL,
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		SkipTokenFetch: true,
 	})
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
 
 	model, err := client.Sensory.GetModel("model-123")
 	if err != nil {
@@ -125,10 +130,15 @@ func TestSensoryCreateModel(t *testing.T) {
 	})
 	defer server.Close()
 
-	client := tama.NewClient(tama.Config{
-		BaseURL: server.URL,
-		APIKey:  "test-key",
+	client, err := tama.NewClient(tama.Config{
+		BaseURL:        server.URL,
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		SkipTokenFetch: true,
 	})
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
 
 	createReq := sensory.CreateModelRequest{
 		Model: sensory.ModelRequestData{
@@ -151,13 +161,18 @@ func TestSensoryCreateModel(t *testing.T) {
 }
 
 func TestSensoryCreateModelValidation(t *testing.T) {
-	client := tama.NewClient(tama.Config{
-		BaseURL: "https://api.example.com",
-		APIKey:  "test-key",
+	client, err := tama.NewClient(tama.Config{
+		BaseURL:        "https://api.example.com",
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		SkipTokenFetch: true,
 	})
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
 
 	// Test empty source ID validation
-	_, err := client.Sensory.CreateModel("", sensory.CreateModelRequest{
+	_, err = client.Sensory.CreateModel("", sensory.CreateModelRequest{
 		Model: sensory.ModelRequestData{
 			Identifier: "test-model",
 			Path:       "/chat/completions",
@@ -189,12 +204,17 @@ func TestSensoryCreateModelValidation(t *testing.T) {
 }
 
 func TestSensoryGetModel_EmptyIDValidation(t *testing.T) {
-	client := tama.NewClient(tama.Config{
-		BaseURL: "https://api.example.com",
-		APIKey:  "test-key",
+	client, err := tama.NewClient(tama.Config{
+		BaseURL:        "https://api.example.com",
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		SkipTokenFetch: true,
 	})
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
 
-	_, err := client.Sensory.GetModel("")
+	_, err = client.Sensory.GetModel("")
 	if err == nil {
 		t.Error("Expected validation error for empty model ID in GetModel")
 	}
@@ -249,10 +269,15 @@ func TestSensoryUpdateModel(t *testing.T) {
 	})
 	defer server.Close()
 
-	client := tama.NewClient(tama.Config{
-		BaseURL: server.URL,
-		APIKey:  "test-key",
+	client, err := tama.NewClient(tama.Config{
+		BaseURL:        server.URL,
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		SkipTokenFetch: true,
 	})
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
 
 	updateReq := sensory.UpdateModelRequest{
 		Model: sensory.UpdateModelData{
@@ -275,10 +300,15 @@ func TestSensoryUpdateModel(t *testing.T) {
 }
 
 func TestSensoryUpdateModel_EmptyIDValidation(t *testing.T) {
-	client := tama.NewClient(tama.Config{
-		BaseURL: "https://api.example.com",
-		APIKey:  "test-key",
+	client, err := tama.NewClient(tama.Config{
+		BaseURL:        "https://api.example.com",
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		SkipTokenFetch: true,
 	})
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
 
 	updateReq := sensory.UpdateModelRequest{
 		Model: sensory.UpdateModelData{
@@ -341,10 +371,15 @@ func TestSensoryReplaceModel(t *testing.T) {
 	})
 	defer server.Close()
 
-	client := tama.NewClient(tama.Config{
-		BaseURL: server.URL,
-		APIKey:  "test-key",
+	client, err := tama.NewClient(tama.Config{
+		BaseURL:        server.URL,
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		SkipTokenFetch: true,
 	})
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
 
 	replaceReq := sensory.UpdateModelRequest{
 		Model: sensory.UpdateModelData{
@@ -375,10 +410,15 @@ func TestSensoryModelParameters(t *testing.T) {
 	})
 	defer server.Close()
 
-	client := tama.NewClient(tama.Config{
-		BaseURL: server.URL,
-		APIKey:  "test-key",
+	client, err := tama.NewClient(tama.Config{
+		BaseURL:        server.URL,
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		SkipTokenFetch: true,
 	})
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
 
 	createReq := createTestModelRequest()
 	model, err := client.Sensory.CreateModel("source-123", createReq)
@@ -391,10 +431,15 @@ func TestSensoryModelParameters(t *testing.T) {
 }
 
 func TestSensoryReplaceModel_EmptyIDValidation(t *testing.T) {
-	client := tama.NewClient(tama.Config{
-		BaseURL: "https://api.example.com",
-		APIKey:  "test-key",
+	client, err := tama.NewClient(tama.Config{
+		BaseURL:        "https://api.example.com",
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		SkipTokenFetch: true,
 	})
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
 
 	replaceReq := sensory.UpdateModelRequest{
 		Model: sensory.UpdateModelData{

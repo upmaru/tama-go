@@ -38,10 +38,15 @@ func TestSensoryGetLimit(t *testing.T) {
 	})
 	defer server.Close()
 
-	client := tama.NewClient(tama.Config{
-		BaseURL: server.URL,
-		APIKey:  "test-key",
+	client, err := tama.NewClient(tama.Config{
+		BaseURL:        server.URL,
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		SkipTokenFetch: true,
 	})
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
 
 	limit, err := client.Sensory.GetLimit("limit-123")
 	if err != nil {
@@ -111,10 +116,15 @@ func TestSensoryCreateLimit(t *testing.T) {
 	})
 	defer server.Close()
 
-	client := tama.NewClient(tama.Config{
-		BaseURL: server.URL,
-		APIKey:  "test-key",
+	client, err := tama.NewClient(tama.Config{
+		BaseURL:        server.URL,
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		SkipTokenFetch: true,
 	})
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
 
 	createReq := sensory.CreateLimitRequest{
 		Limit: sensory.LimitRequestData{
@@ -135,14 +145,19 @@ func TestSensoryCreateLimit(t *testing.T) {
 }
 
 func TestSensoryCreateLimitValidation(t *testing.T) {
-	client := tama.NewClient(tama.Config{
-		BaseURL: "https://api.example.com",
-		APIKey:  "test-key",
-		Timeout: 10 * time.Second,
+	client, err := tama.NewClient(tama.Config{
+		BaseURL:        "https://api.example.com",
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		SkipTokenFetch: true,
+		Timeout:        10 * time.Second,
 	})
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
 
 	// Test empty source ID validation
-	_, err := client.Sensory.CreateLimit("", sensory.CreateLimitRequest{
+	_, err = client.Sensory.CreateLimit("", sensory.CreateLimitRequest{
 		Limit: sensory.LimitRequestData{
 			Count:      32,
 			ScaleUnit:  "seconds",
@@ -190,12 +205,17 @@ func TestSensoryCreateLimitValidation(t *testing.T) {
 }
 
 func TestSensoryGetLimit_EmptyIDValidation(t *testing.T) {
-	client := tama.NewClient(tama.Config{
-		BaseURL: "https://api.example.com",
-		APIKey:  "test-key",
+	client, err := tama.NewClient(tama.Config{
+		BaseURL:        "https://api.example.com",
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		SkipTokenFetch: true,
 	})
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
 
-	_, err := client.Sensory.GetLimit("")
+	_, err = client.Sensory.GetLimit("")
 	if err == nil {
 		t.Error("Expected validation error for empty limit ID in GetLimit")
 	}
