@@ -122,11 +122,18 @@ jobs:
 
           func main() {
               config := tama.Config{
-                  BaseURL: "https://api.example.com",
-                  APIKey:  "test-key",
-                  Timeout: 30 * time.Second,
+                  BaseURL:        "https://api.example.com",
+                  ClientID:       "test-client-id",
+                  ClientSecret:   "test-client-secret",
+                  Timeout:        30 * time.Second,
+                  SkipTokenFetch: true,
               }
-              client := tama.NewClient(config)
+
+              client, err := tama.NewClient(config)
+              if err != nil {
+                  panic(err)
+              }
+
               fmt.Printf("Client created successfully: %v\n", client != nil)
           }
           EOF
