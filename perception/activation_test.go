@@ -288,7 +288,7 @@ func TestPerceptionUpdateActivation(t *testing.T) {
 		SkipTokenFetch: true,
 	}
 
-client, err := tama.NewClient(config)
+	client, err := tama.NewClient(config)
 	if err != nil {
 		t.Skipf("Skipping test due to client creation failure: %v", err)
 	}

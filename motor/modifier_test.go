@@ -257,7 +257,8 @@ func TestMotorDeleteModifier(t *testing.T) {
 	if err != nil {
 		t.Skipf("Skipping test due to client creation failure: %v", err)
 	}
-	if err := client.Motor.DeleteModifier(modifierID); err != nil {
+	err = client.Motor.DeleteModifier(modifierID)
+	if err != nil {
 		t.Fatalf("Expected no error, got %v", err)
 	}
 }

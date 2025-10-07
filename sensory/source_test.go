@@ -315,7 +315,7 @@ func TestSensoryGetSource_EmptyIDValidation(t *testing.T) {
 		t.Skipf("Skipping test due to client creation failure: %v", err)
 	}
 
-_, err = client.Sensory.GetSource("")
+	_, err = client.Sensory.GetSource("")
 	if err == nil {
 		t.Error("Expected validation error for empty source ID in GetSource")
 	}
@@ -591,7 +591,7 @@ func TestSensoryCreateSourceWithFieldErrors(t *testing.T) {
 		},
 	}
 
-_, err = client.Sensory.CreateSource("space-123", createReq)
+	_, err = client.Sensory.CreateSource("space-123", createReq)
 	if err == nil {
 		t.Fatal("Expected error for invalid source data")
 	}

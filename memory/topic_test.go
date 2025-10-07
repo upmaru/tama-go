@@ -32,7 +32,13 @@ func TestMemoryGetTopic(t *testing.T) {
 	})
 	defer server.Close()
 
-	client, err := tama.NewClient(tama.Config{BaseURL: server.URL, ClientID: "test-client-id", ClientSecret: "test-client-secret", Timeout: 10 * time.Second, SkipTokenFetch: true})
+	client, err := tama.NewClient(tama.Config{
+		BaseURL:        server.URL,
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		Timeout:        10 * time.Second,
+		SkipTokenFetch: true,
+	})
 	if err != nil {
 		t.Skipf("Skipping test due to client creation failure: %v", err)
 	}
@@ -69,7 +75,13 @@ func TestMemoryGetTopicError(t *testing.T) {
 	})
 	defer server.Close()
 
-	client, err := tama.NewClient(tama.Config{BaseURL: server.URL, ClientID: "test-client-id", ClientSecret: "test-client-secret", Timeout: 10 * time.Second, SkipTokenFetch: true})
+	client, err := tama.NewClient(tama.Config{
+		BaseURL:        server.URL,
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		Timeout:        10 * time.Second,
+		SkipTokenFetch: true,
+	})
 	if err != nil {
 		t.Skipf("Skipping test due to client creation failure: %v", err)
 	}
@@ -203,7 +215,13 @@ func TestMemoryUpdateTopic(t *testing.T) {
 	})
 	defer server.Close()
 
-	client, err := tama.NewClient(tama.Config{BaseURL: server.URL, ClientID: "test-client-id", ClientSecret: "test-client-secret", Timeout: 10 * time.Second, SkipTokenFetch: true})
+	client, err := tama.NewClient(tama.Config{
+		BaseURL:        server.URL,
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		Timeout:        10 * time.Second,
+		SkipTokenFetch: true,
+	})
 	if err != nil {
 		t.Skipf("Skipping test due to client creation failure: %v", err)
 	}
@@ -270,7 +288,13 @@ func TestMemoryReplaceTopic(t *testing.T) {
 	})
 	defer server.Close()
 
-	client, err := tama.NewClient(tama.Config{BaseURL: server.URL, ClientID: "test-client-id", ClientSecret: "test-client-secret", Timeout: 10 * time.Second, SkipTokenFetch: true})
+	client, err := tama.NewClient(tama.Config{
+		BaseURL:        server.URL,
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		Timeout:        10 * time.Second,
+		SkipTokenFetch: true,
+	})
 	if err != nil {
 		t.Skipf("Skipping test due to client creation failure: %v", err)
 	}
@@ -321,12 +345,19 @@ func TestMemoryDeleteTopic(t *testing.T) {
 	})
 	defer server.Close()
 
-	client, err := tama.NewClient(tama.Config{BaseURL: server.URL, ClientID: "test-client-id", ClientSecret: "test-client-secret", Timeout: 10 * time.Second, SkipTokenFetch: true})
+	client, err := tama.NewClient(tama.Config{
+		BaseURL:        server.URL,
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		Timeout:        10 * time.Second,
+		SkipTokenFetch: true,
+	})
 	if err != nil {
 		t.Skipf("Skipping test due to client creation failure: %v", err)
 	}
 
-	if err := client.Memory.DeleteTopic("topic-123"); err != nil {
+	err = client.Memory.DeleteTopic("topic-123")
+	if err != nil {
 		t.Fatalf("Expected no error, got %v", err)
 	}
 }
@@ -342,7 +373,8 @@ func TestMemoryDeleteTopicValidation(t *testing.T) {
 	if err != nil {
 		t.Skipf("Skipping test due to client creation failure: %v", err)
 	}
-	if err := client.Memory.DeleteTopic(""); err == nil {
+	err = client.Memory.DeleteTopic("")
+	if err == nil {
 		t.Error("Expected validation error for empty topic ID")
 	}
 }

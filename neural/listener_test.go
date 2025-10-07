@@ -75,7 +75,13 @@ func TestNeuralGetListenerError(t *testing.T) {
 	})
 	defer server.Close()
 
-	config := tama.Config{BaseURL: server.URL, ClientID: "test-client-id", ClientSecret: "test-client-secret", Timeout: 10 * time.Second, SkipTokenFetch: true}
+	config := tama.Config{
+		BaseURL:        server.URL,
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		Timeout:        10 * time.Second,
+		SkipTokenFetch: true,
+	}
 	client, err := tama.NewClient(config)
 	if err != nil {
 		t.Skipf("Skipping test due to client creation failure: %v", err)
@@ -131,7 +137,13 @@ func TestNeuralCreateListener(t *testing.T) {
 	})
 	defer server.Close()
 
-	client, err := tama.NewClient(tama.Config{BaseURL: server.URL, ClientID: "test-client-id", ClientSecret: "test-client-secret", Timeout: 10 * time.Second, SkipTokenFetch: true})
+	client, err := tama.NewClient(tama.Config{
+		BaseURL:        server.URL,
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		Timeout:        10 * time.Second,
+		SkipTokenFetch: true,
+	})
 	if err != nil {
 		t.Skipf("Skipping test due to client creation failure: %v", err)
 	}
@@ -155,19 +167,19 @@ func TestNeuralCreateListener(t *testing.T) {
 }
 
 func TestNeuralCreateListenerValidation(t *testing.T) {
-client, err := tama.NewClient(tama.Config{
+	client, err := tama.NewClient(tama.Config{
 		BaseURL:        "https://api.example.com",
 		ClientID:       "test-client-id",
 		ClientSecret:   "test-client-secret",
 		Timeout:        10 * time.Second,
 		SkipTokenFetch: true,
-})
+	})
 	if err != nil {
 		t.Skipf("Skipping test due to client creation failure: %v", err)
 	}
 
 	// Empty space ID
-_, err = client.Neural.CreateListener(
+	_, err = client.Neural.CreateListener(
 		"",
 		neural.CreateListenerRequest{
 			Listener: neural.ListenerRequestData{
@@ -239,7 +251,13 @@ func TestNeuralUpdateListener(t *testing.T) {
 	})
 	defer server.Close()
 
-	client, err := tama.NewClient(tama.Config{BaseURL: server.URL, ClientID: "test-client-id", ClientSecret: "test-client-secret", Timeout: 10 * time.Second, SkipTokenFetch: true})
+	client, err := tama.NewClient(tama.Config{
+		BaseURL:        server.URL,
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		Timeout:        10 * time.Second,
+		SkipTokenFetch: true,
+	})
 	if err != nil {
 		t.Skipf("Skipping test due to client creation failure: %v", err)
 	}
@@ -320,7 +338,13 @@ func TestNeuralReplaceListener(t *testing.T) {
 	})
 	defer server.Close()
 
-	client, err := tama.NewClient(tama.Config{BaseURL: server.URL, ClientID: "test-client-id", ClientSecret: "test-client-secret", Timeout: 10 * time.Second, SkipTokenFetch: true})
+	client, err := tama.NewClient(tama.Config{
+		BaseURL:        server.URL,
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		Timeout:        10 * time.Second,
+		SkipTokenFetch: true,
+	})
 	if err != nil {
 		t.Skipf("Skipping test due to client creation failure: %v", err)
 	}
@@ -401,7 +425,13 @@ func TestNeuralUpdateListenerOnlySecret(t *testing.T) {
 	})
 	defer server.Close()
 
-	client, err := tama.NewClient(tama.Config{BaseURL: server.URL, ClientID: "test-client-id", ClientSecret: "test-client-secret", Timeout: 10 * time.Second, SkipTokenFetch: true})
+	client, err := tama.NewClient(tama.Config{
+		BaseURL:        server.URL,
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		Timeout:        10 * time.Second,
+		SkipTokenFetch: true,
+	})
 	if err != nil {
 		t.Skipf("Skipping test due to client creation failure: %v", err)
 	}
@@ -452,7 +482,13 @@ func TestNeuralUpdateListenerOnlyEndpoint(t *testing.T) {
 	})
 	defer server.Close()
 
-	client, err := tama.NewClient(tama.Config{BaseURL: server.URL, ClientID: "test-client-id", ClientSecret: "test-client-secret", Timeout: 10 * time.Second, SkipTokenFetch: true})
+	client, err := tama.NewClient(tama.Config{
+		BaseURL:        server.URL,
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		Timeout:        10 * time.Second,
+		SkipTokenFetch: true,
+	})
 	if err != nil {
 		t.Skipf("Skipping test due to client creation failure: %v", err)
 	}
@@ -488,7 +524,8 @@ func TestNeuralDeleteListener(t *testing.T) {
 		t.Skipf("Skipping test due to client creation failure: %v", err)
 	}
 
-	if err := client.Neural.DeleteListener("listener-123"); err != nil {
+	err = client.Neural.DeleteListener("listener-123")
+	if err != nil {
 		t.Fatalf("Expected no error, got %v", err)
 	}
 }
@@ -504,7 +541,8 @@ func TestNeuralDeleteListenerValidation(t *testing.T) {
 	if err != nil {
 		t.Skipf("Skipping test due to client creation failure: %v", err)
 	}
-	if err := client.Neural.DeleteListener(""); err == nil {
+	err = client.Neural.DeleteListener("")
+	if err == nil {
 		t.Error("Expected validation error for empty listener ID")
 	}
 }

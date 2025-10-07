@@ -129,10 +129,10 @@ func TestIntegrationSensorySourceLifecycle(t *testing.T) {
 	}
 
 	client, err := tama.NewClient(tama.Config{
-		BaseURL:      baseURL,
-		ClientID:     clientID,
-		ClientSecret: clientSecret,
-		Timeout:      30 * time.Second,
+		BaseURL:        baseURL,
+		ClientID:       clientID,
+		ClientSecret:   clientSecret,
+		Timeout:        30 * time.Second,
 		SkipTokenFetch: true,
 	})
 	if err != nil {
@@ -236,10 +236,10 @@ func TestIntegrationErrorHandling(t *testing.T) {
 	}
 
 	client, err := tama.NewClient(tama.Config{
-		BaseURL:      baseURL,
-		ClientID:     clientID,
-		ClientSecret: clientSecret,
-		Timeout:      30 * time.Second,
+		BaseURL:        baseURL,
+		ClientID:       clientID,
+		ClientSecret:   clientSecret,
+		Timeout:        30 * time.Second,
 		SkipTokenFetch: true,
 	})
 	if err != nil {
@@ -276,19 +276,19 @@ func TestIntegrationAuthentication(t *testing.T) {
 		baseURL = "http://localhost:4000"
 	}
 
-	// Test with invalid API key
+	// Test with OAuth2 (SkipTokenFetch to avoid real token call in test environment)
 	client, err := tama.NewClient(tama.Config{
+		BaseURL:        baseURL,
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		SkipTokenFetch: true,
+		Timeout:        30 * time.Second,
+	})
 	if err != nil {
 		t.Skipf("Skipping test due to client creation failure: %v", err)
 	}
-		BaseURL: baseURL,
-		ClientID: "test-client-id",
-		ClientSecret: "test-client-secret",
-		SkipTokenFetch: true,
-		Timeout: 30 * time.Second,
-	})
 
-	_, err := client.Neural.GetSpace("01927e45-2b7f-7c3e-a123-456789abcdef")
+	_, err = client.Neural.GetSpace("01927e45-2b7f-7c3e-a123-456789abcdef")
 	if err != nil {
 		t.Logf("Authentication error: %v", err)
 	}
@@ -301,19 +301,25 @@ func TestIntegrationFieldValidationErrors(t *testing.T) {
 	if baseURL == "" {
 		baseURL = "http://localhost:4000"
 	}
-	apiKey := os.Getenv("TAMA_API_KEY")
-	if apiKey == "" {
-		apiKey = "test-api-key"
+	clientID := os.Getenv("TAMA_CLIENT_ID")
+	if clientID == "" {
+		clientID = "test-client-id"
+	}
+	clientSecret := os.Getenv("TAMA_CLIENT_SECRET")
+	if clientSecret == "" {
+		clientSecret = "test-client-secret"
 	}
 
 	client, err := tama.NewClient(tama.Config{
+		BaseURL:        baseURL,
+		ClientID:       clientID,
+		ClientSecret:   clientSecret,
+		Timeout:        30 * time.Second,
+		SkipTokenFetch: true,
+	})
 	if err != nil {
 		t.Skipf("Skipping test due to client creation failure: %v", err)
 	}
-		BaseURL: baseURL,
-		APIKey:  apiKey,
-		Timeout: 30 * time.Second,
-	})
 
 	// Enable debug to see the actual error responses
 	client.SetDebug(true)
@@ -371,9 +377,9 @@ func TestIntegrationFieldValidationErrors(t *testing.T) {
 			Type:     "",
 			Endpoint: "",
 			Credential: sensory.SourceCredential{
-				ClientID: "test-client-id",
-		ClientSecret: "test-client-secret",
-		SkipTokenFetch: true,
+				ClientID:       "test-client-id",
+				ClientSecret:   "test-client-secret",
+				SkipTokenFetch: true,
 			},
 		},
 	}
@@ -425,10 +431,10 @@ func TestIntegrationFieldValidationErrors(t *testing.T) {
 				Name:     "Test Source with Valid Client Data",
 				Type:     "model",
 				Endpoint: "https://api.example.com/v1", // Valid URL format
-			Credential: sensory.SourceCredential{
-				ClientID:       "test-client-id",
-				ClientSecret:   "test-client-secret",
-				SkipTokenFetch: true,
+				Credential: sensory.SourceCredential{
+					ClientID:       "test-client-id",
+					ClientSecret:   "test-client-secret",
+					SkipTokenFetch: true,
 				},
 			},
 		}
@@ -472,10 +478,10 @@ func TestIntegrationThoughtInvalidModuleError(t *testing.T) {
 	}
 
 	client, err := tama.NewClient(tama.Config{
-		BaseURL:      baseURL,
-		ClientID:     clientID,
-		ClientSecret: clientSecret,
-		Timeout:      30 * time.Second,
+		BaseURL:        baseURL,
+		ClientID:       clientID,
+		ClientSecret:   clientSecret,
+		Timeout:        30 * time.Second,
 		SkipTokenFetch: true,
 	})
 	if err != nil {
@@ -584,10 +590,10 @@ func TestIntegrationThoughtModuleParametersError(t *testing.T) {
 	}
 
 	client, err := tama.NewClient(tama.Config{
-		BaseURL:      baseURL,
-		ClientID:     clientID,
-		ClientSecret: clientSecret,
-		Timeout:      30 * time.Second,
+		BaseURL:        baseURL,
+		ClientID:       clientID,
+		ClientSecret:   clientSecret,
+		Timeout:        30 * time.Second,
 		SkipTokenFetch: true,
 	})
 	if err != nil {
@@ -718,11 +724,11 @@ func TestIntegrationModuleInputLifecycle(t *testing.T) {
 	}
 
 	config := tama.Config{
-		BaseURL: "https://api.upmaru.com",
-		ClientID: "test-client-id",
-		ClientSecret: "test-client-secret",
+		BaseURL:        "https://api.upmaru.com",
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
 		SkipTokenFetch: true,
-		Timeout: 30 * time.Second,
+		Timeout:        30 * time.Second,
 	}
 
 	client, err := tama.NewClient(config)

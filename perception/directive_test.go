@@ -150,7 +150,7 @@ func TestPerceptionCreateDirectiveValidation(t *testing.T) {
 		t.Skipf("Skipping test due to client creation failure: %v", err)
 	}
 	// Empty path ID
-_, err = client.Perception.CreateDirective(
+	_, err = client.Perception.CreateDirective(
 		"",
 		perception.CreateDirectiveRequest{Directive: perception.DirectiveRequestData{PromptID: "p"}},
 	)
@@ -243,7 +243,13 @@ func TestPerceptionUpdateDirective(t *testing.T) {
 	})
 	defer server.Close()
 
-	client, err := tama.NewClient(tama.Config{BaseURL: server.URL, APIKey: "test-key", Timeout: 10 * time.Second})
+	client, err := tama.NewClient(tama.Config{
+		BaseURL:        server.URL,
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		Timeout:        10 * time.Second,
+		SkipTokenFetch: true,
+	})
 	if err != nil {
 		t.Skipf("Skipping test due to client creation failure: %v", err)
 	}
@@ -287,7 +293,13 @@ func TestPerceptionReplaceDirective(t *testing.T) {
 	})
 	defer server.Close()
 
-	client, err := tama.NewClient(tama.Config{BaseURL: server.URL, APIKey: "test-key", Timeout: 10 * time.Second})
+	client, err := tama.NewClient(tama.Config{
+		BaseURL:        server.URL,
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		Timeout:        10 * time.Second,
+		SkipTokenFetch: true,
+	})
 	if err != nil {
 		t.Skipf("Skipping test due to client creation failure: %v", err)
 	}
@@ -315,30 +327,52 @@ func TestPerceptionDeleteDirective(t *testing.T) {
 	})
 	defer server.Close()
 
-	client, err := tama.NewClient(tama.Config{BaseURL: server.URL, APIKey: "test-key", Timeout: 10 * time.Second})
+	client, err := tama.NewClient(tama.Config{
+		BaseURL:        server.URL,
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		Timeout:        10 * time.Second,
+		SkipTokenFetch: true,
+	})
 	if err != nil {
 		t.Skipf("Skipping test due to client creation failure: %v", err)
 	}
-	if err := client.Perception.DeleteDirective("directive-123"); err != nil {
+	err = client.Perception.DeleteDirective("directive-123")
+	if err != nil {
 		t.Fatalf("Expected no error, got %v", err)
 	}
 }
 
 func TestPerceptionDirectiveEmptyIDValidations(t *testing.T) {
-	client, err := tama.NewClient(tama.Config{BaseURL: "https://api.example.com", APIKey: "test-key"})
+	client, err := tama.NewClient(tama.Config{
+		BaseURL:        "https://api.example.com",
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		SkipTokenFetch: true,
+	})
 	if err != nil {
 		t.Skipf("Skipping test due to client creation failure: %v", err)
 	}
-	if _, err := client.Perception.GetDirective(""); err == nil {
+	_, err = client.Perception.GetDirective("")
+	if err == nil {
 		t.Error("Expected validation error for empty directive ID in GetDirective")
 	}
-	if _, err := client.Perception.UpdateDirective("", perception.UpdateDirectiveRequest{Directive: perception.UpdateDirectiveData{PromptID: "p"}}); err == nil {
+	_, err = client.Perception.UpdateDirective(
+		"",
+		perception.UpdateDirectiveRequest{Directive: perception.UpdateDirectiveData{PromptID: "p"}},
+	)
+	if err == nil {
 		t.Error("Expected validation error for empty directive ID in UpdateDirective")
 	}
-	if _, err := client.Perception.ReplaceDirective("", perception.UpdateDirectiveRequest{Directive: perception.UpdateDirectiveData{PromptID: "p"}}); err == nil {
+	_, err = client.Perception.ReplaceDirective(
+		"",
+		perception.UpdateDirectiveRequest{Directive: perception.UpdateDirectiveData{PromptID: "p"}},
+	)
+	if err == nil {
 		t.Error("Expected validation error for empty directive ID in ReplaceDirective")
 	}
-	if err := client.Perception.DeleteDirective(""); err == nil {
+	err = client.Perception.DeleteDirective("")
+	if err == nil {
 		t.Error("Expected validation error for empty directive ID in DeleteDirective")
 	}
 }

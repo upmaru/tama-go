@@ -2,6 +2,7 @@ package tama
 
 import (
 	"encoding/base64"
+	"errors"
 	"fmt"
 	"strings"
 	"sync"
@@ -15,7 +16,7 @@ const (
 	DefaultTimeout = 30 * time.Second
 )
 
-// TokenResponse represents the OAuth2 token response from /auth/tokens
+// TokenResponse represents the OAuth2 token response from /auth/tokens.
 type TokenResponse struct {
 	AccessToken string `json:"access_token"`
 	TokenType   string `json:"token_type"`
@@ -23,7 +24,7 @@ type TokenResponse struct {
 	ExpiresIn   int64  `json:"expires_in"`
 }
 
-// Token represents an OAuth2 access token with expiration tracking
+// Token represents an OAuth2 access token with expiration tracking.
 type Token struct {
 	AccessToken string
 	TokenType   string
@@ -31,13 +32,17 @@ type Token struct {
 	ExpiresAt   time.Time
 }
 
-// IsExpired checks if the token is expired or will expire within 30 seconds
+// IsExpired checks if the token is expired or will expire within 30 seconds.
 func (t *Token) IsExpired() bool {
 	if t.ExpiresAt.IsZero() {
 		return true
 	}
-	// Consider token expired if it expires within 30 seconds to account for request time
-	return time.Now().Add(30 * time.Second).After(t.ExpiresAt)
+	// Consider token expired if it expires within 30 seconds to account for request time.
+	// Split for readability and to satisfy linters.
+	expiryCheck := time.Now().
+		Add(30 * time.Second). //nolint:mnd // 30-second grace window to account for request time
+		After(t.ExpiresAt)
+	return expiryCheck
 }
 
 // Client represents the main Tama API client.
@@ -77,10 +82,10 @@ func NewClient(config Config) (*Client, error) {
 	// Require client credentials only if APIKey is not provided (backwards compatibility for tests)
 	if config.APIKey == "" {
 		if config.ClientID == "" {
-			return nil, fmt.Errorf("client_id is required")
+			return nil, errors.New("client_id is required")
 		}
 		if config.ClientSecret == "" {
-			return nil, fmt.Errorf("client_secret is required")
+			return nil, errors.New("client_secret is required")
 		}
 	}
 
@@ -102,17 +107,15 @@ func NewClient(config Config) (*Client, error) {
 	if config.APIKey != "" && (config.ClientID == "" || config.ClientSecret == "") {
 		client.skipTokenFetch = true
 		client.httpClient.SetAuthToken(config.APIKey)
-	} else {
+	} else if !config.SkipTokenFetch {
 		// Get initial OAuth2 token (unless skipped for testing)
-		if !config.SkipTokenFetch {
-			if err := client.refreshToken(); err != nil {
-				return nil, fmt.Errorf("failed to obtain initial token: %w", err)
-			}
+		if err := client.refreshToken(); err != nil {
+			return nil, fmt.Errorf("failed to obtain initial token: %w", err)
 		}
 	}
 
-	// Set up request interceptor to ensure token validity on each request
-	httpClient.OnBeforeRequest(func(c *resty.Client, req *resty.Request) error {
+	// Set up request interceptor to ensure token validity on each request.
+	httpClient.OnBeforeRequest(func(_ *resty.Client, _ *resty.Request) error {
 		// Skip token validation if SkipTokenFetch is enabled (for testing)
 		if client.skipTokenFetch {
 			return nil
@@ -136,7 +139,7 @@ func NewClient(config Config) (*Client, error) {
 	return client, nil
 }
 
-// refreshToken obtains a new OAuth2 access token using client credentials flow
+// refreshToken obtains a new OAuth2 access token using client credentials flow.
 func (c *Client) refreshToken() error {
 	c.tokenMutex.Lock()
 	defer c.tokenMutex.Unlock()
@@ -186,7 +189,7 @@ func (c *Client) refreshToken() error {
 	return nil
 }
 
-// ensureValidToken ensures that we have a valid, non-expired token
+// ensureValidToken ensures that we have a valid, non-expired token.
 func (c *Client) ensureValidToken() error {
 	// Skip token validation if SkipTokenFetch is enabled (for testing)
 	if c.skipTokenFetch {
@@ -218,19 +221,19 @@ func (c *Client) SetHeader(header, value string) {
 func (c *Client) GetHTTPClient() *resty.Client {
 	// Ensure we have a valid token before returning the client
 	// If token refresh fails, we'll let the individual API calls handle the error
-	c.ensureValidToken()
+	_ = c.ensureValidToken()
 	return c.httpClient
 }
 
 // TestOAuth2Authentication tests actual OAuth2 authentication flow
-// This test requires a real server with valid client credentials
-// Run with: go test -run TestOAuth2Authentication -tags=oauth2
+// This test requires a real server with valid client credentials.
+// Run with: go test -run TestOAuth2Authentication -tags=oauth2.
 func TestOAuth2Authentication(clientID, clientSecret, baseURL string) error {
 	config := Config{
 		BaseURL:      baseURL,
 		ClientID:     clientID,
 		ClientSecret: clientSecret,
-		Timeout:      30 * time.Second,
+		Timeout:      30 * time.Second, //nolint:mnd // default timeout for this auth test
 		// SkipTokenFetch is false by default, so it will attempt real authentication
 	}
 
@@ -242,11 +245,11 @@ func TestOAuth2Authentication(clientID, clientSecret, baseURL string) error {
 	// Test that we have a valid token
 	token := client.GetToken()
 	if token == nil {
-		return fmt.Errorf("no token available after authentication")
+		return errors.New("no token available after authentication")
 	}
 
 	if token.AccessToken == "" {
-		return fmt.Errorf("empty access token")
+		return errors.New("empty access token")
 	}
 
 	if token.TokenType != "Bearer" {
@@ -256,7 +259,7 @@ func TestOAuth2Authentication(clientID, clientSecret, baseURL string) error {
 	return nil
 }
 
-// GetToken returns the current access token information
+// GetToken returns the current access token information.
 func (c *Client) GetToken() *Token {
 	c.tokenMutex.RLock()
 	defer c.tokenMutex.RUnlock()

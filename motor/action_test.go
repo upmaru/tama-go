@@ -453,6 +453,7 @@ func TestMotorGetActionByPathAndMethodValidationNoHTTPCall(t *testing.T) {
 	}
 }
 
+//nolint:gocognit
 func TestMotorGetActionByPathAndMethodEncoding(t *testing.T) {
 	// Test that the path is correctly encoded and method is lowercased
 	testCases := []struct {

@@ -95,7 +95,7 @@ func TestPerceptionGetThoughtError(t *testing.T) {
 	if err != nil {
 		t.Skipf("Skipping test due to client creation failure: %v", err)
 	}
-_, err = client.Perception.GetThought("nonexistent")
+	_, err = client.Perception.GetThought("nonexistent")
 
 	if err == nil {
 		t.Fatal("Expected error, got nil")
@@ -541,6 +541,7 @@ func TestPerceptionUpdateThought(t *testing.T) {
 	}
 }
 
+//nolint:gocognit
 func TestPerceptionUpdateThoughtWithIndex(t *testing.T) {
 	indexValue := 3
 	request := perception.UpdateThoughtRequest{
@@ -827,7 +828,7 @@ func TestPerceptionDeleteThought(t *testing.T) {
 	if err != nil {
 		t.Skipf("Skipping test due to client creation failure: %v", err)
 	}
-err = client.Perception.DeleteThought("thought-123")
+	err = client.Perception.DeleteThought("thought-123")
 
 	if err != nil {
 		t.Fatalf("Expected no error, got %v", err)
@@ -845,7 +846,7 @@ func TestPerceptionGetThoughtEmptyID(t *testing.T) {
 		t.Skipf("Skipping test due to client creation failure: %v", err)
 	}
 
-_, err = client.Perception.GetThought("")
+	_, err = client.Perception.GetThought("")
 	if err == nil {
 		t.Error("Expected validation error for empty thought ID in GetThought")
 	}
@@ -862,7 +863,7 @@ func TestPerceptionUpdateThoughtEmptyID(t *testing.T) {
 		t.Skipf("Skipping test due to client creation failure: %v", err)
 	}
 
-_, err = client.Perception.UpdateThought("", perception.UpdateThoughtRequest{
+	_, err = client.Perception.UpdateThought("", perception.UpdateThoughtRequest{
 		Thought: perception.UpdateThoughtData{Relation: "test"},
 	})
 	if err == nil {
@@ -881,7 +882,7 @@ func TestPerceptionDeleteThoughtEmptyID(t *testing.T) {
 		t.Skipf("Skipping test due to client creation failure: %v", err)
 	}
 
-err = client.Perception.DeleteThought("")
+	err = client.Perception.DeleteThought("")
 	if err == nil {
 		t.Error("Expected validation error for empty thought ID in DeleteThought")
 	}
@@ -1034,7 +1035,7 @@ func TestPerceptionCreateThoughtWithFieldErrors(t *testing.T) {
 		},
 	}
 
-_, err = client.Perception.CreateThought("chain-123", request)
+	_, err = client.Perception.CreateThought("chain-123", request)
 
 	if err == nil {
 		t.Fatal("Expected error, got nil")
@@ -1226,6 +1227,7 @@ func TestPerceptionUpdateThoughtWithDelegation(t *testing.T) {
 	ValidateThoughtResponse(t, *thought, expectedThought)
 }
 
+//nolint:gocognit
 func TestPerceptionNestedErrorParsing(t *testing.T) {
 	// Test API response with nested validation errors (e.g., module.reference)
 	server := createMockServer(func(w http.ResponseWriter, r *http.Request) {
@@ -1286,7 +1288,7 @@ func TestPerceptionNestedErrorParsing(t *testing.T) {
 		},
 	}
 
-_, err = client.Perception.CreateThought("chain-123", request)
+	_, err = client.Perception.CreateThought("chain-123", request)
 
 	if err == nil {
 		t.Fatal("Expected error, got nil")

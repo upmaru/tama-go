@@ -476,7 +476,6 @@ func TestModuleUpdateInputEmptyID(t *testing.T) {
 		t.Skipf("Skipping test due to client creation failure: %v", err)
 	}
 	service := module.NewService(client.GetHTTPClient())
-	err = service.DeleteInput("")
 
 	req := module.UpdateInputRequest{
 		Input: module.UpdateInputData{
@@ -489,7 +488,6 @@ func TestModuleUpdateInputEmptyID(t *testing.T) {
 	if err == nil || err.Error() != "input ID is required" {
 		t.Errorf("Expected 'input ID is required' error, got %v", err)
 	}
-
 }
 
 func TestModuleReplaceInputEmptyID(t *testing.T) {

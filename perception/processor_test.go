@@ -48,11 +48,11 @@ func TestPerceptionGetProcessor(t *testing.T) {
 	defer server.Close()
 
 	config := tama.Config{
-		BaseURL: server.URL,
-		ClientID: "test-client-id",
-		ClientSecret: "test-client-secret",
+		BaseURL:        server.URL,
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
 		SkipTokenFetch: true,
-		Timeout: 10 * time.Second,
+		Timeout:        10 * time.Second,
 	}
 
 	client, err := tama.NewClient(config)
@@ -99,18 +99,18 @@ func TestPerceptionGetProcessorError(t *testing.T) {
 	defer server.Close()
 
 	config := tama.Config{
-		BaseURL: server.URL,
-		ClientID: "test-client-id",
-		ClientSecret: "test-client-secret",
+		BaseURL:        server.URL,
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
 		SkipTokenFetch: true,
-		Timeout: 10 * time.Second,
+		Timeout:        10 * time.Second,
 	}
 
 	client, err := tama.NewClient(config)
 	if err != nil {
 		t.Skipf("Skipping test due to client creation failure: %v", err)
 	}
-_, err = client.Perception.GetProcessor("thought-123", "nonexistent")
+	_, err = client.Perception.GetProcessor("thought-123", "nonexistent")
 
 	if err == nil {
 		t.Fatal("Expected error, got nil")
@@ -179,11 +179,11 @@ func TestPerceptionCreateProcessor(t *testing.T) {
 	defer server.Close()
 
 	config := tama.Config{
-		BaseURL: server.URL,
-		ClientID: "test-client-id",
-		ClientSecret: "test-client-secret",
+		BaseURL:        server.URL,
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
 		SkipTokenFetch: true,
-		Timeout: 10 * time.Second,
+		Timeout:        10 * time.Second,
 	}
 
 	client, err := tama.NewClient(config)
@@ -218,11 +218,11 @@ func TestPerceptionCreateProcessor(t *testing.T) {
 
 func TestPerceptionCreateProcessorValidation(t *testing.T) {
 	config := tama.Config{
-		BaseURL: "https://api.example.com",
-		ClientID: "test-client-id",
-		ClientSecret: "test-client-secret",
+		BaseURL:        "https://api.example.com",
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
 		SkipTokenFetch: true,
-		Timeout: 10 * time.Second,
+		Timeout:        10 * time.Second,
 	}
 
 	client, err := tama.NewClient(config)
@@ -231,7 +231,7 @@ func TestPerceptionCreateProcessorValidation(t *testing.T) {
 	}
 
 	// Test empty thought ID validation
-_, err = client.Perception.CreateProcessor("", "completion", perception.CreateProcessorRequest{
+	_, err = client.Perception.CreateProcessor("", "completion", perception.CreateProcessorRequest{
 		Processor: perception.ProcessorRequestData{
 			ModelID: "model-123",
 		},
@@ -318,11 +318,11 @@ func TestPerceptionUpdateProcessor(t *testing.T) {
 	defer server.Close()
 
 	config := tama.Config{
-		BaseURL: server.URL,
-		ClientID: "test-client-id",
-		ClientSecret: "test-client-secret",
+		BaseURL:        server.URL,
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
 		SkipTokenFetch: true,
-		Timeout: 10 * time.Second,
+		Timeout:        10 * time.Second,
 	}
 
 	client, err := tama.NewClient(config)
@@ -384,11 +384,11 @@ func TestPerceptionReplaceProcessor(t *testing.T) {
 	defer server.Close()
 
 	config := tama.Config{
-		BaseURL: server.URL,
-		ClientID: "test-client-id",
-		ClientSecret: "test-client-secret",
+		BaseURL:        server.URL,
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
 		SkipTokenFetch: true,
-		Timeout: 10 * time.Second,
+		Timeout:        10 * time.Second,
 	}
 
 	client, err := tama.NewClient(config)
@@ -434,11 +434,11 @@ func TestPerceptionDeleteProcessor(t *testing.T) {
 	defer server.Close()
 
 	config := tama.Config{
-		BaseURL: server.URL,
-		ClientID: "test-client-id",
-		ClientSecret: "test-client-secret",
+		BaseURL:        server.URL,
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
 		SkipTokenFetch: true,
-		Timeout: 10 * time.Second,
+		Timeout:        10 * time.Second,
 	}
 
 	client, err := tama.NewClient(config)
@@ -446,7 +446,7 @@ func TestPerceptionDeleteProcessor(t *testing.T) {
 		t.Skipf("Skipping test due to client creation failure: %v", err)
 	}
 
-err = client.Perception.DeleteProcessor("thought-123", "completion")
+	err = client.Perception.DeleteProcessor("thought-123", "completion")
 
 	if err != nil {
 		t.Fatalf("Expected no error, got %v", err)
@@ -455,18 +455,18 @@ err = client.Perception.DeleteProcessor("thought-123", "completion")
 
 func TestPerceptionGetProcessorEmptyThoughtID(t *testing.T) {
 	config := tama.Config{
-		BaseURL: "https://api.example.com",
-		ClientID: "test-client-id",
-		ClientSecret: "test-client-secret",
+		BaseURL:        "https://api.example.com",
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
 		SkipTokenFetch: true,
-		Timeout: 10 * time.Second,
+		Timeout:        10 * time.Second,
 	}
 
 	client, err := tama.NewClient(config)
 	if err != nil {
 		t.Skipf("Skipping test due to client creation failure: %v", err)
 	}
-_, err = client.Perception.GetProcessor("", "completion")
+	_, err = client.Perception.GetProcessor("", "completion")
 
 	if err == nil || !strings.Contains(err.Error(), "thought ID is required") {
 		t.Errorf("Expected 'thought ID is required' error, got %v", err)
@@ -475,18 +475,18 @@ _, err = client.Perception.GetProcessor("", "completion")
 
 func TestPerceptionGetProcessorEmptyType(t *testing.T) {
 	config := tama.Config{
-		BaseURL: "https://api.example.com",
-		ClientID: "test-client-id",
-		ClientSecret: "test-client-secret",
+		BaseURL:        "https://api.example.com",
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
 		SkipTokenFetch: true,
-		Timeout: 10 * time.Second,
+		Timeout:        10 * time.Second,
 	}
 
 	client, err := tama.NewClient(config)
 	if err != nil {
 		t.Skipf("Skipping test due to client creation failure: %v", err)
 	}
-_, err = client.Perception.GetProcessor("thought-123", "")
+	_, err = client.Perception.GetProcessor("thought-123", "")
 
 	if err == nil || !strings.Contains(err.Error(), "processor type is required") {
 		t.Errorf("Expected 'processor type is required' error, got %v", err)
@@ -495,11 +495,11 @@ _, err = client.Perception.GetProcessor("thought-123", "")
 
 func TestPerceptionUpdateProcessorEmptyThoughtID(t *testing.T) {
 	config := tama.Config{
-		BaseURL: "https://api.example.com",
-		ClientID: "test-client-id",
-		ClientSecret: "test-client-secret",
+		BaseURL:        "https://api.example.com",
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
 		SkipTokenFetch: true,
-		Timeout: 10 * time.Second,
+		Timeout:        10 * time.Second,
 	}
 
 	client, err := tama.NewClient(config)
@@ -513,7 +513,7 @@ func TestPerceptionUpdateProcessorEmptyThoughtID(t *testing.T) {
 		},
 	}
 
-_, err = client.Perception.UpdateProcessor("", "completion", updateReq)
+	_, err = client.Perception.UpdateProcessor("", "completion", updateReq)
 
 	if err == nil || !strings.Contains(err.Error(), "thought ID is required") {
 		t.Errorf("Expected 'thought ID is required' error, got %v", err)
@@ -522,11 +522,11 @@ _, err = client.Perception.UpdateProcessor("", "completion", updateReq)
 
 func TestPerceptionReplaceProcessorEmptyThoughtID(t *testing.T) {
 	config := tama.Config{
-		BaseURL: "https://api.example.com",
-		ClientID: "test-client-id",
-		ClientSecret: "test-client-secret",
+		BaseURL:        "https://api.example.com",
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
 		SkipTokenFetch: true,
-		Timeout: 10 * time.Second,
+		Timeout:        10 * time.Second,
 	}
 
 	client, err := tama.NewClient(config)
@@ -540,7 +540,7 @@ func TestPerceptionReplaceProcessorEmptyThoughtID(t *testing.T) {
 		},
 	}
 
-_, err = client.Perception.ReplaceProcessor("", "completion", replaceReq)
+	_, err = client.Perception.ReplaceProcessor("", "completion", replaceReq)
 
 	if err == nil || !strings.Contains(err.Error(), "thought ID is required") {
 		t.Errorf("Expected 'thought ID is required' error, got %v", err)
@@ -549,11 +549,11 @@ _, err = client.Perception.ReplaceProcessor("", "completion", replaceReq)
 
 func TestPerceptionDeleteProcessorEmptyThoughtID(t *testing.T) {
 	config := tama.Config{
-		BaseURL: "https://api.example.com",
-		ClientID: "test-client-id",
-		ClientSecret: "test-client-secret",
+		BaseURL:        "https://api.example.com",
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
 		SkipTokenFetch: true,
-		Timeout: 10 * time.Second,
+		Timeout:        10 * time.Second,
 	}
 
 	client, err := tama.NewClient(config)
@@ -561,7 +561,7 @@ func TestPerceptionDeleteProcessorEmptyThoughtID(t *testing.T) {
 		t.Skipf("Skipping test due to client creation failure: %v", err)
 	}
 
-err = client.Perception.DeleteProcessor("", "completion")
+	err = client.Perception.DeleteProcessor("", "completion")
 
 	if err == nil || !strings.Contains(err.Error(), "thought ID is required") {
 		t.Errorf("Expected 'thought ID is required' error, got %v", err)

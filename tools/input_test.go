@@ -185,9 +185,9 @@ func TestToolsCreateInputValidation(t *testing.T) {
 	}
 
 	// Test empty thought tool ID
-_, err = client.Tools.CreateInput("", tools.CreateInputRequest{
+	_, err = client.Tools.CreateInput("", tools.CreateInputRequest{
 		Input: tools.InputRequestData{Type: "text", ClassCorpusID: "corpus-123"},
-})
+	})
 	if err == nil {
 		t.Error("Expected validation error for empty thought tool ID")
 	}
@@ -414,12 +414,12 @@ func TestToolsGetInputEmptyID(t *testing.T) {
 }
 
 func TestToolsUpdateInputEmptyID(t *testing.T) {
-client, err := tama.NewClient(tama.Config{
+	client, err := tama.NewClient(tama.Config{
 		BaseURL:        "https://api.example.com",
 		ClientID:       "test-client-id",
 		ClientSecret:   "test-client-secret",
 		SkipTokenFetch: true,
-})
+	})
 	if err != nil {
 		t.Skipf("Skipping test due to client creation failure: %v", err)
 	}
@@ -433,12 +433,12 @@ client, err := tama.NewClient(tama.Config{
 }
 
 func TestToolsReplaceInputEmptyID(t *testing.T) {
-client, err := tama.NewClient(tama.Config{
+	client, err := tama.NewClient(tama.Config{
 		BaseURL:        "https://api.example.com",
 		ClientID:       "test-client-id",
 		ClientSecret:   "test-client-secret",
 		SkipTokenFetch: true,
-})
+	})
 	if err != nil {
 		t.Skipf("Skipping test due to client creation failure: %v", err)
 	}
@@ -452,12 +452,12 @@ client, err := tama.NewClient(tama.Config{
 }
 
 func TestToolsDeleteInputEmptyID(t *testing.T) {
-client, err := tama.NewClient(tama.Config{
+	client, err := tama.NewClient(tama.Config{
 		BaseURL:        "https://api.example.com",
 		ClientID:       "test-client-id",
 		ClientSecret:   "test-client-secret",
 		SkipTokenFetch: true,
-})
+	})
 	if err != nil {
 		t.Skipf("Skipping test due to client creation failure: %v", err)
 	}
@@ -512,7 +512,7 @@ func TestToolsCreateInputWithFieldErrors(t *testing.T) {
 		},
 	}
 
-_, err = client.Tools.CreateInput("tool-123", request)
+	_, err = client.Tools.CreateInput("tool-123", request)
 
 	if err == nil {
 		t.Fatal("Expected error, got nil")

@@ -301,7 +301,7 @@ func TestPerceptionCreateInitializerValidation(t *testing.T) {
 	}
 
 	// Test empty thought ID
-_, err = client.Perception.CreateInitializer("", perception.CreateInitializerRequest{
+	_, err = client.Perception.CreateInitializer("", perception.CreateInitializerRequest{
 		Initializer: perception.InitializerRequestData{
 			ClassID:   "class-123",
 			Reference: "tama/agentic/init",
@@ -515,7 +515,7 @@ func TestPerceptionGetInitializerEmptyID(t *testing.T) {
 		t.Skipf("Skipping test due to client creation failure: %v", err)
 	}
 
-_, err = client.Perception.GetInitializer("")
+	_, err = client.Perception.GetInitializer("")
 	if err == nil {
 		t.Error("Expected validation error for empty initializer ID in GetInitializer")
 	}
@@ -532,7 +532,7 @@ func TestPerceptionUpdateInitializerEmptyID(t *testing.T) {
 		t.Skipf("Skipping test due to client creation failure: %v", err)
 	}
 
-_, err = client.Perception.UpdateInitializer("", perception.UpdateInitializerRequest{
+	_, err = client.Perception.UpdateInitializer("", perception.UpdateInitializerRequest{
 		Initializer: perception.UpdateInitializerData{ClassID: "test"},
 	})
 	if err == nil {
@@ -551,7 +551,7 @@ func TestPerceptionReplaceInitializerEmptyID(t *testing.T) {
 		t.Skipf("Skipping test due to client creation failure: %v", err)
 	}
 
-_, err = client.Perception.ReplaceInitializer("", perception.UpdateInitializerRequest{
+	_, err = client.Perception.ReplaceInitializer("", perception.UpdateInitializerRequest{
 		Initializer: perception.UpdateInitializerData{ClassID: "test"},
 	})
 	if err == nil {
@@ -560,17 +560,17 @@ _, err = client.Perception.ReplaceInitializer("", perception.UpdateInitializerRe
 }
 
 func TestPerceptionDeleteInitializerEmptyID(t *testing.T) {
-client, err := tama.NewClient(tama.Config{
+	client, err := tama.NewClient(tama.Config{
 		BaseURL:        "https://api.example.com",
 		ClientID:       "test-client-id",
 		ClientSecret:   "test-client-secret",
 		SkipTokenFetch: true,
-})
-if err != nil {
-	t.Skipf("Skipping test due to client creation failure: %v", err)
-}
+	})
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
 
-err = client.Perception.DeleteInitializer("")
+	err = client.Perception.DeleteInitializer("")
 	if err == nil {
 		t.Error("Expected validation error for empty initializer ID in DeleteInitializer")
 	}

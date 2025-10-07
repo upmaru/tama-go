@@ -323,7 +323,7 @@ func TestPerceptionDeletePath(t *testing.T) {
 	if err != nil {
 		t.Skipf("Skipping test due to client creation failure: %v", err)
 	}
-err = client.Perception.DeletePath("path-123")
+	err = client.Perception.DeletePath("path-123")
 
 	if err != nil {
 		t.Fatalf("Expected no error, got %v", err)

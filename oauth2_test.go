@@ -13,7 +13,9 @@ import (
 	tama "github.com/upmaru/tama-go"
 )
 
-// TestOAuth2FlowDemo demonstrates the complete OAuth2 flow working end-to-end
+// TestOAuth2FlowDemo demonstrates the complete OAuth2 flow working end-to-end.
+//
+//nolint:gocognit,cyclop // Integration-style test with extensive setup/teardown and branching; acceptable complexity for test coverage.
 func TestOAuth2FlowDemo(t *testing.T) {
 	// Track token requests for verification
 	tokenRequestCount := 0
@@ -26,7 +28,7 @@ func TestOAuth2FlowDemo(t *testing.T) {
 			tokenRequestCount++
 
 			// Verify OAuth2 token request format
-			if r.Method != "POST" {
+			if r.Method != http.MethodPost {
 				t.Errorf("Expected POST request for token, got %s", r.Method)
 				w.WriteHeader(http.StatusMethodNotAllowed)
 				return
@@ -239,7 +241,10 @@ func TestOAuth2FlowDemo(t *testing.T) {
 
 		// Should not have made any token requests
 		if tokenRequestCount != initialCount {
-			t.Errorf("Expected no additional token requests in test mode, got %d additional", tokenRequestCount-initialCount)
+			t.Errorf(
+				"Expected no additional token requests in test mode, got %d additional",
+				tokenRequestCount-initialCount,
+			)
 		}
 
 		// Token should be nil in test mode
@@ -256,7 +261,7 @@ func TestOAuth2FlowDemo(t *testing.T) {
 	})
 }
 
-// TestOAuth2Integration demonstrates integration with actual service calls
+// TestOAuth2Integration demonstrates integration with actual service calls.
 func TestOAuth2Integration(t *testing.T) {
 	// Create mock server that handles both auth and API calls
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -331,7 +336,7 @@ func TestOAuth2Integration(t *testing.T) {
 	t.Logf("   - Service returned expected data")
 }
 
-// TestOAuth2ThreadSafety demonstrates thread-safe token operations
+// TestOAuth2ThreadSafety demonstrates thread-safe token operations.
 func TestOAuth2ThreadSafety(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path == "/auth/tokens" {
@@ -366,7 +371,7 @@ func TestOAuth2ThreadSafety(t *testing.T) {
 	const numGoroutines = 10
 	results := make(chan string, numGoroutines)
 
-	for i := 0; i < numGoroutines; i++ {
+	for i := range make([]int, numGoroutines) {
 		go func(id int) {
 			// Wait for token to expire and trigger refresh
 			time.Sleep(2 * time.Second)
@@ -382,7 +387,7 @@ func TestOAuth2ThreadSafety(t *testing.T) {
 
 	// Collect results
 	tokens := make(map[string]int)
-	for i := 0; i < numGoroutines; i++ {
+	for range make([]int, numGoroutines) {
 		result := <-results
 		parts := strings.Split(result, ": ")
 		if len(parts) == 2 {
