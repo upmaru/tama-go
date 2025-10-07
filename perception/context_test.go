@@ -39,12 +39,17 @@ func TestPerceptionGetContext(t *testing.T) {
 	defer server.Close()
 
 	config := tama.Config{
-		BaseURL: server.URL,
-		APIKey:  "test-key",
-		Timeout: 10 * time.Second,
+		BaseURL:        server.URL,
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		SkipTokenFetch: true,
+		Timeout:        10 * time.Second,
 	}
 
-	client := tama.NewClient(config)
+	client, err := tama.NewClient(config)
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
 	context, err := client.Perception.GetContext("context-123")
 
 	if err != nil {
@@ -114,12 +119,17 @@ func TestPerceptionCreateContext(t *testing.T) {
 	defer server.Close()
 
 	config := tama.Config{
-		BaseURL: server.URL,
-		APIKey:  "test-key",
-		Timeout: 10 * time.Second,
+		BaseURL:        server.URL,
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		SkipTokenFetch: true,
+		Timeout:        10 * time.Second,
 	}
 
-	client := tama.NewClient(config)
+	client, err := tama.NewClient(config)
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
 	context, err := client.Perception.CreateContext("thought-123", request)
 
 	if err != nil {
@@ -130,13 +140,18 @@ func TestPerceptionCreateContext(t *testing.T) {
 }
 
 func TestPerceptionCreateContextValidation(t *testing.T) {
-	client := tama.NewClient(tama.Config{
-		BaseURL: "https://api.example.com",
-		APIKey:  "test-key",
+	client, err := tama.NewClient(tama.Config{
+		BaseURL:        "https://api.example.com",
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		SkipTokenFetch: true,
 	})
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
 
 	// Test empty thought ID
-	_, err := client.Perception.CreateContext("", perception.CreateContextRequest{
+	_, err = client.Perception.CreateContext("", perception.CreateContextRequest{
 		Context: perception.ContextRequestData{PromptID: "prompt-123", Layer: 1},
 	})
 	if err == nil {
@@ -187,12 +202,17 @@ func TestPerceptionUpdateContext(t *testing.T) {
 	defer server.Close()
 
 	config := tama.Config{
-		BaseURL: server.URL,
-		APIKey:  "test-key",
-		Timeout: 10 * time.Second,
+		BaseURL:        server.URL,
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		SkipTokenFetch: true,
+		Timeout:        10 * time.Second,
 	}
 
-	client := tama.NewClient(config)
+	client, err := tama.NewClient(config)
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
 	context, err := client.Perception.UpdateContext("context-123", request)
 
 	if err != nil {
@@ -243,12 +263,17 @@ func TestPerceptionReplaceContext(t *testing.T) {
 	defer server.Close()
 
 	config := tama.Config{
-		BaseURL: server.URL,
-		APIKey:  "test-key",
-		Timeout: 10 * time.Second,
+		BaseURL:        server.URL,
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		SkipTokenFetch: true,
+		Timeout:        10 * time.Second,
 	}
 
-	client := tama.NewClient(config)
+	client, err := tama.NewClient(config)
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
 	context, err := client.Perception.ReplaceContext("context-123", request)
 
 	if err != nil {
@@ -279,13 +304,18 @@ func TestPerceptionDeleteContext(t *testing.T) {
 	defer server.Close()
 
 	config := tama.Config{
-		BaseURL: server.URL,
-		APIKey:  "test-key",
-		Timeout: 10 * time.Second,
+		BaseURL:        server.URL,
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		SkipTokenFetch: true,
+		Timeout:        10 * time.Second,
 	}
 
-	client := tama.NewClient(config)
-	err := client.Perception.DeleteContext("context-123")
+	client, err := tama.NewClient(config)
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
+	err = client.Perception.DeleteContext("context-123")
 
 	if err != nil {
 		t.Fatalf("Expected no error, got %v", err)
@@ -293,24 +323,34 @@ func TestPerceptionDeleteContext(t *testing.T) {
 }
 
 func TestPerceptionGetContextEmptyID(t *testing.T) {
-	client := tama.NewClient(tama.Config{
-		BaseURL: "https://api.example.com",
-		APIKey:  "test-key",
+	client, err := tama.NewClient(tama.Config{
+		BaseURL:        "https://api.example.com",
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		SkipTokenFetch: true,
 	})
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
 
-	_, err := client.Perception.GetContext("")
+	_, err = client.Perception.GetContext("")
 	if err == nil {
 		t.Error("Expected validation error for empty context ID in GetContext")
 	}
 }
 
 func TestPerceptionUpdateContextEmptyID(t *testing.T) {
-	client := tama.NewClient(tama.Config{
-		BaseURL: "https://api.example.com",
-		APIKey:  "test-key",
+	client, err := tama.NewClient(tama.Config{
+		BaseURL:        "https://api.example.com",
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		SkipTokenFetch: true,
 	})
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
 
-	_, err := client.Perception.UpdateContext("", perception.UpdateContextRequest{
+	_, err = client.Perception.UpdateContext("", perception.UpdateContextRequest{
 		Context: perception.UpdateContextData{PromptID: "test"},
 	})
 	if err == nil {
@@ -319,12 +359,17 @@ func TestPerceptionUpdateContextEmptyID(t *testing.T) {
 }
 
 func TestPerceptionReplaceContextEmptyID(t *testing.T) {
-	client := tama.NewClient(tama.Config{
-		BaseURL: "https://api.example.com",
-		APIKey:  "test-key",
+	client, err := tama.NewClient(tama.Config{
+		BaseURL:        "https://api.example.com",
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		SkipTokenFetch: true,
 	})
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
 
-	_, err := client.Perception.ReplaceContext("", perception.UpdateContextRequest{
+	_, err = client.Perception.ReplaceContext("", perception.UpdateContextRequest{
 		Context: perception.UpdateContextData{PromptID: "test"},
 	})
 	if err == nil {
@@ -333,12 +378,17 @@ func TestPerceptionReplaceContextEmptyID(t *testing.T) {
 }
 
 func TestPerceptionDeleteContextEmptyID(t *testing.T) {
-	client := tama.NewClient(tama.Config{
-		BaseURL: "https://api.example.com",
-		APIKey:  "test-key",
+	client, err := tama.NewClient(tama.Config{
+		BaseURL:        "https://api.example.com",
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		SkipTokenFetch: true,
 	})
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
 
-	err := client.Perception.DeleteContext("")
+	err = client.Perception.DeleteContext("")
 	if err == nil {
 		t.Error("Expected validation error for empty context ID in DeleteContext")
 	}

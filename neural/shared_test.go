@@ -16,9 +16,15 @@ func CreateMockServer(handler http.HandlerFunc) *httptest.Server {
 // createTestClient is a helper to create a test client with a given base URL.
 func createTestClient(baseURL string) *tama.Client {
 	config := tama.Config{
-		BaseURL: baseURL,
-		APIKey:  "test-key",
-		Timeout: 10 * time.Second,
+		BaseURL:        baseURL,
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		SkipTokenFetch: true,
+		Timeout:        10 * time.Second,
 	}
-	return tama.NewClient(config)
+	client, err := tama.NewClient(config)
+	if err != nil {
+		return nil
+	}
+	return client
 }

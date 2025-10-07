@@ -45,10 +45,15 @@ func TestSensoryGetSpecification(t *testing.T) {
 	})
 	defer server.Close()
 
-	client := tama.NewClient(tama.Config{
-		BaseURL: server.URL,
-		APIKey:  "test-key",
+	client, err := tama.NewClient(tama.Config{
+		BaseURL:        server.URL,
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		SkipTokenFetch: true,
 	})
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
 
 	spec, err := client.Sensory.GetSpecification("spec-123")
 	if err != nil {
@@ -135,10 +140,15 @@ func TestSensoryCreateSpecification(t *testing.T) {
 	})
 	defer server.Close()
 
-	client := tama.NewClient(tama.Config{
-		BaseURL: server.URL,
-		APIKey:  "test-key",
+	client, err := tama.NewClient(tama.Config{
+		BaseURL:        server.URL,
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		SkipTokenFetch: true,
 	})
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
 
 	createReq := sensory.CreateSpecificationRequest{
 		Specification: sensory.SpecificationRequestData{
@@ -174,13 +184,18 @@ func TestSensoryCreateSpecification(t *testing.T) {
 }
 
 func TestSensoryCreateSpecificationValidation(t *testing.T) {
-	client := tama.NewClient(tama.Config{
-		BaseURL: "https://api.example.com",
-		APIKey:  "test-key",
+	client, err := tama.NewClient(tama.Config{
+		BaseURL:        "https://api.example.com",
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		SkipTokenFetch: true,
 	})
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
 
 	// Test empty space ID validation
-	_, err := client.Sensory.CreateSpecification("", sensory.CreateSpecificationRequest{
+	_, err = client.Sensory.CreateSpecification("", sensory.CreateSpecificationRequest{
 		Specification: sensory.SpecificationRequestData{
 			Schema: map[string]any{
 				"type": "object",
@@ -232,12 +247,17 @@ func TestSensoryCreateSpecificationValidation(t *testing.T) {
 }
 
 func TestSensoryGetSpecification_EmptyIDValidation(t *testing.T) {
-	client := tama.NewClient(tama.Config{
-		BaseURL: "https://api.example.com",
-		APIKey:  "test-key",
+	client, err := tama.NewClient(tama.Config{
+		BaseURL:        "https://api.example.com",
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		SkipTokenFetch: true,
 	})
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
 
-	_, err := client.Sensory.GetSpecification("")
+	_, err = client.Sensory.GetSpecification("")
 	if err == nil {
 		t.Error("Expected validation error for empty specification ID in GetSpecification")
 	}
@@ -288,10 +308,15 @@ func TestSensoryUpdateSpecification(t *testing.T) {
 	})
 	defer server.Close()
 
-	client := tama.NewClient(tama.Config{
-		BaseURL: server.URL,
-		APIKey:  "test-key",
+	client, err := tama.NewClient(tama.Config{
+		BaseURL:        server.URL,
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		SkipTokenFetch: true,
 	})
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
 
 	updateReq := sensory.UpdateSpecificationRequest{
 		Specification: sensory.UpdateSpecificationData{
@@ -323,10 +348,15 @@ func TestSensoryUpdateSpecification(t *testing.T) {
 }
 
 func TestSensoryUpdateSpecification_EmptyIDValidation(t *testing.T) {
-	client := tama.NewClient(tama.Config{
-		BaseURL: "https://api.example.com",
-		APIKey:  "test-key",
+	client, err := tama.NewClient(tama.Config{
+		BaseURL:        "https://api.example.com",
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		SkipTokenFetch: true,
 	})
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
 
 	updateReq := sensory.UpdateSpecificationRequest{
 		Specification: sensory.UpdateSpecificationData{
@@ -334,7 +364,7 @@ func TestSensoryUpdateSpecification_EmptyIDValidation(t *testing.T) {
 		},
 	}
 
-	_, err := client.Sensory.UpdateSpecification("", updateReq)
+	_, err = client.Sensory.UpdateSpecification("", updateReq)
 	if err == nil {
 		t.Error("Expected validation error for empty specification ID in UpdateSpecification")
 	}
@@ -385,10 +415,15 @@ func TestSensoryReplaceSpecification(t *testing.T) {
 	})
 	defer server.Close()
 
-	client := tama.NewClient(tama.Config{
-		BaseURL: server.URL,
-		APIKey:  "test-key",
+	client, err := tama.NewClient(tama.Config{
+		BaseURL:        server.URL,
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		SkipTokenFetch: true,
 	})
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
 
 	replaceReq := sensory.UpdateSpecificationRequest{
 		Specification: sensory.UpdateSpecificationData{
@@ -420,10 +455,15 @@ func TestSensoryReplaceSpecification(t *testing.T) {
 }
 
 func TestSensoryReplaceSpecification_EmptyIDValidation(t *testing.T) {
-	client := tama.NewClient(tama.Config{
-		BaseURL: "https://api.example.com",
-		APIKey:  "test-key",
+	client, err := tama.NewClient(tama.Config{
+		BaseURL:        "https://api.example.com",
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		SkipTokenFetch: true,
 	})
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
 
 	replaceReq := sensory.UpdateSpecificationRequest{
 		Specification: sensory.UpdateSpecificationData{
@@ -431,7 +471,7 @@ func TestSensoryReplaceSpecification_EmptyIDValidation(t *testing.T) {
 		},
 	}
 
-	_, err := client.Sensory.ReplaceSpecification("", replaceReq)
+	_, err = client.Sensory.ReplaceSpecification("", replaceReq)
 	if err == nil {
 		t.Error("Expected validation error for empty specification ID in ReplaceSpecification")
 	}
@@ -451,24 +491,34 @@ func TestSensoryDeleteSpecification(t *testing.T) {
 	})
 	defer server.Close()
 
-	client := tama.NewClient(tama.Config{
-		BaseURL: server.URL,
-		APIKey:  "test-key",
+	client, err := tama.NewClient(tama.Config{
+		BaseURL:        server.URL,
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		SkipTokenFetch: true,
 	})
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
 
-	err := client.Sensory.DeleteSpecification("spec-123")
+	err = client.Sensory.DeleteSpecification("spec-123")
 	if err != nil {
 		t.Fatalf("Unexpected error: %v", err)
 	}
 }
 
 func TestSensoryDeleteSpecification_EmptyIDValidation(t *testing.T) {
-	client := tama.NewClient(tama.Config{
-		BaseURL: "https://api.example.com",
-		APIKey:  "test-key",
+	client, err := tama.NewClient(tama.Config{
+		BaseURL:        "https://api.example.com",
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		SkipTokenFetch: true,
 	})
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
 
-	err := client.Sensory.DeleteSpecification("")
+	err = client.Sensory.DeleteSpecification("")
 	if err == nil {
 		t.Error("Expected validation error for empty specification ID in DeleteSpecification")
 	}

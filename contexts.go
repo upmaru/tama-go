@@ -15,6 +15,6 @@ type ContextsService struct {
 // newContextsService creates a new contexts service instance.
 func newContextsService(client *Client) *ContextsService {
 	return &ContextsService{
-		Service: contexts.NewService(client.httpClient),
+		Service: contexts.NewService(client.GetHTTPClient()),
 	}
 }

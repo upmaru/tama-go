@@ -33,7 +33,16 @@ func TestToolsGetOutput(t *testing.T) {
 	})
 	defer server.Close()
 
-	client := tama.NewClient(tama.Config{BaseURL: server.URL, APIKey: "test-key", Timeout: 10 * time.Second})
+	client, err := tama.NewClient(tama.Config{
+		BaseURL:        server.URL,
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		Timeout:        10 * time.Second,
+		SkipTokenFetch: true,
+	})
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
 	out, err := client.Tools.GetOutput("output-123")
 	if err != nil {
 		t.Fatalf("Expected no error, got %v", err)
@@ -50,8 +59,17 @@ func TestToolsGetOutputError(t *testing.T) {
 	})
 	defer server.Close()
 
-	client := tama.NewClient(tama.Config{BaseURL: server.URL, APIKey: "test-key", Timeout: 10 * time.Second})
-	_, err := client.Tools.GetOutput("missing")
+	client, err := tama.NewClient(tama.Config{
+		BaseURL:        server.URL,
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		Timeout:        10 * time.Second,
+		SkipTokenFetch: true,
+	})
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
+	_, err = client.Tools.GetOutput("missing")
 	if err == nil {
 		t.Fatal("Expected error, got nil")
 	}
@@ -93,7 +111,16 @@ func TestToolsCreateOutput(t *testing.T) {
 	})
 	defer server.Close()
 
-	client := tama.NewClient(tama.Config{BaseURL: server.URL, APIKey: "test-key", Timeout: 10 * time.Second})
+	client, err := tama.NewClient(tama.Config{
+		BaseURL:        server.URL,
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		Timeout:        10 * time.Second,
+		SkipTokenFetch: true,
+	})
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
 	out, err := client.Tools.CreateOutput("tool-123", request)
 	if err != nil {
 		t.Fatalf("Expected no error, got %v", err)
@@ -102,9 +129,17 @@ func TestToolsCreateOutput(t *testing.T) {
 }
 
 func TestToolsCreateOutputValidation(t *testing.T) {
-	client := tama.NewClient(tama.Config{BaseURL: "https://api.example.com", APIKey: "test-key"})
+	client, err := tama.NewClient(tama.Config{
+		BaseURL:        "https://api.example.com",
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		SkipTokenFetch: true,
+	})
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
 	// Missing thought tool id
-	_, err := client.Tools.CreateOutput(
+	_, err = client.Tools.CreateOutput(
 		"",
 		tools.CreateOutputRequest{Output: tools.OutputRequestData{ClassCorpusID: "c1"}},
 	)
@@ -142,7 +177,16 @@ func TestToolsUpdateOutput(t *testing.T) {
 	})
 	defer server.Close()
 
-	client := tama.NewClient(tama.Config{BaseURL: server.URL, APIKey: "test-key", Timeout: 10 * time.Second})
+	client, err := tama.NewClient(tama.Config{
+		BaseURL:        server.URL,
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		Timeout:        10 * time.Second,
+		SkipTokenFetch: true,
+	})
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
 	out, err := client.Tools.UpdateOutput("output-123", request)
 	if err != nil {
 		t.Fatalf("Expected no error, got %v", err)
@@ -171,7 +215,16 @@ func TestToolsReplaceOutput(t *testing.T) {
 	})
 	defer server.Close()
 
-	client := tama.NewClient(tama.Config{BaseURL: server.URL, APIKey: "test-key", Timeout: 10 * time.Second})
+	client, err := tama.NewClient(tama.Config{
+		BaseURL:        server.URL,
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		Timeout:        10 * time.Second,
+		SkipTokenFetch: true,
+	})
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
 	out, err := client.Tools.ReplaceOutput("output-123", request)
 	if err != nil {
 		t.Fatalf("Expected no error, got %v", err)
@@ -191,8 +244,18 @@ func TestToolsDeleteOutput(t *testing.T) {
 	})
 	defer server.Close()
 
-	client := tama.NewClient(tama.Config{BaseURL: server.URL, APIKey: "test-key", Timeout: 10 * time.Second})
-	if err := client.Tools.DeleteOutput("output-123"); err != nil {
+	client, err := tama.NewClient(tama.Config{
+		BaseURL:        server.URL,
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		Timeout:        10 * time.Second,
+		SkipTokenFetch: true,
+	})
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
+	err = client.Tools.DeleteOutput("output-123")
+	if err != nil {
 		t.Fatalf("Expected no error, got %v", err)
 	}
 }

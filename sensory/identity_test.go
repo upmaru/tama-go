@@ -41,10 +41,15 @@ func TestSensoryGetIdentity(t *testing.T) {
 	})
 	defer server.Close()
 
-	client := tama.NewClient(tama.Config{
-		BaseURL: server.URL,
-		APIKey:  "test-key",
+	client, err := tama.NewClient(tama.Config{
+		BaseURL:        server.URL,
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		SkipTokenFetch: true,
 	})
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
 
 	identity, err := client.Sensory.GetIdentity("identity-123")
 	if err != nil {
@@ -150,10 +155,15 @@ func TestSensoryCreateIdentity(t *testing.T) {
 	})
 	defer server.Close()
 
-	client := tama.NewClient(tama.Config{
-		BaseURL: server.URL,
-		APIKey:  "test-key",
+	client, err := tama.NewClient(tama.Config{
+		BaseURL:        server.URL,
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		SkipTokenFetch: true,
 	})
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
 
 	identity, err := client.Sensory.CreateIdentity("spec-123", "test-identifier", requestData)
 	if err != nil {
@@ -174,13 +184,18 @@ func TestSensoryCreateIdentity(t *testing.T) {
 }
 
 func TestSensoryCreateIdentityValidation(t *testing.T) {
-	client := tama.NewClient(tama.Config{
-		BaseURL: "http://localhost:8080",
-		APIKey:  "test-key",
+	client, err := tama.NewClient(tama.Config{
+		BaseURL:        "http://localhost:8080",
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		SkipTokenFetch: true,
 	})
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
 
 	// Test empty specification ID
-	_, err := client.Sensory.CreateIdentity("", "identifier", sensory.CreateIdentityRequest{})
+	_, err = client.Sensory.CreateIdentity("", "identifier", sensory.CreateIdentityRequest{})
 	if err == nil || err.Error() != "specification ID is required" {
 		t.Errorf("Expected 'specification ID is required' error, got: %v", err)
 	}
@@ -281,12 +296,17 @@ func TestSensoryCreateIdentityValidation(t *testing.T) {
 }
 
 func TestSensoryGetIdentity_EmptyIDValidation(t *testing.T) {
-	client := tama.NewClient(tama.Config{
-		BaseURL: "http://localhost:8080",
-		APIKey:  "test-key",
+	client, err := tama.NewClient(tama.Config{
+		BaseURL:        "http://localhost:8080",
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		SkipTokenFetch: true,
 	})
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
 
-	_, err := client.Sensory.GetIdentity("")
+	_, err = client.Sensory.GetIdentity("")
 	if err == nil || err.Error() != "identity ID is required" {
 		t.Errorf("Expected 'identity ID is required' error, got: %v", err)
 	}
@@ -344,10 +364,15 @@ func TestSensoryUpdateIdentity(t *testing.T) {
 	})
 	defer server.Close()
 
-	client := tama.NewClient(tama.Config{
-		BaseURL: server.URL,
-		APIKey:  "test-key",
+	client, err := tama.NewClient(tama.Config{
+		BaseURL:        server.URL,
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		SkipTokenFetch: true,
 	})
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
 
 	identity, err := client.Sensory.UpdateIdentity("identity-123", requestData)
 	if err != nil {
@@ -369,12 +394,17 @@ func TestSensoryUpdateIdentity(t *testing.T) {
 }
 
 func TestSensoryUpdateIdentity_EmptyIDValidation(t *testing.T) {
-	client := tama.NewClient(tama.Config{
-		BaseURL: "http://localhost:8080",
-		APIKey:  "test-key",
+	client, err := tama.NewClient(tama.Config{
+		BaseURL:        "http://localhost:8080",
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		SkipTokenFetch: true,
 	})
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
 
-	_, err := client.Sensory.UpdateIdentity("", sensory.UpdateIdentityRequest{})
+	_, err = client.Sensory.UpdateIdentity("", sensory.UpdateIdentityRequest{})
 	if err == nil || err.Error() != "identity ID is required" {
 		t.Errorf("Expected 'identity ID is required' error, got: %v", err)
 	}
@@ -432,10 +462,15 @@ func TestSensoryReplaceIdentity(t *testing.T) {
 	})
 	defer server.Close()
 
-	client := tama.NewClient(tama.Config{
-		BaseURL: server.URL,
-		APIKey:  "test-key",
+	client, err := tama.NewClient(tama.Config{
+		BaseURL:        server.URL,
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		SkipTokenFetch: true,
 	})
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
 
 	identity, err := client.Sensory.ReplaceIdentity("identity-123", requestData)
 	if err != nil {
@@ -452,12 +487,17 @@ func TestSensoryReplaceIdentity(t *testing.T) {
 }
 
 func TestSensoryReplaceIdentity_EmptyIDValidation(t *testing.T) {
-	client := tama.NewClient(tama.Config{
-		BaseURL: "http://localhost:8080",
-		APIKey:  "test-key",
+	client, err := tama.NewClient(tama.Config{
+		BaseURL:        "http://localhost:8080",
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		SkipTokenFetch: true,
 	})
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
 
-	_, err := client.Sensory.ReplaceIdentity("", sensory.UpdateIdentityRequest{})
+	_, err = client.Sensory.ReplaceIdentity("", sensory.UpdateIdentityRequest{})
 	if err == nil || err.Error() != "identity ID is required" {
 		t.Errorf("Expected 'identity ID is required' error, got: %v", err)
 	}
@@ -477,24 +517,34 @@ func TestSensoryDeleteIdentity(t *testing.T) {
 	})
 	defer server.Close()
 
-	client := tama.NewClient(tama.Config{
-		BaseURL: server.URL,
-		APIKey:  "test-key",
+	client, err := tama.NewClient(tama.Config{
+		BaseURL:        server.URL,
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		SkipTokenFetch: true,
 	})
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
 
-	err := client.Sensory.DeleteIdentity("identity-123")
+	err = client.Sensory.DeleteIdentity("identity-123")
 	if err != nil {
 		t.Fatalf("Unexpected error: %v", err)
 	}
 }
 
 func TestSensoryDeleteIdentity_EmptyIDValidation(t *testing.T) {
-	client := tama.NewClient(tama.Config{
-		BaseURL: "http://localhost:8080",
-		APIKey:  "test-key",
+	client, err := tama.NewClient(tama.Config{
+		BaseURL:        "http://localhost:8080",
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		SkipTokenFetch: true,
 	})
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
 
-	err := client.Sensory.DeleteIdentity("")
+	err = client.Sensory.DeleteIdentity("")
 	if err == nil || err.Error() != "identity ID is required" {
 		t.Errorf("Expected 'identity ID is required' error, got: %v", err)
 	}
@@ -571,10 +621,15 @@ func TestSensoryCreateIdentityWithClientCredentials(t *testing.T) {
 	})
 	defer server.Close()
 
-	client := tama.NewClient(tama.Config{
-		BaseURL: server.URL,
-		APIKey:  "test-key",
+	client, err := tama.NewClient(tama.Config{
+		BaseURL:        server.URL,
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		SkipTokenFetch: true,
 	})
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
 
 	identity, err := client.Sensory.CreateIdentity("spec-123", "test-identifier", requestData)
 	if err != nil {

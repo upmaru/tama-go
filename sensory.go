@@ -19,6 +19,6 @@ type SensoryService struct {
 // newSensoryService creates a new sensory service instance.
 func newSensoryService(client *Client) *SensoryService {
 	return &SensoryService{
-		Service: sensory.NewService(client.httpClient),
+		Service: sensory.NewService(client.GetHTTPClient()),
 	}
 }

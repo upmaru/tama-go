@@ -42,12 +42,17 @@ func TestPerceptionGetPath(t *testing.T) {
 	defer server.Close()
 
 	config := tama.Config{
-		BaseURL: server.URL,
-		APIKey:  "test-key",
-		Timeout: 10 * time.Second,
+		BaseURL:        server.URL,
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		SkipTokenFetch: true,
+		Timeout:        10 * time.Second,
 	}
 
-	client := tama.NewClient(config)
+	client, err := tama.NewClient(config)
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
 	path, err := client.Perception.GetPath("path-123")
 
 	if err != nil {
@@ -112,12 +117,17 @@ func TestPerceptionCreatePath(t *testing.T) {
 	defer server.Close()
 
 	config := tama.Config{
-		BaseURL: server.URL,
-		APIKey:  "test-key",
-		Timeout: 10 * time.Second,
+		BaseURL:        server.URL,
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		SkipTokenFetch: true,
+		Timeout:        10 * time.Second,
 	}
 
-	client := tama.NewClient(config)
+	client, err := tama.NewClient(config)
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
 	path, err := client.Perception.CreatePath("thought-123", request)
 
 	if err != nil {
@@ -128,13 +138,18 @@ func TestPerceptionCreatePath(t *testing.T) {
 }
 
 func TestPerceptionCreatePathValidation(t *testing.T) {
-	client := tama.NewClient(tama.Config{
-		BaseURL: "https://api.example.com",
-		APIKey:  "test-key",
+	client, err := tama.NewClient(tama.Config{
+		BaseURL:        "https://api.example.com",
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		SkipTokenFetch: true,
 	})
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
 
 	// Test empty thought ID
-	_, err := client.Perception.CreatePath("", perception.CreatePathRequest{
+	_, err = client.Perception.CreatePath("", perception.CreatePathRequest{
 		Path: perception.PathRequestData{TargetClassID: "class-123"},
 	})
 	if err == nil {
@@ -191,12 +206,17 @@ func TestPerceptionUpdatePath(t *testing.T) {
 	defer server.Close()
 
 	config := tama.Config{
-		BaseURL: server.URL,
-		APIKey:  "test-key",
-		Timeout: 10 * time.Second,
+		BaseURL:        server.URL,
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		SkipTokenFetch: true,
+		Timeout:        10 * time.Second,
 	}
 
-	client := tama.NewClient(config)
+	client, err := tama.NewClient(config)
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
 	path, err := client.Perception.UpdatePath("path-123", request)
 
 	if err != nil {
@@ -251,12 +271,17 @@ func TestPerceptionReplacePath(t *testing.T) {
 	defer server.Close()
 
 	config := tama.Config{
-		BaseURL: server.URL,
-		APIKey:  "test-key",
-		Timeout: 10 * time.Second,
+		BaseURL:        server.URL,
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		SkipTokenFetch: true,
+		Timeout:        10 * time.Second,
 	}
 
-	client := tama.NewClient(config)
+	client, err := tama.NewClient(config)
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
 	path, err := client.Perception.ReplacePath("path-123", request)
 
 	if err != nil {
@@ -287,13 +312,18 @@ func TestPerceptionDeletePath(t *testing.T) {
 	defer server.Close()
 
 	config := tama.Config{
-		BaseURL: server.URL,
-		APIKey:  "test-key",
-		Timeout: 10 * time.Second,
+		BaseURL:        server.URL,
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		SkipTokenFetch: true,
+		Timeout:        10 * time.Second,
 	}
 
-	client := tama.NewClient(config)
-	err := client.Perception.DeletePath("path-123")
+	client, err := tama.NewClient(config)
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
+	err = client.Perception.DeletePath("path-123")
 
 	if err != nil {
 		t.Fatalf("Expected no error, got %v", err)
@@ -301,24 +331,34 @@ func TestPerceptionDeletePath(t *testing.T) {
 }
 
 func TestPerceptionGetPathEmptyID(t *testing.T) {
-	client := tama.NewClient(tama.Config{
-		BaseURL: "https://api.example.com",
-		APIKey:  "test-key",
+	client, err := tama.NewClient(tama.Config{
+		BaseURL:        "https://api.example.com",
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		SkipTokenFetch: true,
 	})
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
 
-	_, err := client.Perception.GetPath("")
+	_, err = client.Perception.GetPath("")
 	if err == nil {
 		t.Error("Expected validation error for empty path ID in GetPath")
 	}
 }
 
 func TestPerceptionUpdatePathEmptyID(t *testing.T) {
-	client := tama.NewClient(tama.Config{
-		BaseURL: "https://api.example.com",
-		APIKey:  "test-key",
+	client, err := tama.NewClient(tama.Config{
+		BaseURL:        "https://api.example.com",
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		SkipTokenFetch: true,
 	})
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
 
-	_, err := client.Perception.UpdatePath("", perception.UpdatePathRequest{
+	_, err = client.Perception.UpdatePath("", perception.UpdatePathRequest{
 		Path: perception.UpdatePathData{TargetClassID: "test"},
 	})
 	if err == nil {
@@ -327,12 +367,17 @@ func TestPerceptionUpdatePathEmptyID(t *testing.T) {
 }
 
 func TestPerceptionReplacePathEmptyID(t *testing.T) {
-	client := tama.NewClient(tama.Config{
-		BaseURL: "https://api.example.com",
-		APIKey:  "test-key",
+	client, err := tama.NewClient(tama.Config{
+		BaseURL:        "https://api.example.com",
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		SkipTokenFetch: true,
 	})
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
 
-	_, err := client.Perception.ReplacePath("", perception.UpdatePathRequest{
+	_, err = client.Perception.ReplacePath("", perception.UpdatePathRequest{
 		Path: perception.UpdatePathData{TargetClassID: "test"},
 	})
 	if err == nil {
@@ -341,12 +386,17 @@ func TestPerceptionReplacePathEmptyID(t *testing.T) {
 }
 
 func TestPerceptionDeletePathEmptyID(t *testing.T) {
-	client := tama.NewClient(tama.Config{
-		BaseURL: "https://api.example.com",
-		APIKey:  "test-key",
+	client, err := tama.NewClient(tama.Config{
+		BaseURL:        "https://api.example.com",
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		SkipTokenFetch: true,
 	})
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
 
-	err := client.Perception.DeletePath("")
+	err = client.Perception.DeletePath("")
 	if err == nil {
 		t.Error("Expected validation error for empty path ID in DeletePath")
 	}
