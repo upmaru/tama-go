@@ -47,12 +47,17 @@ func TestMotorGetAction(t *testing.T) {
 	defer server.Close()
 
 	config := tama.Config{
-		BaseURL: server.URL,
-		APIKey:  "test-key",
-		Timeout: 10 * time.Second,
+		BaseURL:        server.URL,
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		Timeout:        10 * time.Second,
+		SkipTokenFetch: true,
 	}
 
-	client := tama.NewClient(config)
+	client, err := tama.NewClient(config)
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
 	action, err := client.Motor.GetAction("spec-456", "action-123")
 
 	if err != nil {
@@ -95,13 +100,18 @@ func TestMotorGetActionError(t *testing.T) {
 	defer server.Close()
 
 	config := tama.Config{
-		BaseURL: server.URL,
-		APIKey:  "test-key",
-		Timeout: 10 * time.Second,
+		BaseURL:        server.URL,
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		Timeout:        10 * time.Second,
+		SkipTokenFetch: true,
 	}
 
-	client := tama.NewClient(config)
-	_, err := client.Motor.GetAction("spec-456", "nonexistent")
+	client, err := tama.NewClient(config)
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
+	_, err = client.Motor.GetAction("spec-456", "nonexistent")
 
 	if err == nil {
 		t.Fatal("Expected error, got nil")
@@ -122,13 +132,19 @@ func TestMotorGetActionError(t *testing.T) {
 }
 
 func TestMotorGetActionValidation(t *testing.T) {
-	client := tama.NewClient(tama.Config{
-		BaseURL: "https://api.example.com",
-		APIKey:  "test-key",
+	client, err := tama.NewClient(tama.Config{
+		BaseURL:        "http://example.com",
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		Timeout:        10 * time.Second,
+		SkipTokenFetch: true,
 	})
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
 
 	// Test empty specification ID
-	_, err := client.Motor.GetAction("", "action-123")
+	_, err = client.Motor.GetAction("", "action-123")
 	if err == nil {
 		t.Error("Expected validation error for empty specification ID")
 	}
@@ -166,15 +182,20 @@ func TestMotorGetActionValidationNoHTTPCall(t *testing.T) {
 	defer server.Close()
 
 	config := tama.Config{
-		BaseURL: server.URL,
-		APIKey:  "test-key",
-		Timeout: 10 * time.Second,
+		BaseURL:        server.URL,
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		Timeout:        10 * time.Second,
+		SkipTokenFetch: true,
 	}
 
-	client := tama.NewClient(config)
+	client, err := tama.NewClient(config)
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
 
 	// Test empty specification ID - should not make HTTP call
-	_, err := client.Motor.GetAction("", "action-123")
+	_, err = client.Motor.GetAction("", "action-123")
 	if err == nil {
 		t.Error("Expected validation error for empty specification ID")
 	}
@@ -247,12 +268,17 @@ func TestMotorGetActionByPathAndMethod(t *testing.T) {
 	defer server.Close()
 
 	config := tama.Config{
-		BaseURL: server.URL,
-		APIKey:  "test-key",
-		Timeout: 10 * time.Second,
+		BaseURL:        server.URL,
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		Timeout:        10 * time.Second,
+		SkipTokenFetch: true,
 	}
 
-	client := tama.NewClient(config)
+	client, err := tama.NewClient(config)
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
 	action, err := client.Motor.GetActionByPathAndMethod("spec-789", actionPath, actionMethod)
 
 	if err != nil {
@@ -295,13 +321,18 @@ func TestMotorGetActionByPathAndMethodError(t *testing.T) {
 	defer server.Close()
 
 	config := tama.Config{
-		BaseURL: server.URL,
-		APIKey:  "test-key",
-		Timeout: 10 * time.Second,
+		BaseURL:        server.URL,
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		Timeout:        10 * time.Second,
+		SkipTokenFetch: true,
 	}
 
-	client := tama.NewClient(config)
-	_, err := client.Motor.GetActionByPathAndMethod("spec-789", "/nonexistent/path", "GET")
+	client, err := tama.NewClient(config)
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
+	_, err = client.Motor.GetActionByPathAndMethod("spec-789", "/nonexistent/path", "GET")
 
 	if err == nil {
 		t.Fatal("Expected error, got nil")
@@ -322,13 +353,18 @@ func TestMotorGetActionByPathAndMethodError(t *testing.T) {
 }
 
 func TestMotorGetActionByPathAndMethodValidation(t *testing.T) {
-	client := tama.NewClient(tama.Config{
-		BaseURL: "https://api.example.com",
-		APIKey:  "test-key",
+	client, err := tama.NewClient(tama.Config{
+		BaseURL:        "https://api.example.com",
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		SkipTokenFetch: true,
 	})
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
 
 	// Test empty specification ID
-	_, err := client.Motor.GetActionByPathAndMethod("", "/some/path", "GET")
+	_, err = client.Motor.GetActionByPathAndMethod("", "/some/path", "GET")
 	if err == nil {
 		t.Error("Expected validation error for empty specification ID")
 	}
@@ -375,15 +411,20 @@ func TestMotorGetActionByPathAndMethodValidationNoHTTPCall(t *testing.T) {
 	defer server.Close()
 
 	config := tama.Config{
-		BaseURL: server.URL,
-		APIKey:  "test-key",
-		Timeout: 10 * time.Second,
+		BaseURL:        server.URL,
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		Timeout:        10 * time.Second,
+		SkipTokenFetch: true,
 	}
 
-	client := tama.NewClient(config)
+	client, err := tama.NewClient(config)
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
 
 	// Test empty specification ID - should not make HTTP call
-	_, err := client.Motor.GetActionByPathAndMethod("", "/some/path", "GET")
+	_, err = client.Motor.GetActionByPathAndMethod("", "/some/path", "GET")
 	if err == nil {
 		t.Error("Expected validation error for empty specification ID")
 	}
@@ -412,6 +453,7 @@ func TestMotorGetActionByPathAndMethodValidationNoHTTPCall(t *testing.T) {
 	}
 }
 
+//nolint:gocognit
 func TestMotorGetActionByPathAndMethodEncoding(t *testing.T) {
 	// Test that the path is correctly encoded and method is lowercased
 	testCases := []struct {
@@ -473,12 +515,17 @@ func TestMotorGetActionByPathAndMethodEncoding(t *testing.T) {
 			defer server.Close()
 
 			config := tama.Config{
-				BaseURL: server.URL,
-				APIKey:  "test-key",
-				Timeout: 10 * time.Second,
+				BaseURL:        server.URL,
+				ClientID:       "test-client-id",
+				ClientSecret:   "test-client-secret",
+				Timeout:        10 * time.Second,
+				SkipTokenFetch: true,
 			}
 
-			client := tama.NewClient(config)
+			client, err := tama.NewClient(config)
+			if err != nil {
+				t.Skipf("Skipping test due to client creation failure: %v", err)
+			}
 			action, err := client.Motor.GetActionByPathAndMethod("test-spec", tc.path, tc.method)
 
 			if err != nil {

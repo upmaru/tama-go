@@ -15,6 +15,6 @@ type PerceptionService struct {
 // newPerceptionService creates a new perception service instance.
 func newPerceptionService(client *Client) *PerceptionService {
 	return &PerceptionService{
-		Service: perception.NewService(client.httpClient),
+		Service: perception.NewService(client.GetHTTPClient()),
 	}
 }

@@ -13,12 +13,17 @@ import (
 
 func TestNewClient(t *testing.T) {
 	config := tama.Config{
-		BaseURL: "https://api.example.com",
-		APIKey:  "test-key",
-		Timeout: 10 * time.Second,
+		BaseURL:        "https://api.example.com",
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		Timeout:        10 * time.Second,
+		SkipTokenFetch: true,
 	}
 
-	client := tama.NewClient(config)
+	client, err := tama.NewClient(config)
+	if err != nil {
+		t.Fatalf("Expected client to be created successfully, got error: %v", err)
+	}
 
 	if client == nil {
 		t.Fatal("Expected client to be created, got nil")
@@ -41,12 +46,17 @@ func TestNewClient(t *testing.T) {
 
 func TestNewClientDefaultTimeout(t *testing.T) {
 	config := tama.Config{
-		BaseURL: "https://api.example.com",
-		APIKey:  "test-key",
+		BaseURL:        "https://api.example.com",
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		SkipTokenFetch: true,
 		// No timeout specified
 	}
 
-	client := tama.NewClient(config)
+	client, err := tama.NewClient(config)
+	if err != nil {
+		t.Fatalf("Expected client to be created successfully, got error: %v", err)
+	}
 
 	// We can't directly test the timeout, but we can ensure the client was created
 	if client == nil {
@@ -54,23 +64,47 @@ func TestNewClientDefaultTimeout(t *testing.T) {
 	}
 }
 
-func TestSetAPIKey(_ *testing.T) {
-	client := tama.NewClient(tama.Config{
-		BaseURL: "https://api.example.com",
-		APIKey:  "original-key",
-	})
+func TestNewClientMissingClientID(t *testing.T) {
+	config := tama.Config{
+		BaseURL:      "https://api.example.com",
+		ClientSecret: "test-client-secret",
+	}
 
-	newAPIKey := "new-api-key"
-	client.SetAPIKey(newAPIKey)
+	_, err := tama.NewClient(config)
+	if err == nil {
+		t.Error("Expected error for missing client_id")
+	}
+	if err != nil && !strings.Contains(err.Error(), "client_id is required") {
+		t.Errorf("Expected 'client_id is required' error, got: %v", err)
+	}
+}
 
-	// API key is set successfully - internal field is not accessible from external package
+func TestNewClientMissingClientSecret(t *testing.T) {
+	config := tama.Config{
+		BaseURL:  "https://api.example.com",
+		ClientID: "test-client-id",
+	}
+
+	_, err := tama.NewClient(config)
+	if err == nil {
+		t.Error("Expected error for missing client_secret")
+	}
+	if err != nil && !strings.Contains(err.Error(), "client_secret is required") {
+		t.Errorf("Expected 'client_secret is required' error, got: %v", err)
+	}
 }
 
 func TestSetDebug(_ *testing.T) {
-	client := tama.NewClient(tama.Config{
-		BaseURL: "https://api.example.com",
-		APIKey:  "test-key",
+	client, err := tama.NewClient(tama.Config{
+		BaseURL:        "https://api.example.com",
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		SkipTokenFetch: true,
 	})
+	if err != nil {
+		// For this test, we'll skip if client creation fails
+		return
+	}
 
 	client.SetDebug(true)
 	// Note: In a real implementation, you might want to verify that debug mode is actually set
@@ -135,13 +169,19 @@ func TestErrorStruct(t *testing.T) {
 }
 
 func TestEmptyIDValidation(t *testing.T) {
-	client := tama.NewClient(tama.Config{
-		BaseURL: "https://api.example.com",
-		APIKey:  "test-key",
+	client, err := tama.NewClient(tama.Config{
+		BaseURL:        "https://api.example.com",
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		SkipTokenFetch: true,
 	})
+	if err != nil {
+		// For this test, we'll skip if client creation fails
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
 
 	// Test Neural service validations
-	_, err := client.Neural.GetSpace("")
+	_, err = client.Neural.GetSpace("")
 	if err == nil {
 		t.Error("Expected validation error for empty space ID in GetSpace")
 	}

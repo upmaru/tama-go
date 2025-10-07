@@ -10,7 +10,10 @@ import (
 
 // SourceCredential represents the credential structure for sources.
 type SourceCredential struct {
-	APIKey string `json:"api_key"`
+	APIKey         string `json:"api_key,omitempty"`
+	ClientID       string `json:"client_id,omitempty"`
+	ClientSecret   string `json:"client_secret,omitempty"`
+	SkipTokenFetch bool   `json:"skip_token_fetch,omitempty"`
 }
 
 // Source represents a sensory source resource.

@@ -67,12 +67,16 @@ func main() {
 // initializeClient creates and configures the Tama client.
 func initializeClient() *tama.Client {
 	config := tama.Config{
-		BaseURL: "http://localhost:4000", // Local development server
-		APIKey:  "your-api-key",          // Replace with your actual API key
-		Timeout: defaultTimeout * time.Second,
+		BaseURL:      "http://localhost:4000", // Local development server
+		ClientID:     "your-client-id",        // Replace with your actual client ID
+		ClientSecret: "your-client-secret",    // Replace with your actual client secret
+		Timeout:      defaultTimeout * time.Second,
 	}
 
-	client := tama.NewClient(config)
+	client, err := tama.NewClient(config)
+	if err != nil {
+		log.Fatalf("Failed to create client: %v", err)
+	}
 	client.SetDebug(true) // Enable debug mode to see HTTP requests/responses (optional)
 	return client
 }

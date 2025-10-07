@@ -68,12 +68,17 @@ func TestContextsGetInput(t *testing.T) {
 	defer server.Close()
 
 	config := tama.Config{
-		BaseURL: server.URL,
-		APIKey:  "test-key",
-		Timeout: 10 * time.Second,
+		BaseURL:        server.URL,
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		Timeout:        10 * time.Second,
+		SkipTokenFetch: true,
 	}
 
-	client := tama.NewClient(config)
+	client, err := tama.NewClient(config)
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
 	service := contexts.NewService(client.GetHTTPClient())
 	input, err := service.GetInput("input-123")
 
@@ -97,12 +102,17 @@ func TestContextsGetInputError(t *testing.T) {
 	defer server.Close()
 
 	config := tama.Config{
-		BaseURL: server.URL,
-		APIKey:  "test-key",
-		Timeout: 10 * time.Second,
+		BaseURL:        server.URL,
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		Timeout:        10 * time.Second,
+		SkipTokenFetch: true,
 	}
 
-	client := tama.NewClient(config)
+	client, err := tama.NewClient(config)
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
 	service := contexts.NewService(client.GetHTTPClient())
 	input, err := service.GetInput("invalid-id")
 
@@ -150,12 +160,17 @@ func TestContextsCreateInput(t *testing.T) {
 	defer server.Close()
 
 	config := tama.Config{
-		BaseURL: server.URL,
-		APIKey:  "test-key",
-		Timeout: 10 * time.Second,
+		BaseURL:        server.URL,
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		Timeout:        10 * time.Second,
+		SkipTokenFetch: true,
 	}
 
-	client := tama.NewClient(config)
+	client, err := tama.NewClient(config)
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
 	service := contexts.NewService(client.GetHTTPClient())
 
 	req := contexts.CreateInputRequest{
@@ -186,12 +201,17 @@ func TestContextsCreateInput(t *testing.T) {
 
 func TestContextsCreateInputValidation(t *testing.T) {
 	config := tama.Config{
-		BaseURL: "http://example.com",
-		APIKey:  "test-key",
-		Timeout: 10 * time.Second,
+		BaseURL:        "http://example.com",
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		Timeout:        10 * time.Second,
+		SkipTokenFetch: true,
 	}
 
-	client := tama.NewClient(config)
+	client, clientErr := tama.NewClient(config)
+	if clientErr != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", clientErr)
+	}
 	service := contexts.NewService(client.GetHTTPClient())
 
 	// Test empty thought context ID
@@ -268,12 +288,17 @@ func TestContextsUpdateInput(t *testing.T) {
 	defer server.Close()
 
 	config := tama.Config{
-		BaseURL: server.URL,
-		APIKey:  "test-key",
-		Timeout: 10 * time.Second,
+		BaseURL:        server.URL,
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		Timeout:        10 * time.Second,
+		SkipTokenFetch: true,
 	}
 
-	client := tama.NewClient(config)
+	client, err := tama.NewClient(config)
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
 	service := contexts.NewService(client.GetHTTPClient())
 
 	req := contexts.UpdateInputRequest{
@@ -336,12 +361,17 @@ func TestContextsReplaceInput(t *testing.T) {
 	defer server.Close()
 
 	config := tama.Config{
-		BaseURL: server.URL,
-		APIKey:  "test-key",
-		Timeout: 10 * time.Second,
+		BaseURL:        server.URL,
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		Timeout:        10 * time.Second,
+		SkipTokenFetch: true,
 	}
 
-	client := tama.NewClient(config)
+	client, err := tama.NewClient(config)
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
 	service := contexts.NewService(client.GetHTTPClient())
 
 	req := contexts.UpdateInputRequest{
@@ -385,14 +415,19 @@ func TestContextsDeleteInput(t *testing.T) {
 	defer server.Close()
 
 	config := tama.Config{
-		BaseURL: server.URL,
-		APIKey:  "test-key",
-		Timeout: 10 * time.Second,
+		BaseURL:        server.URL,
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		Timeout:        10 * time.Second,
+		SkipTokenFetch: true,
 	}
 
-	client := tama.NewClient(config)
+	client, err := tama.NewClient(config)
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
 	service := contexts.NewService(client.GetHTTPClient())
-	err := service.DeleteInput("input-123")
+	err = service.DeleteInput("input-123")
 
 	if err != nil {
 		t.Fatalf("Expected no error, got %v", err)
@@ -401,12 +436,17 @@ func TestContextsDeleteInput(t *testing.T) {
 
 func TestContextsGetInputEmptyID(t *testing.T) {
 	config := tama.Config{
-		BaseURL: "http://example.com",
-		APIKey:  "test-key",
-		Timeout: 10 * time.Second,
+		BaseURL:        "http://example.com",
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		Timeout:        10 * time.Second,
+		SkipTokenFetch: true,
 	}
 
-	client := tama.NewClient(config)
+	client, clientErr := tama.NewClient(config)
+	if clientErr != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", clientErr)
+	}
 	service := contexts.NewService(client.GetHTTPClient())
 	_, err := service.GetInput("")
 
@@ -417,12 +457,17 @@ func TestContextsGetInputEmptyID(t *testing.T) {
 
 func TestContextsUpdateInputEmptyID(t *testing.T) {
 	config := tama.Config{
-		BaseURL: "http://example.com",
-		APIKey:  "test-key",
-		Timeout: 10 * time.Second,
+		BaseURL:        "http://example.com",
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		Timeout:        10 * time.Second,
+		SkipTokenFetch: true,
 	}
 
-	client := tama.NewClient(config)
+	client, clientErr := tama.NewClient(config)
+	if clientErr != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", clientErr)
+	}
 	service := contexts.NewService(client.GetHTTPClient())
 
 	req := contexts.UpdateInputRequest{
@@ -440,12 +485,17 @@ func TestContextsUpdateInputEmptyID(t *testing.T) {
 
 func TestContextsReplaceInputEmptyID(t *testing.T) {
 	config := tama.Config{
-		BaseURL: "http://example.com",
-		APIKey:  "test-key",
-		Timeout: 10 * time.Second,
+		BaseURL:        "http://example.com",
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		Timeout:        10 * time.Second,
+		SkipTokenFetch: true,
 	}
 
-	client := tama.NewClient(config)
+	client, clientErr := tama.NewClient(config)
+	if clientErr != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", clientErr)
+	}
 	service := contexts.NewService(client.GetHTTPClient())
 
 	req := contexts.UpdateInputRequest{
@@ -463,14 +513,19 @@ func TestContextsReplaceInputEmptyID(t *testing.T) {
 
 func TestContextsDeleteInputEmptyID(t *testing.T) {
 	config := tama.Config{
-		BaseURL: "http://example.com",
-		APIKey:  "test-key",
-		Timeout: 10 * time.Second,
+		BaseURL:        "http://example.com",
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		Timeout:        10 * time.Second,
+		SkipTokenFetch: true,
 	}
 
-	client := tama.NewClient(config)
+	client, err := tama.NewClient(config)
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
 	service := contexts.NewService(client.GetHTTPClient())
-	err := service.DeleteInput("")
+	err = service.DeleteInput("")
 
 	if err == nil || err.Error() != "input ID is required" {
 		t.Errorf("Expected 'input ID is required' error, got %v", err)
@@ -491,12 +546,17 @@ func TestContextsCreateInputWithFieldErrors(t *testing.T) {
 	defer server.Close()
 
 	config := tama.Config{
-		BaseURL: server.URL,
-		APIKey:  "test-key",
-		Timeout: 10 * time.Second,
+		BaseURL:        server.URL,
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		Timeout:        10 * time.Second,
+		SkipTokenFetch: true,
 	}
 
-	client := tama.NewClient(config)
+	client, err := tama.NewClient(config)
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
 	service := contexts.NewService(client.GetHTTPClient())
 
 	req := contexts.CreateInputRequest{

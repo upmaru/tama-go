@@ -15,6 +15,6 @@ type MemoryService struct {
 // newMemoryService creates a new memory service instance.
 func newMemoryService(client *Client) *MemoryService {
 	return &MemoryService{
-		Service: memory.NewService(client.httpClient),
+		Service: memory.NewService(client.GetHTTPClient()),
 	}
 }

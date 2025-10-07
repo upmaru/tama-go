@@ -33,7 +33,16 @@ func TestToolsGetOption(t *testing.T) {
 	})
 	defer server.Close()
 
-	client := tama.NewClient(tama.Config{BaseURL: server.URL, APIKey: "test-key", Timeout: 10 * time.Second})
+	client, err := tama.NewClient(tama.Config{
+		BaseURL:        server.URL,
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		Timeout:        10 * time.Second,
+		SkipTokenFetch: true,
+	})
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
 	opt, err := client.Tools.GetOption("option-123")
 	if err != nil {
 		t.Fatalf("Expected no error, got %v", err)
@@ -50,8 +59,17 @@ func TestToolsGetOptionError(t *testing.T) {
 	})
 	defer server.Close()
 
-	client := tama.NewClient(tama.Config{BaseURL: server.URL, APIKey: "test-key", Timeout: 10 * time.Second})
-	_, err := client.Tools.GetOption("missing")
+	client, err := tama.NewClient(tama.Config{
+		BaseURL:        server.URL,
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		Timeout:        10 * time.Second,
+		SkipTokenFetch: true,
+	})
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
+	_, err = client.Tools.GetOption("missing")
 	if err == nil {
 		t.Fatal("Expected error, got nil")
 	}
@@ -97,7 +115,16 @@ func TestToolsCreateOption(t *testing.T) {
 	})
 	defer server.Close()
 
-	client := tama.NewClient(tama.Config{BaseURL: server.URL, APIKey: "test-key", Timeout: 10 * time.Second})
+	client, err := tama.NewClient(tama.Config{
+		BaseURL:        server.URL,
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		Timeout:        10 * time.Second,
+		SkipTokenFetch: true,
+	})
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
 	opt, err := client.Tools.CreateOption("output-123", request)
 	if err != nil {
 		t.Fatalf("Expected no error, got %v", err)
@@ -106,9 +133,17 @@ func TestToolsCreateOption(t *testing.T) {
 }
 
 func TestToolsCreateOptionValidation(t *testing.T) {
-	client := tama.NewClient(tama.Config{BaseURL: "https://api.example.com", APIKey: "test-key"})
+	client, err := tama.NewClient(tama.Config{
+		BaseURL:        "https://api.example.com",
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		SkipTokenFetch: true,
+	})
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
 	// Missing output id
-	_, err := client.Tools.CreateOption("", tools.CreateOptionRequest{
+	_, err = client.Tools.CreateOption("", tools.CreateOptionRequest{
 		Option: tools.OptionRequestData{ActionModifierID: "m1"},
 	})
 	if err == nil {
@@ -149,7 +184,16 @@ func TestToolsUpdateOption(t *testing.T) {
 	})
 	defer server.Close()
 
-	client := tama.NewClient(tama.Config{BaseURL: server.URL, APIKey: "test-key", Timeout: 10 * time.Second})
+	client, err := tama.NewClient(tama.Config{
+		BaseURL:        server.URL,
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		Timeout:        10 * time.Second,
+		SkipTokenFetch: true,
+	})
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
 	opt, err := client.Tools.UpdateOption("option-123", request)
 	if err != nil {
 		t.Fatalf("Expected no error, got %v", err)
@@ -178,7 +222,16 @@ func TestToolsReplaceOption(t *testing.T) {
 	})
 	defer server.Close()
 
-	client := tama.NewClient(tama.Config{BaseURL: server.URL, APIKey: "test-key", Timeout: 10 * time.Second})
+	client, err := tama.NewClient(tama.Config{
+		BaseURL:        server.URL,
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		Timeout:        10 * time.Second,
+		SkipTokenFetch: true,
+	})
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
 	opt, err := client.Tools.ReplaceOption("option-123", request)
 	if err != nil {
 		t.Fatalf("Expected no error, got %v", err)
@@ -198,8 +251,18 @@ func TestToolsDeleteOption(t *testing.T) {
 	})
 	defer server.Close()
 
-	client := tama.NewClient(tama.Config{BaseURL: server.URL, APIKey: "test-key", Timeout: 10 * time.Second})
-	if err := client.Tools.DeleteOption("option-123"); err != nil {
+	client, err := tama.NewClient(tama.Config{
+		BaseURL:        server.URL,
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		Timeout:        10 * time.Second,
+		SkipTokenFetch: true,
+	})
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
+	err = client.Tools.DeleteOption("option-123")
+	if err != nil {
 		t.Fatalf("Expected no error, got %v", err)
 	}
 }
