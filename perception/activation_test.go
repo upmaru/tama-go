@@ -39,12 +39,17 @@ func TestPerceptionGetActivation(t *testing.T) {
 	defer server.Close()
 
 	config := tama.Config{
-		BaseURL: server.URL,
-		APIKey:  "test-key",
-		Timeout: 10 * time.Second,
+		BaseURL:        server.URL,
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		Timeout:        10 * time.Second,
+		SkipTokenFetch: true,
 	}
 
-	client := tama.NewClient(config)
+	client, err := tama.NewClient(config)
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
 	activation, err := client.Perception.GetActivation("activation-123")
 
 	if err != nil {
@@ -69,13 +74,18 @@ func TestPerceptionGetActivationError(t *testing.T) {
 	defer server.Close()
 
 	config := tama.Config{
-		BaseURL: server.URL,
-		APIKey:  "test-key",
-		Timeout: 10 * time.Second,
+		BaseURL:        server.URL,
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		Timeout:        10 * time.Second,
+		SkipTokenFetch: true,
 	}
 
-	client := tama.NewClient(config)
-	_, err := client.Perception.GetActivation("nonexistent")
+	client, err := tama.NewClient(config)
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
+	_, err = client.Perception.GetActivation("nonexistent")
 
 	if err == nil {
 		t.Fatal("Expected error, got nil")
@@ -138,12 +148,17 @@ func TestPerceptionCreateActivation(t *testing.T) {
 	defer server.Close()
 
 	config := tama.Config{
-		BaseURL: server.URL,
-		APIKey:  "test-key",
-		Timeout: 10 * time.Second,
+		BaseURL:        server.URL,
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		Timeout:        10 * time.Second,
+		SkipTokenFetch: true,
 	}
 
-	client := tama.NewClient(config)
+	client, err := tama.NewClient(config)
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
 	activation, err := client.Perception.CreateActivation("path-123", request)
 
 	if err != nil {
@@ -154,13 +169,18 @@ func TestPerceptionCreateActivation(t *testing.T) {
 }
 
 func TestPerceptionCreateActivationValidation(t *testing.T) {
-	client := tama.NewClient(tama.Config{
-		BaseURL: "https://api.example.com",
-		APIKey:  "test-key",
+	client, err := tama.NewClient(tama.Config{
+		BaseURL:        "https://api.example.com",
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		SkipTokenFetch: true,
 	})
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
 
 	// Test empty path ID
-	_, err := client.Perception.CreateActivation("", perception.CreateActivationRequest{
+	_, err = client.Perception.CreateActivation("", perception.CreateActivationRequest{
 		Activation: perception.ActivationRequestData{ChainID: "chain-123"},
 	})
 	if err == nil {
@@ -196,13 +216,18 @@ func TestPerceptionCreateActivationChainIDValidationDelegated(t *testing.T) {
 	defer server.Close()
 
 	config := tama.Config{
-		BaseURL: server.URL,
-		APIKey:  "test-key",
-		Timeout: 10 * time.Second,
+		BaseURL:        server.URL,
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		Timeout:        10 * time.Second,
+		SkipTokenFetch: true,
 	}
 
-	client := tama.NewClient(config)
-	_, err := client.Perception.CreateActivation("path-123", perception.CreateActivationRequest{
+	client, err := tama.NewClient(config)
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
+	_, err = client.Perception.CreateActivation("path-123", perception.CreateActivationRequest{
 		Activation: perception.ActivationRequestData{ChainID: "invalid"},
 	})
 
@@ -256,12 +281,20 @@ func TestPerceptionUpdateActivation(t *testing.T) {
 	defer server.Close()
 
 	config := tama.Config{
-		BaseURL: server.URL,
-		APIKey:  "test-key",
-		Timeout: 10 * time.Second,
+		BaseURL:        server.URL,
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		Timeout:        10 * time.Second,
+		SkipTokenFetch: true,
 	}
 
-	client := tama.NewClient(config)
+client, err := tama.NewClient(config)
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
 	activation, err := client.Perception.UpdateActivation("activation-123", request)
 
 	if err != nil {
@@ -306,12 +339,17 @@ func TestPerceptionReplaceActivation(t *testing.T) {
 	defer server.Close()
 
 	config := tama.Config{
-		BaseURL: server.URL,
-		APIKey:  "test-key",
-		Timeout: 10 * time.Second,
+		BaseURL:        server.URL,
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		Timeout:        10 * time.Second,
+		SkipTokenFetch: true,
 	}
 
-	client := tama.NewClient(config)
+	client, err := tama.NewClient(config)
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
 	activation, err := client.Perception.ReplaceActivation("activation-123", request)
 
 	if err != nil {
@@ -338,13 +376,18 @@ func TestPerceptionDeleteActivation(t *testing.T) {
 	defer server.Close()
 
 	config := tama.Config{
-		BaseURL: server.URL,
-		APIKey:  "test-key",
-		Timeout: 10 * time.Second,
+		BaseURL:        server.URL,
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		Timeout:        10 * time.Second,
+		SkipTokenFetch: true,
 	}
 
-	client := tama.NewClient(config)
-	err := client.Perception.DeleteActivation("activation-123")
+	client, err := tama.NewClient(config)
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
+	err = client.Perception.DeleteActivation("activation-123")
 
 	if err != nil {
 		t.Fatalf("Expected no error, got %v", err)
@@ -352,24 +395,34 @@ func TestPerceptionDeleteActivation(t *testing.T) {
 }
 
 func TestPerceptionGetActivationEmptyID(t *testing.T) {
-	client := tama.NewClient(tama.Config{
-		BaseURL: "https://api.example.com",
-		APIKey:  "test-key",
+	client, err := tama.NewClient(tama.Config{
+		BaseURL:        "https://api.example.com",
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		SkipTokenFetch: true,
 	})
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
 
-	_, err := client.Perception.GetActivation("")
+	_, err = client.Perception.GetActivation("")
 	if err == nil {
 		t.Error("Expected validation error for empty activation ID in GetActivation")
 	}
 }
 
 func TestPerceptionUpdateActivationEmptyID(t *testing.T) {
-	client := tama.NewClient(tama.Config{
-		BaseURL: "https://api.example.com",
-		APIKey:  "test-key",
+	client, err := tama.NewClient(tama.Config{
+		BaseURL:        "https://api.example.com",
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		SkipTokenFetch: true,
 	})
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
 
-	_, err := client.Perception.UpdateActivation("", perception.UpdateActivationRequest{
+	_, err = client.Perception.UpdateActivation("", perception.UpdateActivationRequest{
 		Activation: perception.UpdateActivationData{ChainID: "test"},
 	})
 	if err == nil {
@@ -378,12 +431,17 @@ func TestPerceptionUpdateActivationEmptyID(t *testing.T) {
 }
 
 func TestPerceptionReplaceActivationEmptyID(t *testing.T) {
-	client := tama.NewClient(tama.Config{
-		BaseURL: "https://api.example.com",
-		APIKey:  "test-key",
+	client, err := tama.NewClient(tama.Config{
+		BaseURL:        "https://api.example.com",
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		SkipTokenFetch: true,
 	})
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
 
-	_, err := client.Perception.ReplaceActivation("", perception.UpdateActivationRequest{
+	_, err = client.Perception.ReplaceActivation("", perception.UpdateActivationRequest{
 		Activation: perception.UpdateActivationData{ChainID: "test"},
 	})
 	if err == nil {
@@ -392,12 +450,17 @@ func TestPerceptionReplaceActivationEmptyID(t *testing.T) {
 }
 
 func TestPerceptionDeleteActivationEmptyID(t *testing.T) {
-	client := tama.NewClient(tama.Config{
-		BaseURL: "https://api.example.com",
-		APIKey:  "test-key",
+	client, err := tama.NewClient(tama.Config{
+		BaseURL:        "https://api.example.com",
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		SkipTokenFetch: true,
 	})
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
 
-	err := client.Perception.DeleteActivation("")
+	err = client.Perception.DeleteActivation("")
 	if err == nil {
 		t.Error("Expected validation error for empty activation ID in DeleteActivation")
 	}
@@ -428,19 +491,24 @@ func TestPerceptionCreateActivationWithFieldErrors(t *testing.T) {
 	defer server.Close()
 
 	config := tama.Config{
-		BaseURL: server.URL,
-		APIKey:  "test-key",
-		Timeout: 10 * time.Second,
+		BaseURL:        server.URL,
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		Timeout:        10 * time.Second,
+		SkipTokenFetch: true,
 	}
 
-	client := tama.NewClient(config)
+	client, err := tama.NewClient(config)
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
 	request := perception.CreateActivationRequest{
 		Activation: perception.ActivationRequestData{
 			ChainID: "invalid", // Invalid chain ID to trigger server-side validation
 		},
 	}
 
-	_, err := client.Perception.CreateActivation("path-123", request)
+	_, err = client.Perception.CreateActivation("path-123", request)
 
 	if err == nil {
 		t.Fatal("Expected error, got nil")

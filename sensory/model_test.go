@@ -316,7 +316,7 @@ func TestSensoryUpdateModel_EmptyIDValidation(t *testing.T) {
 		},
 	}
 
-	_, err := client.Sensory.UpdateModel("", updateReq)
+	_, err = client.Sensory.UpdateModel("", updateReq)
 	if err == nil {
 		t.Error("Expected validation error for empty model ID in UpdateModel")
 	}
@@ -447,7 +447,7 @@ func TestSensoryReplaceModel_EmptyIDValidation(t *testing.T) {
 		},
 	}
 
-	_, err := client.Sensory.ReplaceModel("", replaceReq)
+	_, err = client.Sensory.ReplaceModel("", replaceReq)
 	if err == nil {
 		t.Error("Expected validation error for empty model ID in ReplaceModel")
 	}

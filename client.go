@@ -55,6 +55,7 @@ type Client struct {
 	Perception     *PerceptionService
 	Motor          *MotorService
 	Contexts       *ContextsService
+	Tools          *ToolsService
 }
 
 // Config holds configuration options for the client.
@@ -62,6 +63,7 @@ type Config struct {
 	BaseURL        string
 	ClientID       string
 	ClientSecret   string
+	APIKey         string
 	Timeout        time.Duration
 	SkipTokenFetch bool // For testing - skips initial token fetch
 }
@@ -72,12 +74,14 @@ func NewClient(config Config) (*Client, error) {
 		config.Timeout = DefaultTimeout
 	}
 
-	if config.ClientID == "" {
-		return nil, fmt.Errorf("client_id is required")
-	}
-
-	if config.ClientSecret == "" {
-		return nil, fmt.Errorf("client_secret is required")
+	// Require client credentials only if APIKey is not provided (backwards compatibility for tests)
+	if config.APIKey == "" {
+		if config.ClientID == "" {
+			return nil, fmt.Errorf("client_id is required")
+		}
+		if config.ClientSecret == "" {
+			return nil, fmt.Errorf("client_secret is required")
+		}
 	}
 
 	httpClient := resty.New().
@@ -94,10 +98,16 @@ func NewClient(config Config) (*Client, error) {
 		skipTokenFetch: config.SkipTokenFetch,
 	}
 
-	// Get initial OAuth2 token (unless skipped for testing)
-	if !config.SkipTokenFetch {
-		if err := client.refreshToken(); err != nil {
-			return nil, fmt.Errorf("failed to obtain initial token: %w", err)
+	// If APIKey is provided without client credentials, enable test mode and set token directly
+	if config.APIKey != "" && (config.ClientID == "" || config.ClientSecret == "") {
+		client.skipTokenFetch = true
+		client.httpClient.SetAuthToken(config.APIKey)
+	} else {
+		// Get initial OAuth2 token (unless skipped for testing)
+		if !config.SkipTokenFetch {
+			if err := client.refreshToken(); err != nil {
+				return nil, fmt.Errorf("failed to obtain initial token: %w", err)
+			}
 		}
 	}
 

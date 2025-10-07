@@ -110,7 +110,7 @@ func TestPerceptionGetProcessorError(t *testing.T) {
 	if err != nil {
 		t.Skipf("Skipping test due to client creation failure: %v", err)
 	}
-	_, err := client.Perception.GetProcessor("thought-123", "nonexistent")
+_, err = client.Perception.GetProcessor("thought-123", "nonexistent")
 
 	if err == nil {
 		t.Fatal("Expected error, got nil")
@@ -231,7 +231,7 @@ func TestPerceptionCreateProcessorValidation(t *testing.T) {
 	}
 
 	// Test empty thought ID validation
-	_, err := client.Perception.CreateProcessor("", "completion", perception.CreateProcessorRequest{
+_, err = client.Perception.CreateProcessor("", "completion", perception.CreateProcessorRequest{
 		Processor: perception.ProcessorRequestData{
 			ModelID: "model-123",
 		},
@@ -446,7 +446,7 @@ func TestPerceptionDeleteProcessor(t *testing.T) {
 		t.Skipf("Skipping test due to client creation failure: %v", err)
 	}
 
-	err := client.Perception.DeleteProcessor("thought-123", "completion")
+err = client.Perception.DeleteProcessor("thought-123", "completion")
 
 	if err != nil {
 		t.Fatalf("Expected no error, got %v", err)
@@ -466,7 +466,7 @@ func TestPerceptionGetProcessorEmptyThoughtID(t *testing.T) {
 	if err != nil {
 		t.Skipf("Skipping test due to client creation failure: %v", err)
 	}
-	_, err := client.Perception.GetProcessor("", "completion")
+_, err = client.Perception.GetProcessor("", "completion")
 
 	if err == nil || !strings.Contains(err.Error(), "thought ID is required") {
 		t.Errorf("Expected 'thought ID is required' error, got %v", err)
@@ -486,7 +486,7 @@ func TestPerceptionGetProcessorEmptyType(t *testing.T) {
 	if err != nil {
 		t.Skipf("Skipping test due to client creation failure: %v", err)
 	}
-	_, err := client.Perception.GetProcessor("thought-123", "")
+_, err = client.Perception.GetProcessor("thought-123", "")
 
 	if err == nil || !strings.Contains(err.Error(), "processor type is required") {
 		t.Errorf("Expected 'processor type is required' error, got %v", err)
@@ -513,7 +513,7 @@ func TestPerceptionUpdateProcessorEmptyThoughtID(t *testing.T) {
 		},
 	}
 
-	_, err := client.Perception.UpdateProcessor("", "completion", updateReq)
+_, err = client.Perception.UpdateProcessor("", "completion", updateReq)
 
 	if err == nil || !strings.Contains(err.Error(), "thought ID is required") {
 		t.Errorf("Expected 'thought ID is required' error, got %v", err)
@@ -540,7 +540,7 @@ func TestPerceptionReplaceProcessorEmptyThoughtID(t *testing.T) {
 		},
 	}
 
-	_, err := client.Perception.ReplaceProcessor("", "completion", replaceReq)
+_, err = client.Perception.ReplaceProcessor("", "completion", replaceReq)
 
 	if err == nil || !strings.Contains(err.Error(), "thought ID is required") {
 		t.Errorf("Expected 'thought ID is required' error, got %v", err)
@@ -561,7 +561,7 @@ func TestPerceptionDeleteProcessorEmptyThoughtID(t *testing.T) {
 		t.Skipf("Skipping test due to client creation failure: %v", err)
 	}
 
-	err := client.Perception.DeleteProcessor("", "completion")
+err = client.Perception.DeleteProcessor("", "completion")
 
 	if err == nil || !strings.Contains(err.Error(), "thought ID is required") {
 		t.Errorf("Expected 'thought ID is required' error, got %v", err)

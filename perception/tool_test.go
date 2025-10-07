@@ -250,7 +250,7 @@ func TestPerceptionDeleteTool(t *testing.T) {
 	if err != nil {
 		t.Skipf("Skipping test due to client creation failure: %v", err)
 	}
-	err := client.Perception.DeleteTool("tool-456")
+err = client.Perception.DeleteTool("tool-456")
 
 	if err != nil {
 		t.Fatalf("Expected no error, got %v", err)
@@ -332,7 +332,7 @@ func TestPerceptionCreateToolValidation(t *testing.T) {
 	}
 
 	// Test empty thought ID
-	_, err := client.Perception.CreateTool("", perception.CreateToolRequest{
+_, err = client.Perception.CreateTool("", perception.CreateToolRequest{
 		Tool: perception.CreateToolData{
 			ActionID: "action-123",
 		},
@@ -363,7 +363,7 @@ func TestPerceptionGetToolEmptyID(t *testing.T) {
 		t.Skipf("Skipping test due to client creation failure: %v", err)
 	}
 
-	_, err := client.Perception.GetTool("")
+_, err = client.Perception.GetTool("")
 	if err == nil {
 		t.Error("Expected validation error for empty tool ID in GetTool")
 	}
@@ -380,7 +380,7 @@ func TestPerceptionUpdateToolEmptyID(t *testing.T) {
 		t.Skipf("Skipping test due to client creation failure: %v", err)
 	}
 
-	_, err := client.Perception.UpdateTool("", perception.UpdateToolRequest{
+_, err = client.Perception.UpdateTool("", perception.UpdateToolRequest{
 		Tool: perception.UpdateToolData{ActionID: "test"},
 	})
 	if err == nil {
@@ -399,7 +399,7 @@ func TestPerceptionReplaceToolEmptyID(t *testing.T) {
 		t.Skipf("Skipping test due to client creation failure: %v", err)
 	}
 
-	_, err := client.Perception.ReplaceTool("", perception.UpdateToolRequest{
+	_, err = client.Perception.ReplaceTool("", perception.UpdateToolRequest{
 		Tool: perception.UpdateToolData{ActionID: "test"},
 	})
 	if err == nil {
@@ -418,7 +418,7 @@ func TestPerceptionDeleteToolEmptyID(t *testing.T) {
 		t.Skipf("Skipping test due to client creation failure: %v", err)
 	}
 
-	err := client.Perception.DeleteTool("")
+	err = client.Perception.DeleteTool("")
 	if err == nil {
 		t.Error("Expected validation error for empty tool ID in DeleteTool")
 	}

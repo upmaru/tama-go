@@ -239,7 +239,7 @@ func TestSensoryCreateSourceValidation(t *testing.T) {
 	}
 
 	// Test empty space ID validation
-	_, err := client.Sensory.CreateSource("", sensory.CreateSourceRequest{
+	_, err = client.Sensory.CreateSource("", sensory.CreateSourceRequest{
 		Source: sensory.SourceRequestData{
 			Name:     "Test",
 			Type:     "model",
@@ -315,7 +315,7 @@ func TestSensoryGetSource_EmptyIDValidation(t *testing.T) {
 		t.Skipf("Skipping test due to client creation failure: %v", err)
 	}
 
-	_, err := client.Sensory.GetSource("")
+_, err = client.Sensory.GetSource("")
 	if err == nil {
 		t.Error("Expected validation error for empty source ID in GetSource")
 	}
@@ -426,7 +426,7 @@ func TestSensoryUpdateSource_EmptyIDValidation(t *testing.T) {
 		},
 	}
 
-	_, err := client.Sensory.UpdateSource("", updateReq)
+	_, err = client.Sensory.UpdateSource("", updateReq)
 	if err == nil {
 		t.Error("Expected validation error for empty source ID in UpdateSource")
 	}
@@ -538,7 +538,7 @@ func TestSensoryReplaceSource_EmptyIDValidation(t *testing.T) {
 		},
 	}
 
-	_, err := client.Sensory.ReplaceSource("", replaceReq)
+	_, err = client.Sensory.ReplaceSource("", replaceReq)
 	if err == nil {
 		t.Error("Expected validation error for empty source ID in ReplaceSource")
 	}
@@ -591,7 +591,7 @@ func TestSensoryCreateSourceWithFieldErrors(t *testing.T) {
 		},
 	}
 
-	_, err := client.Sensory.CreateSource("space-123", createReq)
+_, err = client.Sensory.CreateSource("space-123", createReq)
 	if err == nil {
 		t.Fatal("Expected error for invalid source data")
 	}

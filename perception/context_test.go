@@ -151,7 +151,7 @@ func TestPerceptionCreateContextValidation(t *testing.T) {
 	}
 
 	// Test empty thought ID
-	_, err := client.Perception.CreateContext("", perception.CreateContextRequest{
+	_, err = client.Perception.CreateContext("", perception.CreateContextRequest{
 		Context: perception.ContextRequestData{PromptID: "prompt-123", Layer: 1},
 	})
 	if err == nil {
@@ -315,7 +315,7 @@ func TestPerceptionDeleteContext(t *testing.T) {
 	if err != nil {
 		t.Skipf("Skipping test due to client creation failure: %v", err)
 	}
-	err := client.Perception.DeleteContext("context-123")
+	err = client.Perception.DeleteContext("context-123")
 
 	if err != nil {
 		t.Fatalf("Expected no error, got %v", err)
@@ -333,7 +333,7 @@ func TestPerceptionGetContextEmptyID(t *testing.T) {
 		t.Skipf("Skipping test due to client creation failure: %v", err)
 	}
 
-	_, err := client.Perception.GetContext("")
+	_, err = client.Perception.GetContext("")
 	if err == nil {
 		t.Error("Expected validation error for empty context ID in GetContext")
 	}

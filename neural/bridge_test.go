@@ -442,7 +442,7 @@ func TestNeuralDeleteBridge(t *testing.T) {
 	defer server.Close()
 
 	config := tama.Config{
-		BaseURL:        "https://api.example.com",
+		BaseURL:        server.URL,
 		ClientID:       "test-client-id",
 		ClientSecret:   "test-client-secret",
 		SkipTokenFetch: true,

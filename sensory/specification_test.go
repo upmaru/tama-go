@@ -195,7 +195,7 @@ func TestSensoryCreateSpecificationValidation(t *testing.T) {
 	}
 
 	// Test empty space ID validation
-	_, err := client.Sensory.CreateSpecification("", sensory.CreateSpecificationRequest{
+	_, err = client.Sensory.CreateSpecification("", sensory.CreateSpecificationRequest{
 		Specification: sensory.SpecificationRequestData{
 			Schema: map[string]any{
 				"type": "object",
@@ -257,7 +257,7 @@ func TestSensoryGetSpecification_EmptyIDValidation(t *testing.T) {
 		t.Skipf("Skipping test due to client creation failure: %v", err)
 	}
 
-	_, err := client.Sensory.GetSpecification("")
+	_, err = client.Sensory.GetSpecification("")
 	if err == nil {
 		t.Error("Expected validation error for empty specification ID in GetSpecification")
 	}
@@ -364,7 +364,7 @@ func TestSensoryUpdateSpecification_EmptyIDValidation(t *testing.T) {
 		},
 	}
 
-	_, err := client.Sensory.UpdateSpecification("", updateReq)
+	_, err = client.Sensory.UpdateSpecification("", updateReq)
 	if err == nil {
 		t.Error("Expected validation error for empty specification ID in UpdateSpecification")
 	}
@@ -471,7 +471,7 @@ func TestSensoryReplaceSpecification_EmptyIDValidation(t *testing.T) {
 		},
 	}
 
-	_, err := client.Sensory.ReplaceSpecification("", replaceReq)
+	_, err = client.Sensory.ReplaceSpecification("", replaceReq)
 	if err == nil {
 		t.Error("Expected validation error for empty specification ID in ReplaceSpecification")
 	}
@@ -501,7 +501,7 @@ func TestSensoryDeleteSpecification(t *testing.T) {
 		t.Skipf("Skipping test due to client creation failure: %v", err)
 	}
 
-	err := client.Sensory.DeleteSpecification("spec-123")
+	err = client.Sensory.DeleteSpecification("spec-123")
 	if err != nil {
 		t.Fatalf("Unexpected error: %v", err)
 	}
@@ -518,7 +518,7 @@ func TestSensoryDeleteSpecification_EmptyIDValidation(t *testing.T) {
 		t.Skipf("Skipping test due to client creation failure: %v", err)
 	}
 
-	err := client.Sensory.DeleteSpecification("")
+	err = client.Sensory.DeleteSpecification("")
 	if err == nil {
 		t.Error("Expected validation error for empty specification ID in DeleteSpecification")
 	}
