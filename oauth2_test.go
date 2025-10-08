@@ -14,8 +14,6 @@ import (
 )
 
 // TestOAuth2FlowDemo demonstrates the complete OAuth2 flow working end-to-end.
-//
-//nolint:gocognit,cyclop // Integration-style test with extensive setup/teardown and branching; acceptable complexity for test coverage.
 func TestOAuth2FlowDemo(t *testing.T) {
 	// Track token requests for verification
 	tokenRequestCount := 0
@@ -23,205 +21,20 @@ func TestOAuth2FlowDemo(t *testing.T) {
 
 	// Create mock OAuth2 server
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		switch r.URL.Path {
-		case "/auth/tokens":
-			tokenRequestCount++
-
-			// Verify OAuth2 token request format
-			if r.Method != http.MethodPost {
-				t.Errorf("Expected POST request for token, got %s", r.Method)
-				w.WriteHeader(http.StatusMethodNotAllowed)
-				return
-			}
-
-			// Verify Content-Type
-			contentType := r.Header.Get("Content-Type")
-			if contentType != "application/x-www-form-urlencoded" {
-				t.Errorf("Expected application/x-www-form-urlencoded, got %s", contentType)
-				w.WriteHeader(http.StatusBadRequest)
-				return
-			}
-
-			// Verify Authorization header (HTTP Basic Auth)
-			auth := r.Header.Get("Authorization")
-			if !strings.HasPrefix(auth, "Bearer ") {
-				t.Logf("Expected Bearer token in Authorization header, got %s", auth)
-				w.WriteHeader(http.StatusUnauthorized)
-				return
-			}
-
-			// Decode and verify credentials
-			encodedCreds := strings.TrimPrefix(auth, "Bearer ")
-			decodedCreds, err := base64.StdEncoding.DecodeString(encodedCreds)
-			if err != nil {
-				t.Errorf("Failed to decode credentials: %v", err)
-				w.WriteHeader(http.StatusBadRequest)
-				return
-			}
-
-			expectedCreds := "test-client-id:test-client-secret"
-			if string(decodedCreds) != expectedCreds {
-				t.Logf("Expected credentials %s, got %s", expectedCreds, string(decodedCreds))
-				w.WriteHeader(http.StatusUnauthorized)
-				return
-			}
-
-			// Parse form data
-			r.ParseForm()
-			grantType := r.Form.Get("grant_type")
-			scope := r.Form.Get("scope")
-
-			// Verify OAuth2 parameters
-			if grantType != "client_credentials" {
-				t.Errorf("Expected grant_type=client_credentials, got %s", grantType)
-				w.WriteHeader(http.StatusBadRequest)
-				return
-			}
-
-			if scope != "provision.all" {
-				t.Errorf("Expected scope=provision.all, got %s", scope)
-				w.WriteHeader(http.StatusBadRequest)
-				return
-			}
-
-			lastTokenRequest = fmt.Sprintf("grant_type=%s&scope=%s", grantType, scope)
-
-			// Return valid OAuth2 token response
-			tokenResponse := map[string]interface{}{
-				"access_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.test-token",
-				"token_type":   "Bearer",
-				"scope":        "provision.all",
-				"expires_in":   3600,
-			}
-
-			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(tokenResponse)
-
-		case "/provision/test":
-			// Mock API endpoint to test authenticated requests
-			auth := r.Header.Get("Authorization")
-			if auth != "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.test-token" {
-				w.WriteHeader(http.StatusUnauthorized)
-				json.NewEncoder(w).Encode(map[string]string{"error": "invalid_token"})
-				return
-			}
-
-			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(map[string]string{"message": "authenticated success"})
-
-		default:
-			w.WriteHeader(http.StatusNotFound)
-		}
+		handleOAuth2Request(t, r, w, &tokenRequestCount, &lastTokenRequest)
 	}))
 	defer server.Close()
 
 	t.Run("OAuth2 Client Creation and Token Acquisition", func(t *testing.T) {
-		// Test OAuth2 client creation
-		config := tama.Config{
-			BaseURL:      server.URL,
-			ClientID:     "test-client-id",
-			ClientSecret: "test-client-secret",
-			Timeout:      5 * time.Second,
-			// SkipTokenFetch is false, so it will make real token request
-		}
-
-		client, err := tama.NewClient(config)
-		if err != nil {
-			t.Fatalf("Failed to create OAuth2 client: %v", err)
-		}
-
-		// Verify token was acquired
-		if tokenRequestCount != 1 {
-			t.Errorf("Expected 1 token request, got %d", tokenRequestCount)
-		}
-
-		if lastTokenRequest != "grant_type=client_credentials&scope=provision.all" {
-			t.Errorf("Expected OAuth2 token request, got %s", lastTokenRequest)
-		}
-
-		// Verify client has token
-		token := client.GetToken()
-		if token == nil {
-			t.Fatal("Client should have a token after creation")
-		}
-
-		if token.AccessToken != "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.test-token" {
-			t.Errorf("Expected specific access token, got %s", token.AccessToken)
-		}
-
-		if token.TokenType != "Bearer" {
-			t.Errorf("Expected Bearer token type, got %s", token.TokenType)
-		}
-
-		if token.Scope != "provision.all" {
-			t.Errorf("Expected scope provision.all, got %s", token.Scope)
-		}
-
-		// Verify token expiration is set correctly (should be ~1 hour from now)
-		expectedExpiry := time.Now().Add(3600 * time.Second)
-		timeDiff := token.ExpiresAt.Sub(expectedExpiry).Abs()
-		if timeDiff > 5*time.Second {
-			t.Errorf("Token expiration time is incorrect. Expected around %v, got %v", expectedExpiry, token.ExpiresAt)
-		}
+		testOAuth2ClientCreation(t, server.URL, &tokenRequestCount, &lastTokenRequest)
 	})
 
 	t.Run("Token Refresh on Expiry", func(t *testing.T) {
-		// Reset counter
-		initialCount := tokenRequestCount
-
-		// Create client with OAuth2
-		config := tama.Config{
-			BaseURL:      server.URL,
-			ClientID:     "test-client-id",
-			ClientSecret: "test-client-secret",
-			Timeout:      5 * time.Second,
-		}
-
-		client, err := tama.NewClient(config)
-		if err != nil {
-			t.Fatalf("Failed to create OAuth2 client: %v", err)
-		}
-
-		// Verify initial token acquisition
-		if tokenRequestCount != initialCount+1 {
-			t.Errorf("Expected %d token requests, got %d", initialCount+1, tokenRequestCount)
-		}
-
-		// Make HTTP client call (this should use existing token)
-		httpClient := client.GetHTTPClient()
-
-		// This should not trigger a new token request since token is valid
-		resp, err := httpClient.R().Get("/provision/test")
-		if err != nil {
-			t.Fatalf("Failed to make authenticated request: %v", err)
-		}
-
-		if resp.StatusCode() != 200 {
-			t.Errorf("Expected 200 status, got %d", resp.StatusCode())
-		}
-
-		// Should still be the same number of token requests
-		if tokenRequestCount != initialCount+1 {
-			t.Errorf("Expected %d token requests (no refresh needed), got %d", initialCount+1, tokenRequestCount)
-		}
+		testTokenRefreshOnExpiry(t, server.URL, &tokenRequestCount)
 	})
 
 	t.Run("Error Handling for Invalid Credentials", func(t *testing.T) {
-		config := tama.Config{
-			BaseURL:      server.URL,
-			ClientID:     "invalid-client",
-			ClientSecret: "invalid-secret",
-			Timeout:      5 * time.Second,
-		}
-
-		_, err := tama.NewClient(config)
-		if err == nil {
-			t.Fatal("Expected error for invalid credentials")
-		}
-
-		if !strings.Contains(err.Error(), "failed to obtain initial token") {
-			t.Errorf("Expected token acquisition error, got: %v", err)
-		}
+		testInvalidCredentialsHandling(t, server.URL)
 	})
 
 	t.Run("Test Mode with SkipTokenFetch", func(t *testing.T) {
@@ -404,4 +217,320 @@ func TestOAuth2ThreadSafety(t *testing.T) {
 	t.Logf("   - %d goroutines executed concurrently", numGoroutines)
 	t.Logf("   - %d unique tokens received", len(tokens))
 	t.Logf("   - All operations completed without race conditions")
+}
+
+// handleOAuth2Request handles OAuth2 requests for the mock server.
+func handleOAuth2Request(
+	t *testing.T,
+	r *http.Request,
+	w http.ResponseWriter,
+	tokenRequestCount *int,
+	lastTokenRequest *string,
+) {
+	switch r.URL.Path {
+	case "/auth/tokens":
+		handleTokenRequest(t, r, w, tokenRequestCount, lastTokenRequest)
+	case "/provision/test":
+		handleTestAPIRequest(t, r, w)
+	default:
+		w.WriteHeader(http.StatusNotFound)
+	}
+}
+
+// handleTokenRequest handles /auth/tokens requests.
+func handleTokenRequest(
+	t *testing.T,
+	r *http.Request,
+	w http.ResponseWriter,
+	tokenRequestCount *int,
+	lastTokenRequest *string,
+) {
+	*tokenRequestCount++
+
+	// Verify OAuth2 token request format
+	if r.Method != http.MethodPost {
+		t.Errorf("Expected POST request for token, got %s", r.Method)
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+
+	// Verify Content-Type
+	contentType := r.Header.Get("Content-Type")
+	if contentType != "application/json" {
+		t.Errorf("Expected application/json, got %s", contentType)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	// Verify Authorization header (HTTP Basic Auth)
+	auth := r.Header.Get("Authorization")
+	if !strings.HasPrefix(auth, "Bearer ") {
+		t.Logf("Expected Bearer token in Authorization header, got %s", auth)
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	// Decode and verify credentials
+	encodedCreds := strings.TrimPrefix(auth, "Bearer ")
+	decodedCreds, err := base64.StdEncoding.DecodeString(encodedCreds)
+	if err != nil {
+		t.Errorf("Failed to decode credentials: %v", err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	expectedCreds := "test-client-id:test-client-secret"
+	if string(decodedCreds) != expectedCreds {
+		t.Logf("Expected credentials %s, got %s", expectedCreds, string(decodedCreds))
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	// Parse JSON body
+	var requestBody map[string]string
+	if decodeErr := json.NewDecoder(r.Body).Decode(&requestBody); decodeErr != nil {
+		t.Errorf("Failed to parse JSON body: %v", decodeErr)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	grantType := requestBody["grant_type"]
+	scope := requestBody["scope"]
+
+	// Verify OAuth2 parameters
+	if grantType != "client_credentials" {
+		t.Errorf("Expected grant_type=client_credentials, got %s", grantType)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	if scope != "provision.all" {
+		t.Errorf("Expected scope=provision.all, got %s", scope)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	*lastTokenRequest = fmt.Sprintf("grant_type=%s&scope=%s", grantType, scope)
+
+	// Return valid OAuth2 token response
+	tokenResponse := map[string]interface{}{
+		"access_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.test-token",
+		"token_type":   "Bearer",
+		"scope":        "provision.all",
+		"expires_in":   3600,
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(tokenResponse)
+}
+
+// handleTestAPIRequest handles /provision/test requests.
+func handleTestAPIRequest(_ *testing.T, r *http.Request, w http.ResponseWriter) {
+	// Mock API endpoint to test authenticated requests
+	auth := r.Header.Get("Authorization")
+	if auth != "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.test-token" {
+		w.WriteHeader(http.StatusUnauthorized)
+		json.NewEncoder(w).Encode(map[string]string{"error": "invalid_token"})
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]string{"message": "authenticated success"})
+}
+
+// testOAuth2ClientCreation tests OAuth2 client creation and token acquisition.
+func testOAuth2ClientCreation(t *testing.T, serverURL string, tokenRequestCount *int, lastTokenRequest *string) {
+	// Test OAuth2 client creation
+	config := tama.Config{
+		BaseURL:      serverURL,
+		ClientID:     "test-client-id",
+		ClientSecret: "test-client-secret",
+		Timeout:      5 * time.Second,
+		// SkipTokenFetch is false, so it will make real token request
+	}
+
+	client, err := tama.NewClient(config)
+	if err != nil {
+		t.Fatalf("Failed to create OAuth2 client: %v", err)
+	}
+
+	// Verify token was acquired
+	if *tokenRequestCount != 1 {
+		t.Errorf("Expected 1 token request, got %d", *tokenRequestCount)
+	}
+
+	if *lastTokenRequest != "grant_type=client_credentials&scope=provision.all" {
+		t.Errorf("Expected OAuth2 token request, got %s", *lastTokenRequest)
+	}
+
+	// Verify client has token
+	token := client.GetToken()
+	if token == nil {
+		t.Fatal("Client should have a token after creation")
+	}
+
+	if token.AccessToken != "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.test-token" {
+		t.Errorf("Expected specific access token, got %s", token.AccessToken)
+	}
+
+	if token.TokenType != "Bearer" {
+		t.Errorf("Expected Bearer token type, got %s", token.TokenType)
+	}
+
+	if token.Scope != "provision.all" {
+		t.Errorf("Expected scope provision.all, got %s", token.Scope)
+	}
+
+	// Verify token expiration is set correctly (should be ~1 hour from now)
+	expectedExpiry := time.Now().Add(3600 * time.Second)
+	timeDiff := token.ExpiresAt.Sub(expectedExpiry).Abs()
+	if timeDiff > 5*time.Second {
+		t.Errorf("Token expiration time is incorrect. Expected around %v, got %v", expectedExpiry, token.ExpiresAt)
+	}
+}
+
+// testTokenRefreshOnExpiry tests token refresh functionality.
+func testTokenRefreshOnExpiry(t *testing.T, serverURL string, tokenRequestCount *int) {
+	// Reset counter
+	initialCount := *tokenRequestCount
+
+	// Create client with OAuth2
+	config := tama.Config{
+		BaseURL:      serverURL,
+		ClientID:     "test-client-id",
+		ClientSecret: "test-client-secret",
+		Timeout:      5 * time.Second,
+	}
+
+	client, err := tama.NewClient(config)
+	if err != nil {
+		t.Fatalf("Failed to create OAuth2 client: %v", err)
+	}
+
+	// Verify initial token acquisition
+	if *tokenRequestCount != initialCount+1 {
+		t.Errorf("Expected %d token requests, got %d", initialCount+1, *tokenRequestCount)
+	}
+
+	// Make HTTP client call (this should use existing token)
+	httpClient := client.GetHTTPClient()
+
+	// This should not trigger a new token request since token is valid
+	resp, err := httpClient.R().Get("/provision/test")
+	if err != nil {
+		t.Fatalf("Failed to make authenticated request: %v", err)
+	}
+
+	if resp.StatusCode() != 200 {
+		t.Errorf("Expected 200 status, got %d", resp.StatusCode())
+	}
+
+	// Should still be the same number of token requests
+	if *tokenRequestCount != initialCount+1 {
+		t.Errorf("Expected %d token requests (no refresh needed), got %d", initialCount+1, *tokenRequestCount)
+	}
+}
+
+// testInvalidCredentialsHandling tests error handling for invalid credentials.
+func testInvalidCredentialsHandling(t *testing.T, serverURL string) {
+	config := tama.Config{
+		BaseURL:      serverURL,
+		ClientID:     "invalid-client",
+		ClientSecret: "invalid-secret",
+		Timeout:      5 * time.Second,
+	}
+
+	_, err := tama.NewClient(config)
+	if err == nil {
+		t.Fatal("Expected error for invalid credentials")
+	}
+
+	if !strings.Contains(err.Error(), "failed to obtain initial token") {
+		t.Errorf("Expected token acquisition error, got: %v", err)
+	}
+}
+
+// TestCustomScopes verifies that custom scopes can be passed to the client.
+func TestCustomScopes(t *testing.T) {
+	mux := http.NewServeMux()
+	server := httptest.NewServer(mux)
+	defer server.Close()
+
+	var lastTokenRequest string
+
+	mux.HandleFunc("/auth/tokens", func(w http.ResponseWriter, r *http.Request) {
+		// Parse JSON body
+		var requestBody map[string]string
+		if decodeErr := json.NewDecoder(r.Body).Decode(&requestBody); decodeErr != nil {
+			t.Errorf("Failed to parse JSON body: %v", decodeErr)
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		// Store the scope for verification
+		lastTokenRequest = requestBody["scope"]
+
+		// Return valid OAuth2 token response
+		tokenResponse := map[string]interface{}{
+			"access_token": "test-token",
+			"token_type":   "Bearer",
+			"scope":        requestBody["scope"],
+			"expires_in":   3600,
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(tokenResponse)
+	})
+
+	tests := []struct {
+		name          string
+		scopes        []string
+		expectedScope string
+	}{
+		{
+			name:          "default scope",
+			scopes:        nil,
+			expectedScope: "provision.all",
+		},
+		{
+			name:          "single custom scope",
+			scopes:        []string{"read.data"},
+			expectedScope: "read.data",
+		},
+		{
+			name:          "multiple custom scopes",
+			scopes:        []string{"read.data", "write.data", "admin.access"},
+			expectedScope: "read.data write.data admin.access",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			config := tama.Config{
+				BaseURL:      server.URL,
+				ClientID:     "test-client",
+				ClientSecret: "test-secret",
+				Scopes:       tt.scopes,
+			}
+
+			client, err := tama.NewClient(config)
+			if err != nil {
+				t.Fatalf("Failed to create client: %v", err)
+			}
+
+			// Verify the scope was sent correctly
+			if lastTokenRequest != tt.expectedScope {
+				t.Errorf("Expected scope %q, got %q", tt.expectedScope, lastTokenRequest)
+			}
+
+			// Verify the token has the correct scope
+			token := client.GetToken()
+			if token == nil {
+				t.Fatal("No token available")
+			}
+
+			if token.Scope != tt.expectedScope {
+				t.Errorf("Expected token scope %q, got %q", tt.expectedScope, token.Scope)
+			}
+		})
+	}
 }

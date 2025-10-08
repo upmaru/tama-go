@@ -54,6 +54,7 @@ type Client struct {
 	token          *Token
 	tokenMutex     sync.RWMutex
 	skipTokenFetch bool
+	scopes         []string
 	Neural         *NeuralService
 	Sensory        *SensoryService
 	Memory         *MemoryService
@@ -70,7 +71,8 @@ type Config struct {
 	ClientSecret   string
 	APIKey         string
 	Timeout        time.Duration
-	SkipTokenFetch bool // For testing - skips initial token fetch
+	SkipTokenFetch bool     // For testing - skips initial token fetch
+	Scopes         []string // OAuth2 scopes to request
 }
 
 // NewClient creates a new Tama API client with OAuth2 authentication.
@@ -101,6 +103,7 @@ func NewClient(config Config) (*Client, error) {
 		clientID:       config.ClientID,
 		clientSecret:   config.ClientSecret,
 		skipTokenFetch: config.SkipTokenFetch,
+		scopes:         config.Scopes,
 	}
 
 	// If APIKey is provided without client credentials, enable test mode and set token directly
@@ -109,7 +112,7 @@ func NewClient(config Config) (*Client, error) {
 		client.httpClient.SetAuthToken(config.APIKey)
 	} else if !config.SkipTokenFetch {
 		// Get initial OAuth2 token (unless skipped for testing)
-		if err := client.refreshToken(); err != nil {
+		if err := client.refreshToken(config.Scopes...); err != nil {
 			return nil, fmt.Errorf("failed to obtain initial token: %w", err)
 		}
 	}
@@ -140,9 +143,16 @@ func NewClient(config Config) (*Client, error) {
 }
 
 // refreshToken obtains a new OAuth2 access token using client credentials flow.
-func (c *Client) refreshToken() error {
+func (c *Client) refreshToken(scopes ...string) error {
 	c.tokenMutex.Lock()
 	defer c.tokenMutex.Unlock()
+
+	// Determine scope - use provided scopes or default to "provision.all"
+	requestScope := "provision.all"
+	if len(scopes) > 0 {
+		// Join multiple scopes with spaces (OAuth2 standard)
+		requestScope = strings.Join(scopes, " ")
+	}
 
 	// Create Basic Auth credentials: base64(client_id:client_secret)
 	credentials := base64.StdEncoding.EncodeToString([]byte(c.clientID + ":" + c.clientSecret))
@@ -151,16 +161,19 @@ func (c *Client) refreshToken() error {
 	tokenClient := resty.New().
 		SetBaseURL(c.baseURL).
 		SetTimeout(c.httpClient.GetClient().Timeout).
-		SetHeader("Content-Type", "application/x-www-form-urlencoded").
+		SetHeader("Content-Type", "application/json").
 		SetHeader("Accept", "application/json").
 		SetHeader("Authorization", "Bearer "+credentials)
 
+	// Create JSON body for the token request
+	requestBody := map[string]string{
+		"grant_type": "client_credentials",
+		"scope":      requestScope,
+	}
+
 	var tokenResponse TokenResponse
 	resp, err := tokenClient.R().
-		SetFormData(map[string]string{
-			"grant_type": "client_credentials",
-			"scope":      "provision.all",
-		}).
+		SetBody(requestBody).
 		SetResult(&tokenResponse).
 		Post("/auth/tokens")
 
@@ -204,7 +217,7 @@ func (c *Client) ensureValidToken() error {
 	c.tokenMutex.RUnlock()
 
 	// Token is expired or missing, refresh it
-	return c.refreshToken()
+	return c.refreshToken(c.scopes...)
 }
 
 // SetDebug enables or disables debug mode for HTTP requests.
