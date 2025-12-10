@@ -62,6 +62,7 @@ type Client struct {
 	Motor          *MotorService
 	Contexts       *ContextsService
 	Tools          *ToolsService
+	System         *SystemService
 }
 
 // Config holds configuration options for the client.
@@ -138,6 +139,7 @@ func NewClient(config Config) (*Client, error) {
 	client.Motor = newMotorService(client)
 	client.Contexts = newContextsService(client)
 	client.Tools = newToolsService(client)
+	client.System = newSystemService(client)
 
 	return client, nil
 }
