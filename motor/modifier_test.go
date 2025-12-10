@@ -142,9 +142,6 @@ func TestMotorCreateModifierValidation(t *testing.T) {
 	if err != nil {
 		t.Skipf("Skipping test due to client creation failure: %v", err)
 	}
-	if err != nil {
-		t.Skipf("Skipping test due to client creation failure: %v", err)
-	}
 	_, err = client.Motor.CreateModifier("",
 		motor.CreateModifierRequest{Modifier: motor.ModifierRequestData{Name: "x", Schema: map[string]any{"a": 1}}})
 	if err == nil {
