@@ -7,6 +7,7 @@ import (
 
 // Queue represents a system queue resource.
 type Queue struct {
+	ID          string `json:"id,omitempty"`
 	Role        string `json:"role"`
 	Name        string `json:"name"`
 	Concurrency int    `json:"concurrency"`

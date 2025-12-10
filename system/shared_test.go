@@ -15,6 +15,10 @@ func createSystemMockServer(handler http.HandlerFunc) *httptest.Server {
 
 // validateQueueResponse validates that actual queue matches expected queue.
 func validateQueueResponse(t *testing.T, actual, expected system.Queue) {
+	if actual.ID != expected.ID {
+		t.Errorf("Expected queue ID %s, got %s", expected.ID, actual.ID)
+	}
+
 	if actual.Role != expected.Role {
 		t.Errorf("Expected queue role %s, got %s", expected.Role, actual.Role)
 	}

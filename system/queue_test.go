@@ -12,6 +12,7 @@ import (
 
 func TestSystemGetQueue(t *testing.T) {
 	expectedQueue := system.Queue{
+		ID:          "queue-123",
 		Role:        "translator",
 		Name:        "primary",
 		Concurrency: 5,
@@ -63,6 +64,7 @@ func TestSystemCreateQueue(t *testing.T) {
 	}
 
 	expectedQueue := system.Queue{
+		ID:          "queue-456",
 		Role:        "planner",
 		Name:        "analysis",
 		Concurrency: 3,
@@ -179,6 +181,7 @@ func TestSystemUpdateQueue(t *testing.T) {
 	}
 
 	expectedQueue := system.Queue{
+		ID:          "queue-123",
 		Role:        "planner",
 		Name:        "critical",
 		Concurrency: 10,
