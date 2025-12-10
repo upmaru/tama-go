@@ -15,6 +15,13 @@ func createMockServer(handler http.HandlerFunc) *httptest.Server {
 
 // ValidateThoughtResponse validates that actual thought matches expected thought.
 func ValidateThoughtResponse(t *testing.T, actual, expected perception.Thought) {
+	validateThoughtBasics(t, actual, expected)
+	validateThoughtModule(t, actual.Module, expected.Module)
+	validateThoughtDelegation(t, actual.Delegation, expected.Delegation)
+	validateThoughtFaculty(t, actual.Faculty, expected.Faculty)
+}
+
+func validateThoughtBasics(t *testing.T, actual, expected perception.Thought) {
 	if actual.ID != expected.ID {
 		t.Errorf("Expected thought ID %s, got %s", expected.ID, actual.ID)
 	}
@@ -31,70 +38,6 @@ func ValidateThoughtResponse(t *testing.T, actual, expected perception.Thought) 
 		)
 	}
 
-	// Handle Module pointer comparison
-	if (actual.Module == nil) != (expected.Module == nil) {
-		t.Errorf(
-			"Expected module nil status %v, got %v",
-			expected.Module == nil,
-			actual.Module == nil,
-		)
-	}
-	if actual.Module != nil && expected.Module != nil {
-		if actual.Module.ID != expected.Module.ID {
-			t.Errorf("Expected module ID %s, got %s", expected.Module.ID, actual.Module.ID)
-		}
-		if actual.Module.Reference != expected.Module.Reference {
-			t.Errorf(
-				"Expected module reference %s, got %s",
-				expected.Module.Reference,
-				actual.Module.Reference,
-			)
-		}
-	}
-
-	// Handle Delegation pointer comparison
-	if (actual.Delegation == nil) != (expected.Delegation == nil) {
-		t.Errorf(
-			"Expected delegation nil status %v, got %v",
-			expected.Delegation == nil,
-			actual.Delegation == nil,
-		)
-	}
-	if actual.Delegation != nil && expected.Delegation != nil {
-		if actual.Delegation.TargetThoughtID != expected.Delegation.TargetThoughtID {
-			t.Errorf(
-				"Expected delegation target_thought_id %s, got %s",
-				expected.Delegation.TargetThoughtID,
-				actual.Delegation.TargetThoughtID,
-			)
-		}
-	}
-
-	// Handle Faculty pointer comparison
-	if (actual.Faculty == nil) != (expected.Faculty == nil) {
-		t.Errorf(
-			"Expected faculty nil status %v, got %v",
-			expected.Faculty == nil,
-			actual.Faculty == nil,
-		)
-	}
-	if actual.Faculty != nil && expected.Faculty != nil {
-		if actual.Faculty.QueueID != expected.Faculty.QueueID {
-			t.Errorf(
-				"Expected faculty queue_id %s, got %s",
-				expected.Faculty.QueueID,
-				actual.Faculty.QueueID,
-			)
-		}
-		if actual.Faculty.Priority != expected.Faculty.Priority {
-			t.Errorf(
-				"Expected faculty priority %d, got %d",
-				expected.Faculty.Priority,
-				actual.Faculty.Priority,
-			)
-		}
-	}
-
 	if actual.ProvisionState != expected.ProvisionState {
 		t.Errorf(
 			"Expected thought provision_state %s, got %s",
@@ -109,6 +52,58 @@ func ValidateThoughtResponse(t *testing.T, actual, expected perception.Thought) 
 
 	if actual.Index != expected.Index {
 		t.Errorf("Expected thought index %d, got %d", expected.Index, actual.Index)
+	}
+}
+
+func validateThoughtModule(t *testing.T, actual, expected *perception.Module) {
+	if (actual == nil) != (expected == nil) {
+		t.Errorf("Expected module nil status %v, got %v", expected == nil, actual == nil)
+		return
+	}
+	if actual == nil || expected == nil {
+		return
+	}
+
+	if actual.ID != expected.ID {
+		t.Errorf("Expected module ID %s, got %s", expected.ID, actual.ID)
+	}
+	if actual.Reference != expected.Reference {
+		t.Errorf("Expected module reference %s, got %s", expected.Reference, actual.Reference)
+	}
+}
+
+func validateThoughtDelegation(t *testing.T, actual, expected *perception.Delegation) {
+	if (actual == nil) != (expected == nil) {
+		t.Errorf("Expected delegation nil status %v, got %v", expected == nil, actual == nil)
+		return
+	}
+	if actual == nil || expected == nil {
+		return
+	}
+
+	if actual.TargetThoughtID != expected.TargetThoughtID {
+		t.Errorf(
+			"Expected delegation target_thought_id %s, got %s",
+			expected.TargetThoughtID,
+			actual.TargetThoughtID,
+		)
+	}
+}
+
+func validateThoughtFaculty(t *testing.T, actual, expected *perception.Faculty) {
+	if (actual == nil) != (expected == nil) {
+		t.Errorf("Expected faculty nil status %v, got %v", expected == nil, actual == nil)
+		return
+	}
+	if actual == nil || expected == nil {
+		return
+	}
+
+	if actual.QueueID != expected.QueueID {
+		t.Errorf("Expected faculty queue_id %s, got %s", expected.QueueID, actual.QueueID)
+	}
+	if actual.Priority != expected.Priority {
+		t.Errorf("Expected faculty priority %d, got %d", expected.Priority, actual.Priority)
 	}
 }
 

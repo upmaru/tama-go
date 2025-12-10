@@ -297,7 +297,8 @@ func TestSystemDeleteQueue(t *testing.T) {
 		t.Skipf("Skipping test due to client creation failure: %v", err)
 	}
 
-	if err := client.System.DeleteQueue("queue-123"); err != nil {
+	err = client.System.DeleteQueue("queue-123")
+	if err != nil {
 		t.Fatalf("Expected no error, got %v", err)
 	}
 }
@@ -313,7 +314,8 @@ func TestSystemDeleteQueueEmptyID(t *testing.T) {
 		t.Skipf("Skipping test due to client creation failure: %v", err)
 	}
 
-	if err := client.System.DeleteQueue(""); err == nil {
+	err = client.System.DeleteQueue("")
+	if err == nil {
 		t.Error("Expected validation error for empty queue ID")
 	}
 }

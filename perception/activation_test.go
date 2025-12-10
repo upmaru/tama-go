@@ -292,9 +292,6 @@ func TestPerceptionUpdateActivation(t *testing.T) {
 	if err != nil {
 		t.Skipf("Skipping test due to client creation failure: %v", err)
 	}
-	if err != nil {
-		t.Skipf("Skipping test due to client creation failure: %v", err)
-	}
 	activation, err := client.Perception.UpdateActivation("activation-123", request)
 
 	if err != nil {
