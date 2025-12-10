@@ -70,6 +70,31 @@ func ValidateThoughtResponse(t *testing.T, actual, expected perception.Thought) 
 		}
 	}
 
+	// Handle Faculty pointer comparison
+	if (actual.Faculty == nil) != (expected.Faculty == nil) {
+		t.Errorf(
+			"Expected faculty nil status %v, got %v",
+			expected.Faculty == nil,
+			actual.Faculty == nil,
+		)
+	}
+	if actual.Faculty != nil && expected.Faculty != nil {
+		if actual.Faculty.QueueID != expected.Faculty.QueueID {
+			t.Errorf(
+				"Expected faculty queue_id %s, got %s",
+				expected.Faculty.QueueID,
+				actual.Faculty.QueueID,
+			)
+		}
+		if actual.Faculty.Priority != expected.Faculty.Priority {
+			t.Errorf(
+				"Expected faculty priority %d, got %d",
+				expected.Faculty.Priority,
+				actual.Faculty.Priority,
+			)
+		}
+	}
+
 	if actual.ProvisionState != expected.ProvisionState {
 		t.Errorf(
 			"Expected thought provision_state %s, got %s",

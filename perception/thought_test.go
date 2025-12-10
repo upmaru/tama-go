@@ -25,6 +25,10 @@ func TestPerceptionGetThought(t *testing.T) {
 				"max_tokens":  100,
 			},
 		},
+		Faculty: &perception.Faculty{
+			QueueID:  "queue-abc",
+			Priority: 2,
+		},
 		ProvisionState: "active",
 		Relation:       "description",
 		Index:          1,
@@ -457,6 +461,23 @@ func TestPerceptionCreateThoughtValidation(t *testing.T) {
 	})
 	if err == nil {
 		t.Error("Expected validation error for empty module reference")
+	}
+
+	// Test faculty with empty queue ID
+	_, err = client.Perception.CreateThought("chain-123", perception.CreateThoughtRequest{
+		Thought: perception.ThoughtRequestData{
+			Relation: "description",
+			Module: &perception.Module{
+				Reference: "tama/agentic/generate",
+			},
+			Faculty: &perception.Faculty{
+				QueueID:  "",
+				Priority: 1,
+			},
+		},
+	})
+	if err == nil {
+		t.Error("Expected validation error for empty faculty queue ID")
 	}
 }
 
@@ -1144,6 +1165,104 @@ func TestPerceptionCreateThoughtWithDelegation(t *testing.T) {
 	ValidateThoughtResponse(t, *thought, expectedThought)
 }
 
+func TestPerceptionCreateThoughtWithFaculty(t *testing.T) {
+	request := perception.CreateThoughtRequest{
+		Thought: perception.ThoughtRequestData{
+			Relation: "faculty",
+			Module: &perception.Module{
+				Reference: "tama/agentic/generate",
+			},
+			Faculty: &perception.Faculty{
+				QueueID:  "queue-123",
+				Priority: 0,
+			},
+		},
+	}
+
+	expectedThought := perception.Thought{
+		ID:      "thought-faculty-456",
+		ChainID: "chain-123",
+		Module: &perception.Module{
+			ID:        "module-456",
+			Reference: "tama/agentic/generate",
+		},
+		Faculty: &perception.Faculty{
+			QueueID:  "queue-123",
+			Priority: 0,
+		},
+		ProvisionState: "pending",
+		Relation:       "faculty",
+		Index:          2,
+	}
+
+	expectedResponse := perception.ThoughtResponse{
+		Data: expectedThought,
+	}
+
+	server := createMockServer(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			t.Errorf("Expected POST request, got %s", r.Method)
+		}
+
+		if r.URL.Path != "/provision/perception/chains/chain-123/thoughts" {
+			t.Errorf(
+				"Expected path /provision/perception/chains/chain-123/thoughts, got %s",
+				r.URL.Path,
+			)
+		}
+
+		var receivedRequest perception.CreateThoughtRequest
+		if err := json.NewDecoder(r.Body).Decode(&receivedRequest); err != nil {
+			t.Fatalf("Failed to decode request body: %v", err)
+		}
+
+		if receivedRequest.Thought.Faculty == nil {
+			t.Fatal("Expected faculty to be present in the request")
+		}
+
+		if receivedRequest.Thought.Faculty.QueueID != request.Thought.Faculty.QueueID {
+			t.Errorf(
+				"Expected faculty queue_id %s, got %s",
+				request.Thought.Faculty.QueueID,
+				receivedRequest.Thought.Faculty.QueueID,
+			)
+		}
+
+		if receivedRequest.Thought.Faculty.Priority != request.Thought.Faculty.Priority {
+			t.Errorf(
+				"Expected faculty priority %d, got %d",
+				request.Thought.Faculty.Priority,
+				receivedRequest.Thought.Faculty.Priority,
+			)
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusCreated)
+		json.NewEncoder(w).Encode(expectedResponse)
+	})
+	defer server.Close()
+
+	config := tama.Config{
+		BaseURL:        server.URL,
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		SkipTokenFetch: true,
+		Timeout:        10 * time.Second,
+	}
+
+	client, err := tama.NewClient(config)
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
+	thought, err := client.Perception.CreateThought("chain-123", request)
+
+	if err != nil {
+		t.Fatalf("Expected no error, got %v", err)
+	}
+
+	ValidateThoughtResponse(t, *thought, expectedThought)
+}
+
 func TestPerceptionUpdateThoughtWithDelegation(t *testing.T) {
 	request := perception.UpdateThoughtRequest{
 		Thought: perception.UpdateThoughtData{
@@ -1198,6 +1317,93 @@ func TestPerceptionUpdateThoughtWithDelegation(t *testing.T) {
 				"Expected delegation target_thought_id %s, got %s",
 				request.Thought.Delegation.TargetThoughtID,
 				receivedRequest.Thought.Delegation.TargetThoughtID,
+			)
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(expectedResponse)
+	})
+	defer server.Close()
+
+	config := tama.Config{
+		BaseURL:        server.URL,
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		SkipTokenFetch: true,
+		Timeout:        10 * time.Second,
+	}
+
+	client, err := tama.NewClient(config)
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
+	thought, err := client.Perception.UpdateThought("thought-123", request)
+
+	if err != nil {
+		t.Fatalf("Expected no error, got %v", err)
+	}
+
+	ValidateThoughtResponse(t, *thought, expectedThought)
+}
+
+func TestPerceptionUpdateThoughtWithFaculty(t *testing.T) {
+	request := perception.UpdateThoughtRequest{
+		Thought: perception.UpdateThoughtData{
+			Relation: "updated-faculty",
+			Faculty: &perception.Faculty{
+				QueueID:  "queue-789",
+				Priority: 3,
+			},
+		},
+	}
+
+	expectedThought := perception.Thought{
+		ID:      "thought-123",
+		ChainID: "chain-123",
+		Faculty: &perception.Faculty{
+			QueueID:  "queue-789",
+			Priority: 3,
+		},
+		ProvisionState: "active",
+		Relation:       "updated-faculty",
+		Index:          1,
+	}
+
+	expectedResponse := perception.ThoughtResponse{
+		Data: expectedThought,
+	}
+
+	server := createMockServer(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPatch {
+			t.Errorf("Expected PATCH request, got %s", r.Method)
+		}
+
+		if r.URL.Path != "/provision/perception/thoughts/thought-123" {
+			t.Errorf("Expected path /provision/perception/thoughts/thought-123, got %s", r.URL.Path)
+		}
+
+		var receivedRequest perception.UpdateThoughtRequest
+		if err := json.NewDecoder(r.Body).Decode(&receivedRequest); err != nil {
+			t.Fatalf("Failed to decode request body: %v", err)
+		}
+
+		if receivedRequest.Thought.Faculty == nil {
+			t.Fatal("Expected faculty to be present in the request")
+		}
+
+		if receivedRequest.Thought.Faculty.QueueID != request.Thought.Faculty.QueueID {
+			t.Errorf(
+				"Expected faculty queue_id %s, got %s",
+				request.Thought.Faculty.QueueID,
+				receivedRequest.Thought.Faculty.QueueID,
+			)
+		}
+
+		if receivedRequest.Thought.Faculty.Priority != request.Thought.Faculty.Priority {
+			t.Errorf(
+				"Expected faculty priority %d, got %d",
+				request.Thought.Faculty.Priority,
+				receivedRequest.Thought.Faculty.Priority,
 			)
 		}
 

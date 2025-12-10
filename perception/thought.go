@@ -17,6 +17,12 @@ type Delegation struct {
 	TargetThoughtID string `json:"target_thought_id"`
 }
 
+// Faculty represents a thought faculty configuration.
+type Faculty struct {
+	QueueID  string `json:"queue_id"`
+	Priority int    `json:"priority"`
+}
+
 // Thought represents a perception thought resource.
 type Thought struct {
 	ID             string      `json:"id,omitempty"`
@@ -24,6 +30,7 @@ type Thought struct {
 	OutputClassID  string      `json:"output_class_id,omitempty"`
 	Module         *Module     `json:"module,omitempty"`
 	Delegation     *Delegation `json:"delegation,omitempty"`
+	Faculty        *Faculty    `json:"faculty,omitempty"`
 	ProvisionState string      `json:"provision_state"`
 	Relation       string      `json:"relation"`
 	Index          int         `json:"index"`
@@ -46,6 +53,7 @@ type ThoughtRequestData struct {
 	Index         *int        `json:"index,omitempty"`
 	Module        *Module     `json:"module,omitempty"`
 	Delegation    *Delegation `json:"delegation,omitempty"`
+	Faculty       *Faculty    `json:"faculty,omitempty"`
 }
 
 // UpdateThoughtRequest represents the request payload for updating a thought.
@@ -60,6 +68,7 @@ type UpdateThoughtData struct {
 	Index         *int        `json:"index,omitempty"`
 	Module        *Module     `json:"module,omitempty"`
 	Delegation    *Delegation `json:"delegation,omitempty"`
+	Faculty       *Faculty    `json:"faculty,omitempty"`
 }
 
 // GetThought retrieves a specific thought by ID.
@@ -93,6 +102,9 @@ func (s *Service) CreateThought(chainID string, req CreateThoughtRequest) (*Thou
 	}
 	if req.Thought.Module != nil && req.Thought.Module.Reference == "" {
 		return nil, errors.New("thought module reference is required")
+	}
+	if req.Thought.Faculty != nil && req.Thought.Faculty.QueueID == "" {
+		return nil, errors.New("thought faculty queue ID is required")
 	}
 	if req.Thought.Module == nil && req.Thought.Delegation == nil {
 		return nil, errors.New("either module or delegation is required")
