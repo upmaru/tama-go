@@ -53,7 +53,7 @@ type ThoughtRequestData struct {
 	Index         *int        `json:"index,omitempty"`
 	Module        *Module     `json:"module,omitempty"`
 	Delegation    *Delegation `json:"delegation,omitempty"`
-	Faculty       *Faculty    `json:"faculty,omitempty"`
+	Faculty       *Faculty    `json:"faculty"`
 }
 
 // UpdateThoughtRequest represents the request payload for updating a thought.
@@ -68,7 +68,7 @@ type UpdateThoughtData struct {
 	Index         *int        `json:"index,omitempty"`
 	Module        *Module     `json:"module,omitempty"`
 	Delegation    *Delegation `json:"delegation,omitempty"`
-	Faculty       *Faculty    `json:"faculty,omitempty"`
+	Faculty       *Faculty    `json:"faculty"`
 }
 
 // GetThought retrieves a specific thought by ID.
