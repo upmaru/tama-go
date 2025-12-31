@@ -608,3 +608,378 @@ func TestSensoryCreateSourceWithFieldErrors(t *testing.T) {
 		t.Errorf("Expected error to contain 'endpoint must use HTTPS', got %s", errorMsg)
 	}
 }
+
+func TestSensoryCreateSourceWithRequest(t *testing.T) {
+	expectedSource := sensory.Source{
+		ID:             "source-789",
+		Name:           "Source With Request",
+		Endpoint:       "https://api.test.com/v1",
+		SpaceID:        "space-123",
+		ProvisionState: "pending",
+	}
+
+	expectedResponse := sensory.SourceResponse{
+		Data: expectedSource,
+	}
+
+	server := CreateMockServer(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			t.Errorf("Expected POST request, got %s", r.Method)
+		}
+
+		if r.URL.Path != "/provision/sensory/spaces/space-123/sources" {
+			t.Errorf("Expected path /provision/sensory/spaces/space-123/sources, got %s", r.URL.Path)
+		}
+
+		var req sensory.CreateSourceRequest
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			t.Fatalf("Failed to decode request body: %v", err)
+		}
+
+		// Verify request field is present
+		if req.Source.Request == nil {
+			t.Error("Expected request field to be present")
+		} else {
+			// Verify headers
+			if len(req.Source.Request.Headers) != 2 {
+				t.Errorf("Expected 2 headers, got %d", len(req.Source.Request.Headers))
+			}
+			if req.Source.Request.Headers[0].Name != "Authorization" {
+				t.Errorf("Expected first header name 'Authorization', got %s", req.Source.Request.Headers[0].Name)
+			}
+			if req.Source.Request.Headers[0].Value != "Bearer token123" {
+				t.Errorf("Expected first header value 'Bearer token123', got %s", req.Source.Request.Headers[0].Value)
+			}
+			if req.Source.Request.Headers[1].Name != "X-Custom-Header" {
+				t.Errorf("Expected second header name 'X-Custom-Header', got %s", req.Source.Request.Headers[1].Name)
+			}
+			if req.Source.Request.Headers[1].Value != "custom-value" {
+				t.Errorf("Expected second header value 'custom-value', got %s", req.Source.Request.Headers[1].Value)
+			}
+
+			// Verify session affinity
+			if req.Source.Request.SessionAffinity == nil {
+				t.Error("Expected session_affinity to be present")
+			} else {
+				if req.Source.Request.SessionAffinity.Location != "header" {
+					t.Errorf("Expected session_affinity location 'header', got %s", req.Source.Request.SessionAffinity.Location)
+				}
+				if req.Source.Request.SessionAffinity.Key != "X-Actor-ID" {
+					t.Errorf("Expected session_affinity key 'X-Actor-ID', got %s", req.Source.Request.SessionAffinity.Key)
+				}
+				if req.Source.Request.SessionAffinity.Value != "actor_id" {
+					t.Errorf("Expected session_affinity value 'actor_id', got %s", req.Source.Request.SessionAffinity.Value)
+				}
+			}
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusCreated)
+		json.NewEncoder(w).Encode(expectedResponse)
+	})
+	defer server.Close()
+
+	client, err := tama.NewClient(tama.Config{
+		BaseURL:        server.URL,
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		SkipTokenFetch: true,
+	})
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
+
+	createReq := sensory.CreateSourceRequest{
+		Source: sensory.SourceRequestData{
+			Name:     "Source With Request",
+			Type:     "model",
+			Endpoint: "https://api.test.com/v1",
+			Credential: sensory.SourceCredential{
+				ClientID:       "test-client-id",
+				ClientSecret:   "test-client-secret",
+				SkipTokenFetch: true,
+			},
+			Request: &sensory.Request{
+				Headers: []sensory.Header{
+					{Name: "Authorization", Value: "Bearer token123"},
+					{Name: "X-Custom-Header", Value: "custom-value"},
+				},
+				SessionAffinity: &sensory.SessionAffinity{
+					Location: "header",
+					Key:      "X-Actor-ID",
+					Value:    "actor_id",
+				},
+			},
+		},
+	}
+
+	source, err := client.Sensory.CreateSource("space-123", createReq)
+	if err != nil {
+		t.Fatalf("Unexpected error: %v", err)
+	}
+
+	if source.ID != expectedSource.ID {
+		t.Errorf("Expected source ID %s, got %s", expectedSource.ID, source.ID)
+	}
+
+	if source.Name != expectedSource.Name {
+		t.Errorf("Expected source name %s, got %s", expectedSource.Name, source.Name)
+	}
+}
+
+func TestSensoryCreateSourceWithNullRequest(t *testing.T) {
+	expectedSource := sensory.Source{
+		ID:             "source-999",
+		Name:           "Source Without Request",
+		Endpoint:       "https://api.test.com/v1",
+		SpaceID:        "space-123",
+		ProvisionState: "pending",
+	}
+
+	expectedResponse := sensory.SourceResponse{
+		Data: expectedSource,
+	}
+
+	server := CreateMockServer(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			t.Errorf("Expected POST request, got %s", r.Method)
+		}
+
+		// Decode to raw JSON to check if request is null
+		var rawBody map[string]any
+		if err := json.NewDecoder(r.Body).Decode(&rawBody); err != nil {
+			t.Fatalf("Failed to decode request body: %v", err)
+		}
+
+		source, ok := rawBody["source"].(map[string]any)
+		if !ok {
+			t.Fatal("Expected source object in request body")
+		}
+
+		// Verify that request field exists and is null
+		requestValue, hasRequest := source["request"]
+		if !hasRequest {
+			t.Error("Expected request field to be present in JSON")
+		}
+		if requestValue != nil {
+			t.Errorf("Expected request to be null, got %v", requestValue)
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusCreated)
+		json.NewEncoder(w).Encode(expectedResponse)
+	})
+	defer server.Close()
+
+	client, err := tama.NewClient(tama.Config{
+		BaseURL:        server.URL,
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		SkipTokenFetch: true,
+	})
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
+
+	createReq := sensory.CreateSourceRequest{
+		Source: sensory.SourceRequestData{
+			Name:     "Source Without Request",
+			Type:     "model",
+			Endpoint: "https://api.test.com/v1",
+			Credential: sensory.SourceCredential{
+				ClientID:       "test-client-id",
+				ClientSecret:   "test-client-secret",
+				SkipTokenFetch: true,
+			},
+			Request: nil, // Explicitly set to nil
+		},
+	}
+
+	source, err := client.Sensory.CreateSource("space-123", createReq)
+	if err != nil {
+		t.Fatalf("Unexpected error: %v", err)
+	}
+
+	if source.ID != expectedSource.ID {
+		t.Errorf("Expected source ID %s, got %s", expectedSource.ID, source.ID)
+	}
+}
+
+func TestSensoryUpdateSourceWithRequest(t *testing.T) {
+	expectedSource := sensory.Source{
+		ID:             "source-123",
+		Name:           "Updated Source With Request",
+		Endpoint:       "https://api.updated.com/v1",
+		SpaceID:        "space-456",
+		ProvisionState: "active",
+	}
+
+	expectedResponse := sensory.SourceResponse{
+		Data: expectedSource,
+	}
+
+	server := CreateMockServer(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPatch {
+			t.Errorf("Expected PATCH request, got %s", r.Method)
+		}
+
+		if r.URL.Path != "/provision/sensory/sources/source-123" {
+			t.Errorf("Expected path /provision/sensory/sources/source-123, got %s", r.URL.Path)
+		}
+
+		var req sensory.UpdateSourceRequest
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			t.Fatalf("Failed to decode request body: %v", err)
+		}
+
+		// Verify request field is present
+		if req.Source.Request == nil {
+			t.Error("Expected request field to be present")
+		} else {
+			// Verify headers
+			if len(req.Source.Request.Headers) != 1 {
+				t.Errorf("Expected 1 header, got %d", len(req.Source.Request.Headers))
+			}
+			if req.Source.Request.Headers[0].Name != "X-API-Key" {
+				t.Errorf("Expected header name 'X-API-Key', got %s", req.Source.Request.Headers[0].Name)
+			}
+			if req.Source.Request.Headers[0].Value != "secret-key" {
+				t.Errorf("Expected header value 'secret-key', got %s", req.Source.Request.Headers[0].Value)
+			}
+
+			// Verify session affinity
+			if req.Source.Request.SessionAffinity == nil {
+				t.Error("Expected session_affinity to be present")
+			} else {
+				if req.Source.Request.SessionAffinity.Location != "body" {
+					t.Errorf("Expected session_affinity location 'body', got %s", req.Source.Request.SessionAffinity.Location)
+				}
+				if req.Source.Request.SessionAffinity.Key != "actor_id" {
+					t.Errorf("Expected session_affinity key 'actor_id', got %s", req.Source.Request.SessionAffinity.Key)
+				}
+				if req.Source.Request.SessionAffinity.Value != "actor_id" {
+					t.Errorf("Expected session_affinity value 'actor_id', got %s", req.Source.Request.SessionAffinity.Value)
+				}
+			}
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(expectedResponse)
+	})
+	defer server.Close()
+
+	client, err := tama.NewClient(tama.Config{
+		BaseURL:        server.URL,
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		SkipTokenFetch: true,
+	})
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
+
+	updateReq := sensory.UpdateSourceRequest{
+		Source: sensory.UpdateSourceData{
+			Name:     "Updated Source With Request",
+			Endpoint: "https://api.updated.com/v1",
+			Request: &sensory.Request{
+				Headers: []sensory.Header{
+					{Name: "X-API-Key", Value: "secret-key"},
+				},
+				SessionAffinity: &sensory.SessionAffinity{
+					Location: "body",
+					Key:      "actor_id",
+					Value:    "actor_id",
+				},
+			},
+		},
+	}
+
+	source, err := client.Sensory.UpdateSource("source-123", updateReq)
+	if err != nil {
+		t.Fatalf("Unexpected error: %v", err)
+	}
+
+	if source.ID != expectedSource.ID {
+		t.Errorf("Expected source ID %s, got %s", expectedSource.ID, source.ID)
+	}
+
+	if source.Name != expectedSource.Name {
+		t.Errorf("Expected source name %s, got %s", expectedSource.Name, source.Name)
+	}
+}
+
+func TestSensoryUpdateSourceWithNullRequest(t *testing.T) {
+	expectedSource := sensory.Source{
+		ID:             "source-123",
+		Name:           "Updated Source Without Request",
+		Endpoint:       "https://api.updated.com/v1",
+		SpaceID:        "space-456",
+		ProvisionState: "active",
+	}
+
+	expectedResponse := sensory.SourceResponse{
+		Data: expectedSource,
+	}
+
+	server := CreateMockServer(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPatch {
+			t.Errorf("Expected PATCH request, got %s", r.Method)
+		}
+
+		// Decode to raw JSON to check if request is null
+		var rawBody map[string]any
+		if err := json.NewDecoder(r.Body).Decode(&rawBody); err != nil {
+			t.Fatalf("Failed to decode request body: %v", err)
+		}
+
+		source, ok := rawBody["source"].(map[string]any)
+		if !ok {
+			t.Fatal("Expected source object in request body")
+		}
+
+		// Verify that request field exists and is null
+		requestValue, hasRequest := source["request"]
+		if !hasRequest {
+			t.Error("Expected request field to be present in JSON")
+		}
+		if requestValue != nil {
+			t.Errorf("Expected request to be null, got %v", requestValue)
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(expectedResponse)
+	})
+	defer server.Close()
+
+	client, err := tama.NewClient(tama.Config{
+		BaseURL:        server.URL,
+		ClientID:       "test-client-id",
+		ClientSecret:   "test-client-secret",
+		SkipTokenFetch: true,
+	})
+	if err != nil {
+		t.Skipf("Skipping test due to client creation failure: %v", err)
+	}
+
+	updateReq := sensory.UpdateSourceRequest{
+		Source: sensory.UpdateSourceData{
+			Name:     "Updated Source Without Request",
+			Endpoint: "https://api.updated.com/v1",
+			Request:  nil, // Explicitly set to nil
+		},
+	}
+
+	source, err := client.Sensory.UpdateSource("source-123", updateReq)
+	if err != nil {
+		t.Fatalf("Unexpected error: %v", err)
+	}
+
+	if source.ID != expectedSource.ID {
+		t.Errorf("Expected source ID %s, got %s", expectedSource.ID, source.ID)
+	}
+
+	if source.Name != expectedSource.Name {
+		t.Errorf("Expected source name %s, got %s", expectedSource.Name, source.Name)
+	}
+}

@@ -16,6 +16,25 @@ type SourceCredential struct {
 	SkipTokenFetch bool   `json:"skip_token_fetch,omitempty"`
 }
 
+// Header represents a request header.
+type Header struct {
+	Name  string `json:"name"`
+	Value string `json:"value"`
+}
+
+// SessionAffinity represents session affinity configuration.
+type SessionAffinity struct {
+	Location string `json:"location"` // body or header
+	Key      string `json:"key"`
+	Value    string `json:"value"` // actor_id
+}
+
+// Request represents request configuration for a source.
+type Request struct {
+	Headers         []Header         `json:"headers,omitempty"`
+	SessionAffinity *SessionAffinity `json:"session_affinity,omitempty"`
+}
+
 // Source represents a sensory source resource.
 type Source struct {
 	ID             string `json:"id,omitempty"`
@@ -43,6 +62,7 @@ type SourceRequestData struct {
 	Type       string           `json:"type"`
 	Endpoint   string           `json:"endpoint"`
 	Credential SourceCredential `json:"credential"`
+	Request    *Request         `json:"request"`
 }
 
 // UpdateSourceRequest represents the request payload for updating a source.
@@ -56,6 +76,7 @@ type UpdateSourceData struct {
 	Type       string            `json:"type,omitempty"`
 	Endpoint   string            `json:"endpoint,omitempty"`
 	Credential *SourceCredential `json:"credential,omitempty"`
+	Request    *Request          `json:"request"`
 }
 
 // Source operations
