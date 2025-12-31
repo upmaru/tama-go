@@ -37,13 +37,14 @@ type Request struct {
 
 // Source represents a sensory source resource.
 type Source struct {
-	ID             string `json:"id,omitempty"`
-	Name           string `json:"name"`
-	Slug           string `json:"slug"`
-	Endpoint       string `json:"endpoint"`
-	SpaceID        string `json:"space_id"`
-	Type           string `json:"type"`
-	ProvisionState string `json:"provision_state"`
+	ID             string   `json:"id,omitempty"`
+	Name           string   `json:"name"`
+	Slug           string   `json:"slug"`
+	Endpoint       string   `json:"endpoint"`
+	SpaceID        string   `json:"space_id"`
+	Type           string   `json:"type"`
+	ProvisionState string   `json:"provision_state"`
+	Request        *Request `json:"request,omitempty"`
 }
 
 // SourceResponse represents the API response for source operations.
