@@ -246,6 +246,25 @@ func ValidateActivationResponse(t *testing.T, actual, expected perception.Activa
 	}
 }
 
+// ValidatePruningResponse validates that actual pruning matches expected pruning.
+func ValidatePruningResponse(t *testing.T, actual, expected perception.Pruning) {
+	if actual.ID != expected.ID {
+		t.Errorf("Expected pruning ID %s, got %s", expected.ID, actual.ID)
+	}
+
+	if actual.ThoughtID != expected.ThoughtID {
+		t.Errorf("Expected pruning thought_id %s, got %s", expected.ThoughtID, actual.ThoughtID)
+	}
+
+	if actual.PreviousVersionsCount != expected.PreviousVersionsCount {
+		t.Errorf(
+			"Expected pruning previous_versions_count %d, got %d",
+			expected.PreviousVersionsCount,
+			actual.PreviousVersionsCount,
+		)
+	}
+}
+
 // GetKeys returns the keys from a map for debugging purposes.
 func GetKeys(m map[string][]string) []string {
 	keys := make([]string, 0, len(m))
