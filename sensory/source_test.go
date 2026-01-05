@@ -10,6 +10,64 @@ import (
 	"github.com/upmaru/tama-go/sensory"
 )
 
+func assertRequestDetails(
+	t *testing.T,
+	req *sensory.Request,
+	expectedHeaders []sensory.Header,
+	expectedAffinity *sensory.SessionAffinity,
+) {
+	t.Helper()
+
+	if req == nil {
+		t.Fatal("Expected request field to be present")
+	}
+
+	assertRequestHeaders(t, req.Headers, expectedHeaders)
+	assertSessionAffinity(t, req.SessionAffinity, expectedAffinity)
+}
+
+func assertRequestHeaders(t *testing.T, actual, expected []sensory.Header) {
+	t.Helper()
+
+	if len(actual) != len(expected) {
+		t.Fatalf("Expected %d headers, got %d", len(expected), len(actual))
+	}
+
+	for i, header := range expected {
+		if actual[i].Name != header.Name {
+			t.Errorf("Expected header %d name %q, got %q", i, header.Name, actual[i].Name)
+		}
+		if actual[i].Value != header.Value {
+			t.Errorf("Expected header %d value %q, got %q", i, header.Value, actual[i].Value)
+		}
+	}
+}
+
+func assertSessionAffinity(t *testing.T, actual, expected *sensory.SessionAffinity) {
+	t.Helper()
+
+	if expected == nil {
+		if actual != nil {
+			t.Errorf("Expected nil session_affinity, got %+v", actual)
+		}
+		return
+	}
+
+	if actual == nil {
+		t.Fatal("Expected session_affinity to be present")
+	}
+
+	if actual.Location != expected.Location {
+		t.Errorf("Expected session_affinity location %q, got %q", expected.Location, actual.Location)
+	}
+	if actual.Key != expected.Key {
+		t.Errorf("Expected session_affinity key %q, got %q", expected.Key, actual.Key)
+	}
+	if actual.Value != expected.Value {
+		t.Errorf("Expected session_affinity value %q, got %q", expected.Value, actual.Value)
+	}
+}
+
 func TestSensoryGetSource(t *testing.T) {
 	expectedSource := sensory.Source{
 		ID:             "source-123",
@@ -636,42 +694,14 @@ func TestSensoryCreateSourceWithRequest(t *testing.T) {
 			t.Fatalf("Failed to decode request body: %v", err)
 		}
 
-		// Verify request field is present
-		if req.Source.Request == nil {
-			t.Error("Expected request field to be present")
-		} else {
-			// Verify headers
-			if len(req.Source.Request.Headers) != 2 {
-				t.Errorf("Expected 2 headers, got %d", len(req.Source.Request.Headers))
-			}
-			if req.Source.Request.Headers[0].Name != "Authorization" {
-				t.Errorf("Expected first header name 'Authorization', got %s", req.Source.Request.Headers[0].Name)
-			}
-			if req.Source.Request.Headers[0].Value != "Bearer token123" {
-				t.Errorf("Expected first header value 'Bearer token123', got %s", req.Source.Request.Headers[0].Value)
-			}
-			if req.Source.Request.Headers[1].Name != "X-Custom-Header" {
-				t.Errorf("Expected second header name 'X-Custom-Header', got %s", req.Source.Request.Headers[1].Name)
-			}
-			if req.Source.Request.Headers[1].Value != "custom-value" {
-				t.Errorf("Expected second header value 'custom-value', got %s", req.Source.Request.Headers[1].Value)
-			}
-
-			// Verify session affinity
-			if req.Source.Request.SessionAffinity == nil {
-				t.Error("Expected session_affinity to be present")
-			} else {
-				if req.Source.Request.SessionAffinity.Location != "header" {
-					t.Errorf("Expected session_affinity location 'header', got %s", req.Source.Request.SessionAffinity.Location)
-				}
-				if req.Source.Request.SessionAffinity.Key != "X-Actor-ID" {
-					t.Errorf("Expected session_affinity key 'X-Actor-ID', got %s", req.Source.Request.SessionAffinity.Key)
-				}
-				if req.Source.Request.SessionAffinity.Value != "actor_id" {
-					t.Errorf("Expected session_affinity value 'actor_id', got %s", req.Source.Request.SessionAffinity.Value)
-				}
-			}
-		}
+		assertRequestDetails(t, req.Source.Request, []sensory.Header{
+			{Name: "Authorization", Value: "Bearer token123"},
+			{Name: "X-Custom-Header", Value: "custom-value"},
+		}, &sensory.SessionAffinity{
+			Location: "header",
+			Key:      "X-Actor-ID",
+			Value:    "actor_id",
+		})
 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusCreated)
@@ -832,36 +862,13 @@ func TestSensoryUpdateSourceWithRequest(t *testing.T) {
 			t.Fatalf("Failed to decode request body: %v", err)
 		}
 
-		// Verify request field is present
-		if req.Source.Request == nil {
-			t.Error("Expected request field to be present")
-		} else {
-			// Verify headers
-			if len(req.Source.Request.Headers) != 1 {
-				t.Errorf("Expected 1 header, got %d", len(req.Source.Request.Headers))
-			}
-			if req.Source.Request.Headers[0].Name != "X-API-Key" {
-				t.Errorf("Expected header name 'X-API-Key', got %s", req.Source.Request.Headers[0].Name)
-			}
-			if req.Source.Request.Headers[0].Value != "secret-key" {
-				t.Errorf("Expected header value 'secret-key', got %s", req.Source.Request.Headers[0].Value)
-			}
-
-			// Verify session affinity
-			if req.Source.Request.SessionAffinity == nil {
-				t.Error("Expected session_affinity to be present")
-			} else {
-				if req.Source.Request.SessionAffinity.Location != "body" {
-					t.Errorf("Expected session_affinity location 'body', got %s", req.Source.Request.SessionAffinity.Location)
-				}
-				if req.Source.Request.SessionAffinity.Key != "actor_id" {
-					t.Errorf("Expected session_affinity key 'actor_id', got %s", req.Source.Request.SessionAffinity.Key)
-				}
-				if req.Source.Request.SessionAffinity.Value != "actor_id" {
-					t.Errorf("Expected session_affinity value 'actor_id', got %s", req.Source.Request.SessionAffinity.Value)
-				}
-			}
-		}
+		assertRequestDetails(t, req.Source.Request, []sensory.Header{
+			{Name: "X-API-Key", Value: "secret-key"},
+		}, &sensory.SessionAffinity{
+			Location: "body",
+			Key:      "actor_id",
+			Value:    "actor_id",
+		})
 
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(expectedResponse)
