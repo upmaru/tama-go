@@ -29,7 +29,7 @@ func TestToolsGetModifier(t *testing.T) {
 	})
 	defer server.Close()
 
-	client := modifierClient(server.URL)
+	client := modifierClient(t, server.URL)
 	modifier, err := client.Tools.GetModifier("modifier-123")
 	if err != nil {
 		t.Fatalf("Expected no error, got %v", err)
@@ -72,7 +72,7 @@ func TestToolsCreateModifier(t *testing.T) {
 	})
 	defer server.Close()
 
-	client := modifierClient(server.URL)
+	client := modifierClient(t, server.URL)
 	modifier, err := client.Tools.CreateModifier("tool-456", request)
 	if err != nil {
 		t.Fatalf("Expected no error, got %v", err)
@@ -102,7 +102,7 @@ func TestToolsUpdateModifierOmitsUnsetFields(t *testing.T) {
 	})
 	defer server.Close()
 
-	client := modifierClient(server.URL)
+	client := modifierClient(t, server.URL)
 	modifier, err := client.Tools.UpdateModifier("modifier-123", tools.UpdateModifierRequest{})
 	if err != nil {
 		t.Fatalf("Expected no error, got %v", err)
@@ -133,7 +133,7 @@ func TestToolsUpdateModifierSendsCompleteSource(t *testing.T) {
 	})
 	defer server.Close()
 
-	client := modifierClient(server.URL)
+	client := modifierClient(t, server.URL)
 	_, err := client.Tools.UpdateModifier("modifier-123", tools.UpdateModifierRequest{
 		Modifier: tools.UpdateModifierData{Source: &source},
 	})
@@ -168,7 +168,7 @@ func TestToolsReplaceModifier(t *testing.T) {
 	})
 	defer server.Close()
 
-	client := modifierClient(server.URL)
+	client := modifierClient(t, server.URL)
 	modifier, err := client.Tools.ReplaceModifier("modifier-123", tools.UpdateModifierRequest{
 		Modifier: tools.UpdateModifierData{
 			OnMissingParent: tools.ModifierMissingPolicyError,
@@ -199,7 +199,7 @@ func TestToolsDeleteModifierAcceptsInactiveResponse(t *testing.T) {
 	})
 	defer server.Close()
 
-	client := modifierClient(server.URL)
+	client := modifierClient(t, server.URL)
 	if err := client.Tools.DeleteModifier("modifier-123"); err != nil {
 		t.Fatalf("Expected no error, got %v", err)
 	}
@@ -213,7 +213,7 @@ func TestToolsModifierValidationDoesNotMakeHTTPRequest(t *testing.T) {
 	})
 	defer server.Close()
 
-	client := modifierClient(server.URL)
+	client := modifierClient(t, server.URL)
 	validCreate := validCreateModifierRequest()
 	validSource := validCreate.Modifier.Source
 
@@ -383,7 +383,7 @@ func TestToolsGetModifierNotFoundReturnsTypedError(t *testing.T) {
 	})
 	defer server.Close()
 
-	client := modifierClient(server.URL)
+	client := modifierClient(t, server.URL)
 	_, err := client.Tools.GetModifier("modifier-123")
 	assertModifierAPIError(t, err, http.StatusNotFound, "detail", "Not Found")
 }
@@ -400,7 +400,7 @@ func TestToolsCreateModifierPreservesNestedValidationError(t *testing.T) {
 	})
 	defer server.Close()
 
-	client := modifierClient(server.URL)
+	client := modifierClient(t, server.URL)
 	_, err := client.Tools.CreateModifier("tool-456", validCreateModifierRequest())
 	assertModifierAPIError(t, err, http.StatusUnprocessableEntity, "source.path", "can't be blank")
 }
@@ -410,7 +410,7 @@ func TestToolsModifierTransportErrorsIncludeOperation(t *testing.T) {
 	baseURL := server.URL
 	server.Close()
 
-	client := modifierClient(baseURL)
+	client := modifierClient(t, baseURL)
 	source := validCreateModifierRequest().Modifier.Source
 	tests := []struct {
 		name      string
@@ -472,12 +472,19 @@ func TestToolsModifierTransportErrorsIncludeOperation(t *testing.T) {
 	}
 }
 
-func modifierClient(baseURL string) *tama.Client {
-	return tama.NewClient(tama.Config{
+func modifierClient(t *testing.T, baseURL string) *tama.Client {
+	t.Helper()
+
+	client, err := tama.NewClient(tama.Config{
 		BaseURL: baseURL,
 		APIKey:  "test-key",
 		Timeout: 10 * time.Second,
 	})
+	if err != nil {
+		t.Fatalf("Failed to create client: %v", err)
+	}
+
+	return client
 }
 
 func modifierFixture() tools.Modifier {
