@@ -1616,7 +1616,11 @@ func validateIndexRequest(t *testing.T, r *http.Request, expectedIndex *int, exp
 	if receivedRequest.Thought.Delegation == nil {
 		t.Error("Expected delegation to be present")
 	} else if receivedRequest.Thought.Delegation.TargetThoughtID != expectedTargetID {
-		t.Errorf("Expected target thought ID %s, got %s", expectedTargetID, receivedRequest.Thought.Delegation.TargetThoughtID)
+		t.Errorf(
+			"Expected target thought ID %s, got %s",
+			expectedTargetID,
+			receivedRequest.Thought.Delegation.TargetThoughtID,
+		)
 	}
 }
 

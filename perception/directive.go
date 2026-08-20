@@ -59,7 +59,15 @@ func (s *Service) CreateDirective(pathID string, req CreateDirectiveRequest) (*D
 	}
 
 	var directiveResp DirectiveResponse
-	if err := genericCreate(s, pathID, req, "directive", "path", "/provision/perception/paths/%s/directives", &directiveResp); err != nil {
+	if err := genericCreate(
+		s,
+		pathID,
+		req,
+		"directive",
+		"path",
+		"/provision/perception/paths/%s/directives",
+		&directiveResp,
+	); err != nil {
 		return nil, err
 	}
 	return &directiveResp.Data, nil
@@ -69,7 +77,14 @@ func (s *Service) CreateDirective(pathID string, req CreateDirectiveRequest) (*D
 // PATCH /provision/perception/directives/:id.
 func (s *Service) UpdateDirective(id string, req UpdateDirectiveRequest) (*Directive, error) {
 	var directiveResp DirectiveResponse
-	if err := genericUpdate(s, id, req, "directive", "/provision/perception/directives/%s", &directiveResp); err != nil {
+	if err := genericUpdate(
+		s,
+		id,
+		req,
+		"directive",
+		"/provision/perception/directives/%s",
+		&directiveResp,
+	); err != nil {
 		return nil, err
 	}
 	return &directiveResp.Data, nil
@@ -79,7 +94,14 @@ func (s *Service) UpdateDirective(id string, req UpdateDirectiveRequest) (*Direc
 // PUT /provision/perception/directives/:id.
 func (s *Service) ReplaceDirective(id string, req UpdateDirectiveRequest) (*Directive, error) {
 	var directiveResp DirectiveResponse
-	if err := genericReplace(s, id, req, "directive", "/provision/perception/directives/%s", &directiveResp); err != nil {
+	if err := genericReplace(
+		s,
+		id,
+		req,
+		"directive",
+		"/provision/perception/directives/%s",
+		&directiveResp,
+	); err != nil {
 		return nil, err
 	}
 	return &directiveResp.Data, nil

@@ -401,7 +401,10 @@ func TestIntegrationFieldValidationErrors(t *testing.T) {
 	// Test duplicate space name (should pass client validation but fail server validation)
 	duplicateSpace := neural.CreateSpaceRequest{
 		Space: neural.SpaceRequestData{
-			Name: fmt.Sprintf("Field Validation Test Space %d", time.Now().Unix()), // Use same timestamp to potentially trigger slug conflict
+			Name: fmt.Sprintf(
+				"Field Validation Test Space %d",
+				time.Now().Unix(),
+			), // Use same timestamp to potentially trigger slug conflict
 			Type: "root",
 		},
 	}

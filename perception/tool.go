@@ -54,7 +54,15 @@ func (s *Service) CreateTool(thoughtID string, req CreateToolRequest) (*Tool, er
 	}
 
 	var toolResp ToolResponse
-	if err := genericCreate(s, thoughtID, req, "tool", "thought", "/provision/perception/thoughts/%s/tools", &toolResp); err != nil {
+	if err := genericCreate(
+		s,
+		thoughtID,
+		req,
+		"tool",
+		"thought",
+		"/provision/perception/thoughts/%s/tools",
+		&toolResp,
+	); err != nil {
 		return nil, err
 	}
 	return &toolResp.Data, nil
