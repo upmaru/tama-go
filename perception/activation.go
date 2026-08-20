@@ -54,7 +54,15 @@ func (s *Service) CreateActivation(pathID string, req CreateActivationRequest) (
 	}
 
 	var activationResp ActivationResponse
-	if err := genericCreate(s, pathID, req, "activation", "path", "/provision/perception/paths/%s/activations", &activationResp); err != nil {
+	if err := genericCreate(
+		s,
+		pathID,
+		req,
+		"activation",
+		"path",
+		"/provision/perception/paths/%s/activations",
+		&activationResp,
+	); err != nil {
 		return nil, err
 	}
 	return &activationResp.Data, nil
@@ -64,7 +72,14 @@ func (s *Service) CreateActivation(pathID string, req CreateActivationRequest) (
 // PATCH /provision/perception/activations/:id.
 func (s *Service) UpdateActivation(id string, req UpdateActivationRequest) (*Activation, error) {
 	var activationResp ActivationResponse
-	if err := genericUpdate(s, id, req, "activation", "/provision/perception/activations/%s", &activationResp); err != nil {
+	if err := genericUpdate(
+		s,
+		id,
+		req,
+		"activation",
+		"/provision/perception/activations/%s",
+		&activationResp,
+	); err != nil {
 		return nil, err
 	}
 	return &activationResp.Data, nil
@@ -74,7 +89,14 @@ func (s *Service) UpdateActivation(id string, req UpdateActivationRequest) (*Act
 // PUT /provision/perception/activations/:id.
 func (s *Service) ReplaceActivation(id string, req UpdateActivationRequest) (*Activation, error) {
 	var activationResp ActivationResponse
-	if err := genericReplace(s, id, req, "activation", "/provision/perception/activations/%s", &activationResp); err != nil {
+	if err := genericReplace(
+		s,
+		id,
+		req,
+		"activation",
+		"/provision/perception/activations/%s",
+		&activationResp,
+	); err != nil {
 		return nil, err
 	}
 	return &activationResp.Data, nil

@@ -46,7 +46,15 @@ func (s *Service) GetPruning(id string) (*Pruning, error) {
 // POST /provision/perception/thoughts/:thought_id/prunings.
 func (s *Service) CreatePruning(thoughtID string, req CreatePruningRequest) (*Pruning, error) {
 	var pruningResp PruningResponse
-	if err := genericCreate(s, thoughtID, req, "pruning", "thought", "/provision/perception/thoughts/%s/prunings", &pruningResp); err != nil {
+	if err := genericCreate(
+		s,
+		thoughtID,
+		req,
+		"pruning",
+		"thought",
+		"/provision/perception/thoughts/%s/prunings",
+		&pruningResp,
+	); err != nil {
 		return nil, err
 	}
 	return &pruningResp.Data, nil
