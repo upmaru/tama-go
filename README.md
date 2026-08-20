@@ -156,6 +156,7 @@ The client library is organized into the following packages:
 - `neural.go` - Neural service wrapper that uses the neural package
 - `sensory.go` - Sensory service wrapper that uses the sensory package
 - `perception.go` - Perception service wrapper that uses the perception package
+- `tools.go` - Tools service wrapper that uses the tools package
 - `types.go` - Shared types and documentation
 
 ### Neural Package (`neural/`)
@@ -179,6 +180,14 @@ The client library is organized into the following packages:
 - `path.go` - Path operations (GET, POST, PATCH, PUT, DELETE)
 - `context.go` - Context operations (GET, POST, PATCH, PUT, DELETE)
 
+### Tools Package (`tools/`)
+- `service.go` - Service definition and typed API error handling
+- `input.go` - Thought-tool input operations
+- `initializer.go` - Thought-tool initializer operations
+- `output.go` - Thought-tool output operations
+- `option.go` - Output option operations
+- `modifier.go` - Trusted thought-tool modifier operations (GET, POST, PATCH, PUT, DELETE)
+
 ### Examples
 - `example/` - Working examples demonstrating all features
 
@@ -193,6 +202,7 @@ Detailed API documentation is available in the [`docs/`](docs/) directory:
 - **[Memory Service](docs/memory.md)** - Prompt operations and memory management
 - **[Sensory Service](docs/sensory.md)** - Source, Model, Limit, Specification, and Identity operations
 - **[Perception Service](docs/perception.md)** - Chain, Thought, Path, and Context operations
+- **[Tools Service](docs/tools.md)** - Input, initializer, output, option, and trusted modifier operations
 
 For a complete overview, see the [documentation index](docs/README.md).
 
@@ -296,6 +306,17 @@ Note: Paths are associated with thoughts and define target classes with configur
 - `DELETE /provision/perception/contexts/:id` - Delete context
 
 Note: Contexts are associated with thoughts and contain prompt IDs with layer information for neural processing operations.
+
+### Tools Resources (`/provision/tools`)
+
+#### Trusted thought-tool modifiers
+- `GET /provision/tools/modifiers/:id` - Get an active modifier by ID
+- `POST /provision/tools/:thought_tool_id/modifiers` - Create or reactivate a modifier
+- `PATCH /provision/tools/modifiers/:id` - Update a modifier
+- `PUT /provision/tools/modifiers/:id` - Send mutable replacement fields
+- `DELETE /provision/tools/modifiers/:id` - Deactivate a modifier
+
+Trusted tool modifiers reserve request fields for values resolved from authoritative runtime metadata. The API does not expose a list endpoint for this resource; PUT routes to the same update action as PATCH and cannot change the immutable index.
 
 ## Usage Examples
 

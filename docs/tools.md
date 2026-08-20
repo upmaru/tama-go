@@ -1,475 +1,234 @@
 # Tools Service
 
-The **Tools** service provides three main categories of operations:
-- **Input** – Manage tool inputs (type, class corpus ID, CRUD).
-- **Initializer** – Manage tool initializers (reference, index, parameters, CRUD).
-- **Output** – Manage tool outputs (class corpus ID, CRUD).
-- **Option** – Manage tool options (maps outputs to action modifiers, CRUD).
-
-These are exposed via the `Client.Tools` field and can be accessed as follows:
+The Tools service provisions inputs, initializers, outputs, output options, and
+trusted thought-tool modifiers. Its methods are exposed directly through
+`Client.Tools`:
 
 ```go
 client := tama.NewClient(config)
-tools := client.Tools
 
-// Input operations
-input, err := tools.Input.Create(ctx, newInput)
-
-// Initializer operations
-initializer, err := tools.Initializer.Create(ctx, newInitializer)
+input, err := client.Tools.GetInput("input-123")
+modifier, err := client.Tools.GetModifier("modifier-123")
 ```
 
-## Table of Contents
+Methods do not take a `context.Context`; request timeouts are configured on the
+root `tama.Client`.
 
-- [Overview](#overview)
-- [Input Operations](#input-operations)
-  - [Create](#create-input)
-  - [Get](#get-input)
-  - [List](#list-inputs)
-  - [Update](#update-input)
-  - [Delete](#delete-input)
-- [Initializer Operations](#initializer-operations)
-  - [Create](#create-initializer)
-  - [Get](#get-initializer)
-  - [List](#list-initializers)
-  - [Update](#update-initializer)
-  - [Delete](#delete-initializer)
-- [Output Operations](#output-operations)
-- [Option Operations](#option-operations)
+## Supported operations
 
-## Overview
+| Resource | Get | Create parent | Update | Replace | Delete |
+| --- | --- | --- | --- | --- | --- |
+| Input | `GetInput` | `CreateInput(thoughtToolID, ...)` | `UpdateInput` | `ReplaceInput` | `DeleteInput` |
+| Initializer | `GetInitializer` | `CreateInitializer(thoughtToolID, ...)` | `UpdateInitializer` | `ReplaceInitializer` | `DeleteInitializer` |
+| Output | `GetOutput` | `CreateOutput(thoughtToolID, ...)` | `UpdateOutput` | `ReplaceOutput` | `DeleteOutput` |
+| Option | `GetOption` | `CreateOption(outputID, ...)` | `UpdateOption` | `ReplaceOption` | `DeleteOption` |
+| Modifier | `GetModifier` | `CreateModifier(thoughtToolID, ...)` | `UpdateModifier` | `ReplaceModifier` | `DeleteModifier` |
 
-The Tools service allows clients to store and retrieve metadata about tools that can be used by other services such as **Perception**.  
-- An **Input** represents a set of parameters that a tool expects.
-- An **Initializer** contains the logic (reference, index, parameters) required to instantiate or invoke a tool.
+The Tama provision API does not currently expose Tools list endpoints. Phoenix
+routes both `PATCH` and `PUT` to each resource's update action. Consequently,
+the `Replace*` methods use the same request fields as `Update*`; callers should
+not assume that PUT can change server-owned or immutable fields.
 
-Both resources support full CRUD operations with pagination for listing endpoints.
+## Inputs
 
-## Input Operations
-
-### Create
-```go
-func (s *InputService) Create(ctx context.Context, input *tools.Input) (*tools.Input, error)
-```
-Creates a new tool input. Required fields: `Type`, `ClassCorpusID`.
-
-### Get
-```go
-func (s *InputService) Get(ctx context.Context, id string) (*tools.Input, error)
-```
-Retrieves an existing input by its unique identifier.
-
-### List
-```go
-func (s *InputService) List(ctx context.Context, opts *tools.ListOptions) ([]*tools.Input, error)
-```
-Returns a paginated list of inputs. Supports filtering by `Type` or `ClassCorpusID`.
-
-### Update
-```go
-func (s *InputService) Update(ctx context.Context, id string, input *tools.InputUpdate) (*tools.Input, error)
-```
-Updates mutable fields of an existing input.
-
-### Delete
-```go
-func (s *InputService) Delete(ctx context.Context, id string) error
-```
-Deletes the specified input.
-
-## Initializer Operations
-
-### Create
-```go
-func (s *InitializerService) Create(ctx context.Context, init *tools.Initializer) (*tools.Initializer, error)
-```
-Creates a new tool initializer. Required fields: `Reference`, `Index`, `Parameters`.
-
-### Get
-```go
-func (s *InitializerService) Get(ctx context.Context, id string) (*tools.Initializer, error)
-```
-Retrieves an existing initializer by its unique identifier.
-
-### List
-```go
-func (s *InitializerService) List(ctx context.Context, opts *tools.ListOptions) ([]*tools.Initializer, error)
-```
-Returns a paginated list of initializers. Supports filtering by `Reference`.
-
-### Update
-```go
-func (s *InitializerService) Update(ctx context.Context, id string, init *tools.InitializerUpdate) (*tools.Initializer, error)
-```
-Updates mutable fields of an existing initializer.
-
-### Delete
-```go
-func (s *InitializerService) Delete(ctx context.Context, id string) error
-```
-Deletes the specified initializer.
-
-## Usage Example
+An input associates a thought tool with a class corpus and input type.
 
 ```go
-import (
-    "context"
-    "github.com/upmaru/tama-go"
-)
-
-func main() {
-    cfg := tama.Config{BaseURL: "https://api.tama.io", APIKey: "YOUR_KEY"}
-    client := tama.NewClient(cfg)
-    ctx := context.Background()
-
-    // Create an input
-    in, _ := client.Tools.Input.Create(ctx, &tama.tools.Input{
+created, err := client.Tools.CreateInput("tool-123", tools.CreateInputRequest{
+    Input: tools.InputRequestData{
         Type:          "text",
-        ClassCorpusID: "corpus-123",
-    })
-
-    // Create an initializer referencing the input
-    init, _ := client.Tools.Initializer.Create(ctx, &tama.tools.Initializer{
-        Reference:  in.ID,
-        Index:      0,
-        Parameters: []string{"param1", "param2"},
-    })
-}
-```
-
-> **Tip:**  
-> Use the listing endpoints with pagination options (`Limit`, `Offset`) to efficiently navigate large sets of inputs or initializers.
-
---- 
-
-For more detailed information on each service, refer to the generated SDK documentation in the `tools` package source.
-
-## Output Operations
-
-### GetOutput(id string) (*Output, error)
-
-Retrieves a specific tools output by ID.
-
-**Endpoint:** `GET /provision/tools/outputs/:id`
-
-**Parameters:**
-- `id` (string): Output ID (required)
-
-**Returns:**
-- `*Output`: Output object with ID, ThoughtToolID, ClassCorpusID, and ProvisionState
-- `error`: Error if request fails
-
-**Example:**
-```go
-output, err := client.Tools.GetOutput("output-123")
-if err != nil {
-    log.Fatal(err)
-}
-fmt.Printf("Output: %+v\n", output)
-```
-
-### CreateOutput(thoughtToolID string, req CreateOutputRequest) (*Output, error)
-
-Creates a new output under a specific thought tool.
-
-**Endpoint:** `POST /provision/tools/:thought_tool_id/outputs`
-
-**Parameters:**
-- `thoughtToolID` (string): Parent thought tool ID (required)
-- `req` (CreateOutputRequest): Output creation request (required)
-  - `Output` (OutputRequestData): Output data (required)
-    - `ClassCorpusID` (string): Class corpus ID (required)
-
-**Returns:**
-- `*Output`: Created output object
-- `error`: Error if request fails
-
-**Request Structure:**
-```go
-type CreateOutputRequest struct {
-    Output OutputRequestData `json:"output"`
-}
-
-type OutputRequestData struct {
-    ClassCorpusID string `json:"class_corpus_id"`
-}
-```
-
-**Example:**
-```go
-req := tools.CreateOutputRequest{
-    Output: tools.OutputRequestData{
         ClassCorpusID: "corpus-789",
     },
-}
-created, err := client.Tools.CreateOutput("tool-123", req)
+})
+
+updated, err := client.Tools.UpdateInput(created.ID, tools.UpdateInputRequest{
+    Input: tools.UpdateInputData{Type: "json"},
+})
 ```
 
-### UpdateOutput(id string, req UpdateOutputRequest) (*Output, error)
+## Initializers
 
-Updates an existing output using PATCH (partial update).
+An initializer supplies a reference, optional index, and arbitrary parameters
+used to initialize a thought tool.
 
-**Endpoint:** `PATCH /provision/tools/outputs/:id`
-
-**Parameters:**
-- `id` (string): Output ID (required)
-- `req` (UpdateOutputRequest): Output update request (required)
-  - `Output` (UpdateOutputData): Updatable fields
-    - `ClassCorpusID` (string, optional)
-
-**Returns:**
-- `*Output`: Updated output object
-- `error`: Error if request fails
-
-**Request Structure:**
 ```go
-type UpdateOutputRequest struct {
-    Output UpdateOutputData `json:"output"`
-}
-
-type UpdateOutputData struct {
-    ClassCorpusID string `json:"class_corpus_id,omitempty"`
-}
-```
-
-**Example:**
-```go
-update := tools.UpdateOutputRequest{
-    Output: tools.UpdateOutputData{
-        ClassCorpusID: "corpus-updated",
+index := 0
+created, err := client.Tools.CreateInitializer("tool-123", tools.CreateInitializerRequest{
+    Initializer: tools.InitializerRequestData{
+        Reference:  "tama/example/initializer",
+        Index:      &index,
+        Parameters: map[string]any{"temperature": 0.2},
     },
-}
-updated, err := client.Tools.UpdateOutput("output-123", update)
+})
 ```
 
-### ReplaceOutput(id string, req UpdateOutputRequest) (*Output, error)
+## Outputs and options
 
-Replaces an existing output using PUT (full replacement semantics on the server side).
+An output associates a thought tool with a class corpus. An option associates
+that output with a Motor action modifier.
 
-**Endpoint:** `PUT /provision/tools/outputs/:id`
-
-**Parameters:**
-- `id` (string): Output ID (required)
-- `req` (UpdateOutputRequest): Replacement request (required)
-
-**Returns:**
-- `*Output`: Replaced output object
-- `error`: Error if request fails
-
-**Example:**
 ```go
-replace := tools.UpdateOutputRequest{
-    Output: tools.UpdateOutputData{
-        ClassCorpusID: "corpus-replaced",
+output, err := client.Tools.CreateOutput("tool-123", tools.CreateOutputRequest{
+    Output: tools.OutputRequestData{ClassCorpusID: "corpus-789"},
+})
+
+option, err := client.Tools.CreateOption(output.ID, tools.CreateOptionRequest{
+    Option: tools.OptionRequestData{ActionModifierID: "action-modifier-123"},
+})
+```
+
+`tools.Option` and `tools.Modifier` are different resources. An option refers to
+an action-level `motor.Modifier`; a trusted tool modifier populates request
+arguments from runtime metadata.
+
+## Trusted tool modifiers
+
+A trusted tool modifier reserves a request field for a value obtained from
+authoritative runtime metadata instead of model-generated arguments.
+
+### Types and constants
+
+```go
+type ModifierSource struct {
+    Type string `json:"type"`
+    Path string `json:"path"`
+}
+
+type Modifier struct {
+    ID              string
+    Index           int
+    Target          string
+    OnMissingParent string
+    OnMissingSource string
+    Source          ModifierSource
+    ThoughtToolID   string
+    ProvisionState  string
+}
+```
+
+Use the exported wire-value constants:
+
+```go
+tools.ModifierMissingPolicyError
+tools.ModifierMissingPolicySkip
+tools.ModifierSourceTypeMetadata
+tools.ModifierSourcePathActorIdentifier
+tools.ModifierSourcePathOriginEntityIdentifier
+tools.ModifierSourcePathCurrentTimestamp
+```
+
+### Create or reactivate
+
+```go
+modifier, err := client.Tools.CreateModifier("tool-123", tools.CreateModifierRequest{
+    Modifier: tools.ModifierRequestData{
+        Index:           0,
+        Target:          "/body/search/scope/user_id",
+        OnMissingParent: tools.ModifierMissingPolicySkip,
+        OnMissingSource: tools.ModifierMissingPolicyError,
+        Source: tools.ModifierSource{
+            Type: tools.ModifierSourceTypeMetadata,
+            Path: tools.ModifierSourcePathActorIdentifier,
+        },
     },
-}
-replaced, err := client.Tools.ReplaceOutput("output-123", replace)
+})
 ```
 
-### DeleteOutput(id string) error
+Create sends `POST /provision/tools/:thought_tool_id/modifiers`. Tama activates a
+new modifier and returns `201`. If the exact configuration already exists in an
+inactive state, Tama reactivates it and returns the same ID.
 
-Deletes an output by ID.
+All create fields are required. The client rejects empty structural fields and
+negative indexes before sending a request. Tama remains authoritative for
+allowed values, JSON Pointer syntax, callable-schema compatibility, and active
+modifier conflicts.
 
-**Endpoint:** `DELETE /provision/tools/outputs/:id`
+### Get
 
-**Parameters:**
-- `id` (string): Output ID (required)
-
-**Returns:**
-- `error`: Error if request fails
-
-**Example:**
 ```go
-if err := client.Tools.DeleteOutput("output-123"); err != nil {
-    log.Fatal(err)
-}
+modifier, err := client.Tools.GetModifier("modifier-123")
 ```
 
-## Output Structure
+Get sends `GET /provision/tools/modifiers/:id`. Only active modifiers are
+visible; invalid, unknown, and inactive IDs return `404`.
 
-### Output
-
-The `Output` struct represents a tools output with the following fields:
-
-```go
-type Output struct {
-    ID             string `json:"id,omitempty"`
-    ThoughtToolID  string `json:"thought_tool_id,omitempty"`
-    ClassCorpusID  string `json:"class_corpus_id"`
-    ProvisionState string `json:"provision_state"`
-}
-```
-
-### OutputResponse
-
-Wraps an Output in API responses:
+### Update
 
 ```go
-type OutputResponse struct {
-    Data Output `json:"data"`
-}
-```
-
-## Option Operations
-
-The Option resource binds a Thought Tool Output to a Motor Action Modifier. This allows you to specify which action should be taken when a particular tool output is selected.
-
-### GetOption(id string) (*Option, error)
-
-Retrieves a specific tools option by ID.
-
-**Endpoint:** `GET /provision/tools/options/:id`
-
-**Parameters:**
-- `id` (string): Option ID (required)
-
-**Returns:**
-- `*Option`: Option object with ID, ThoughtToolOutputID, ActionModifierID, and ProvisionState
-- `error`: Error if request fails
-
-**Example:**
-```go
-option, err := client.Tools.GetOption("option-123")
-```
-
-### CreateOption(outputID string, req CreateOptionRequest) (*Option, error)
-
-Creates a new option under a specific thought tool output.
-
-**Endpoint:** `POST /provision/tools/outputs/:output_id/options`
-
-**Parameters:**
-- `outputID` (string): Parent thought tool output ID (required)
-- `req` (CreateOptionRequest): Option creation request (required)
-  - `Option` (OptionRequestData): Option data (required)
-    - `ActionModifierID` (string): Action modifier ID (required)
-
-**Returns:**
-- `*Option`: Created option object
-- `error`: Error if request fails
-
-**Request Structure:**
-```go
-type CreateOptionRequest struct {
-    Option OptionRequestData `json:"option"`
+source := tools.ModifierSource{
+    Type: tools.ModifierSourceTypeMetadata,
+    Path: tools.ModifierSourcePathOriginEntityIdentifier,
 }
 
-type OptionRequestData struct {
-    ActionModifierID string `json:"action_modifier_id"`
-}
-```
-
-**Example:**
-```go
-req := tools.CreateOptionRequest{
-    Option: tools.OptionRequestData{
-        ActionModifierID: "modifier-789",
+modifier, err := client.Tools.UpdateModifier("modifier-123", tools.UpdateModifierRequest{
+    Modifier: tools.UpdateModifierData{
+        OnMissingParent: tools.ModifierMissingPolicyError,
+        Source:          &source,
     },
-}
-created, err := client.Tools.CreateOption("output-123", req)
+})
 ```
 
-### UpdateOption(id string, req UpdateOptionRequest) (*Option, error)
+Update sends `PATCH /provision/tools/modifiers/:id` and supports partial
+updates. `Source` is a pointer so it can be omitted; when supplied, both its
+`Type` and `Path` are required. `Index` is not part of the update type because
+Tama makes it immutable.
 
-Updates an existing option using PATCH (partial update).
+### Replace
 
-**Endpoint:** `PATCH /provision/tools/options/:id`
-
-**Parameters:**
-- `id` (string): Option ID (required)
-- `req` (UpdateOptionRequest): Option update request (required)
-  - `Option` (UpdateOptionData): Updatable fields
-    - `ActionModifierID` (string, optional)
-
-**Returns:**
-- `*Option`: Updated option object
-- `error`: Error if request fails
-
-**Request Structure:**
 ```go
-type UpdateOptionRequest struct {
-    Option UpdateOptionData `json:"option"`
-}
-
-type UpdateOptionData struct {
-    ActionModifierID string `json:"action_modifier_id,omitempty"`
-}
-```
-
-**Example:**
-```go
-update := tools.UpdateOptionRequest{
-    Option: tools.UpdateOptionData{
-        ActionModifierID: "modifier-updated",
+modifier, err := client.Tools.ReplaceModifier("modifier-123", tools.UpdateModifierRequest{
+    Modifier: tools.UpdateModifierData{
+        Target:          "/body/search/scope/account_id",
+        OnMissingParent: tools.ModifierMissingPolicyError,
+        OnMissingSource: tools.ModifierMissingPolicyError,
+        Source:          &source,
     },
-}
-updated, err := client.Tools.UpdateOption("option-123", update)
+})
 ```
 
-### ReplaceOption(id string, req UpdateOptionRequest) (*Option, error)
+Replace sends `PUT /provision/tools/modifiers/:id`. Tama routes PUT to the same
+update action as PATCH, so the mutable request type is shared and `index`
+remains unavailable.
 
-Replaces an existing option using PUT (full replacement semantics on the server side).
-
-**Endpoint:** `PUT /provision/tools/options/:id`
-
-**Parameters:**
-- `id` (string): Option ID (required)
-- `req` (UpdateOptionRequest): Replacement request (required)
-
-**Returns:**
-- `*Option`: Replaced option object
-- `error`: Error if request fails
-
-**Example:**
-```go
-replace := tools.UpdateOptionRequest{
-    Option: tools.UpdateOptionData{
-        ActionModifierID: "modifier-replaced",
-    },
-}
-replaced, err := client.Tools.ReplaceOption("option-123", replace)
-```
-
-### DeleteOption(id string) error
-
-Deletes an option by ID.
-
-**Endpoint:** `DELETE /provision/tools/options/:id`
-
-**Parameters:**
-- `id` (string): Option ID (required)
-
-**Returns:**
-- `error`: Error if request fails
-
-**Example:**
-```go
-if err := client.Tools.DeleteOption("option-123"); err != nil {
-    log.Fatal(err)
-}
-```
-
-## Option Structure
-
-### Option
-
-Represents a tool option and its binding to an action modifier:
+### Delete
 
 ```go
-type Option struct {
-    ID                  string `json:"id,omitempty"`
-    ThoughtToolOutputID string `json:"thought_tool_output_id,omitempty"`
-    ActionModifierID    string `json:"action_modifier_id"`
-    ProvisionState      string `json:"provision_state"`
-}
+err := client.Tools.DeleteModifier("modifier-123")
 ```
 
-### OptionResponse
+Delete sends `DELETE /provision/tools/modifiers/:id`. Tama deactivates the
+resource and returns it with `provision_state` set to `inactive`; the client
+discards that response body.
 
-Wraps an Option in API responses:
+## Errors
+
+Parsed API failures are returned as `*tools.Error`. This permits callers to
+distinguish refresh-time not-found responses and inspect flattened validation
+fields:
 
 ```go
-type OptionResponse struct {
-    Data Option `json:"data"`
+var apiErr *tools.Error
+if errors.As(err, &apiErr) {
+    if apiErr.StatusCode == http.StatusNotFound {
+        // The active resource no longer exists.
+    }
+
+    sourcePathMessages := apiErr.Errors["source.path"]
 }
 ```
+
+Local structural validation errors are ordinary Go errors. Server responses,
+including `404`, `401`, and `422`, retain their HTTP status through
+`tools.Error.StatusCode`.
+
+## Modifier authorization
+
+A credential needs both narrow capabilities for a complete lifecycle:
+
+```text
+provision.tools.modifier.read
+provision.tools.modifier.manage
+```
+
+`read` authorizes get. `manage` authorizes create, update/replace, and delete.
+Either `provision.tools.all` or `provision.all` grants all modifier operations.

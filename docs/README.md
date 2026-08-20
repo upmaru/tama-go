@@ -12,6 +12,7 @@ This directory contains the API documentation for the Tama Go client library, or
 - [Motor Service](motor.md) - Action operations
 - [Perception Service](perception.md) - Chain, Thought, Path, and Context operations
 - [Contexts Service](contexts.md) - Input operations
+- [Tools Service](tools.md) - Thought-tool inputs, initializers, outputs, options, and trusted modifiers
 
 ## Quick Start
 
@@ -58,5 +59,6 @@ func main() {
 - **Motor Service**: Handles action operations
 - **Perception Service**: Handles chains, thoughts, paths, and contexts
 - **Contexts Service**: Handles input operations
+- **Tools Service**: Manages thought-tool inputs, initializers, outputs, options, and trusted modifiers
 
 Each service provides comprehensive CRUD operations with proper error handling and validation.
