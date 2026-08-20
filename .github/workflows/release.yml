@@ -15,17 +15,17 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
       - name: Set up Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v7
         with:
           go-version: "1.25.13"
 
       - name: Cache Go modules
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: |
             ~/.cache/go-build
@@ -46,7 +46,6 @@ jobs:
           go build -v ./...
 
       - name: Generate changelog
-        id: changelog
         run: |
           # Get the previous tag
           PREV_TAG=$(git tag --sort=-version:refname | head -n 2 | tail -n 1)
@@ -54,25 +53,24 @@ jobs:
             PREV_TAG=$(git rev-list --max-parents=0 HEAD)
           fi
 
-          # Generate changelog and escape for JSON
+          # Generate changelog
           echo "## Changes" > CHANGELOG.md
           echo "" >> CHANGELOG.md
           git log $PREV_TAG..HEAD --pretty=format:"- %s (%h)" --no-merges >> CHANGELOG.md
 
-          # Escape the changelog content for JSON and set as output
-          CHANGELOG_JSON=$(jq -Rs . < CHANGELOG.md)
-          echo "changelog=${CHANGELOG_JSON}" >> $GITHUB_OUTPUT
-
       - name: Create Release
-        uses: actions/create-release@v1
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
-          body: ${{ fromJSON(steps.changelog.outputs.changelog) }}
-          draft: false
-          prerelease: ${{ contains(github.ref, 'alpha') || contains(github.ref, 'beta') || contains(github.ref, 'rc') }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          args=()
+          if [[ "$GITHUB_REF_NAME" =~ (alpha|beta|rc) ]]; then
+            args+=(--prerelease)
+          fi
+
+          gh release create "$GITHUB_REF_NAME" \
+            --title "Release $GITHUB_REF_NAME" \
+            --notes-file CHANGELOG.md \
+            "${args[@]}"
 
   validate-tag:
     name: Validate Tag
@@ -80,7 +78,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Validate semantic version
         run: |
@@ -98,7 +96,7 @@ jobs:
 
     steps:
       - name: Set up Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v7
         with:
           go-version: "1.25.13"
 
